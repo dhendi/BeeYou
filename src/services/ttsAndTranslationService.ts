@@ -3,8 +3,15 @@ import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
 import https from 'https';
-import type { Request, Response } from 'express';
-import { defaultRateLimitStore, getClientIp } from './sharedRateLimitStore';
+import type { Request, Response as ExpressResponse } from 'express';
+import {
+  defaultRateLimitStore,
+  getClientIp,
+  isRtdbConfigured,
+  resolveRtdbUrl,
+  fetchRtdbWithAuth,
+  getSecondsUntilMidnight,
+} from './sharedRateLimitStore';
 import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../data/voicePersonasData';
 import {
   getAudioFromCloudStorage,
@@ -73,8 +80,10 @@ export function validateTextInput(raw: unknown, maxLength = 150): { valid: boole
 
 // -------------------------------------------------------------
 // Daily Usage & Budget Tracking (Prevents Upstream Billing Abuse)
+// Supports multi-server atomic budget reservations via Firebase RTDB
+// with non-blocking local persistence and instant 0ms cache hits.
 // -------------------------------------------------------------
-interface DailyUsageMetrics {
+export interface DailyUsageMetrics {
   date: string; // YYYY-MM-DD
   ttsUpstreamCalls: number;
   translateUpstreamCalls: number;
@@ -83,78 +92,588 @@ interface DailyUsageMetrics {
   lastBudgetAlertSent?: number;
 }
 
+export interface UsageBudgetTrackerOptions {
+  customPath?: string;
+  customDbUrl?: string;
+  customAuthHeader?: string;
+  customFetch?: typeof fetch;
+  disableRtdb?: boolean;
+  timeoutMs?: number;
+  dailyTtsCap?: number;
+  dailyTranslateCap?: number;
+}
+
 export class UsageBudgetTracker {
   private metricsFile: string;
   private currentMetrics: DailyUsageMetrics;
   private dailyTtsCap = 5000; // Hard cap on daily upstream TTS calls
   private dailyTranslateCap = 5000; // Hard cap on daily upstream translation calls
   private warningThreshold = 0.8; // Warn at 80% capacity
+  private options: UsageBudgetTrackerOptions;
+  private isDirty = false;
+  private flushTimer: NodeJS.Timeout | null = null;
 
-  constructor(customPath?: string) {
+  constructor(options?: string | UsageBudgetTrackerOptions) {
+    if (typeof options === 'string') {
+      this.options = { customPath: options };
+    } else {
+      this.options = options || {};
+    }
+
     const dataDir = path.join(process.cwd(), '.data');
-    this.metricsFile = customPath || path.join(dataDir, 'usage_metrics.json');
-    this.currentMetrics = this.loadMetrics();
+    this.metricsFile = this.options.customPath || path.join(dataDir, 'usage_metrics.json');
+    if (this.options.dailyTtsCap !== undefined) this.dailyTtsCap = this.options.dailyTtsCap;
+    if (this.options.dailyTranslateCap !== undefined) this.dailyTranslateCap = this.options.dailyTranslateCap;
+
+    this.currentMetrics = {
+      date: this.getTodayString(),
+      ttsUpstreamCalls: 0,
+      translateUpstreamCalls: 0,
+      ttsCacheHits: 0,
+      translateCacheHits: 0,
+    };
+
+    this.initStore();
+  }
+
+  public isRtdbConfigured(): boolean {
+    return isRtdbConfigured(this.options);
+  }
+
+  private resolveRtdbUrl(subPath: string): string {
+    return resolveRtdbUrl(subPath, this.options.customDbUrl);
+  }
+
+  private async fetchRtdb(
+    url: string,
+    init: RequestInit,
+    timeoutMs: number = 3000
+  ): Promise<Response> {
+    return fetchRtdbWithAuth(url, init, {
+      customAuthHeader: this.options.customAuthHeader,
+      customFetch: this.options.customFetch,
+      timeoutMs,
+    });
+  }
+
+  private initStore(): void {
+    // Non-blocking asynchronous initial file read for fallback/offline cache
+    fs.promises
+      .readFile(this.metricsFile, 'utf-8')
+      .then((raw) => {
+        const data = JSON.parse(raw);
+        const today = this.getTodayString();
+        if (data && data.date === today) {
+          this.currentMetrics = {
+            date: today,
+            ttsUpstreamCalls: Number(data.ttsUpstreamCalls) || 0,
+            translateUpstreamCalls: Number(data.translateUpstreamCalls) || 0,
+            ttsCacheHits: Number(data.ttsCacheHits) || 0,
+            translateCacheHits: Number(data.translateCacheHits) || 0,
+            lastBudgetAlertSent: data.lastBudgetAlertSent,
+          };
+        }
+      })
+      .catch(() => {});
   }
 
   private getTodayString(): string {
     return new Date().toISOString().split('T')[0];
   }
 
-  private loadMetrics(): DailyUsageMetrics {
-    const today = this.getTodayString();
-    try {
-      if (fs.existsSync(this.metricsFile)) {
-        const raw = fs.readFileSync(this.metricsFile, 'utf-8');
-        const data = JSON.parse(raw);
-        if (data && data.date === today) {
-          return data;
-        }
-      }
-    } catch {}
-
-    return {
-      date: today,
-      ttsUpstreamCalls: 0,
-      translateUpstreamCalls: 0,
-      ttsCacheHits: 0,
-      translateCacheHits: 0,
-    };
-  }
-
-  private saveMetrics(): void {
-    try {
-      const dir = path.dirname(this.metricsFile);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(this.metricsFile, JSON.stringify(this.currentMetrics, null, 2), 'utf-8');
-    } catch {}
-  }
-
-  private checkRollover(): void {
-    const today = this.getTodayString();
-    if (this.currentMetrics.date !== today) {
+  private checkRollover(today?: string): void {
+    const target = today || this.getTodayString();
+    if (this.currentMetrics.date !== target) {
       this.currentMetrics = {
-        date: today,
+        date: target,
         ttsUpstreamCalls: 0,
         translateUpstreamCalls: 0,
         ttsCacheHits: 0,
         translateCacheHits: 0,
       };
-      this.saveMetrics();
+      this.markDirty();
     }
   }
 
-  public recordTtsCacheHit(): void {
-    this.checkRollover();
-    this.currentMetrics.ttsCacheHits++;
-    this.saveMetrics();
+  private markDirty(): void {
+    this.isDirty = true;
+    if (!this.flushTimer) {
+      this.flushTimer = setTimeout(() => {
+        this.flushTimer = null;
+        this.flushToDisk().catch(() => {});
+      }, 1500);
+      this.flushTimer.unref?.();
+    }
   }
 
-  public recordTranslateCacheHit(): void {
-    this.checkRollover();
+  public async flushToDisk(): Promise<void> {
+    if (!this.isDirty) return;
+    this.isDirty = false;
+
+    try {
+      const dir = path.dirname(this.metricsFile);
+      await fs.promises.mkdir(dir, { recursive: true }).catch(() => {});
+
+      const tempPath = `${this.metricsFile}.${Date.now()}-${Math.random().toString(36).slice(2, 6)}.tmp`;
+      await fs.promises.writeFile(tempPath, JSON.stringify(this.currentMetrics, null, 2), 'utf-8');
+      await fs.promises.rename(tempPath, this.metricsFile);
+    } catch {
+      this.isDirty = true;
+    }
+  }
+
+  public setCapsForTesting(caps: { dailyTtsCap?: number; dailyTranslateCap?: number }): void {
+    if (caps.dailyTtsCap !== undefined) this.dailyTtsCap = caps.dailyTtsCap;
+    if (caps.dailyTranslateCap !== undefined) this.dailyTranslateCap = caps.dailyTranslateCap;
+  }
+
+  /**
+   * Concurrency-safe atomic budget reservation for TTS upstream call.
+   * Eliminates check-then-act races across distributed server instances.
+   */
+  public async reserveTtsBudget(targetDate?: string): Promise<{
+    allowed: boolean;
+    remaining: number;
+    date: string;
+    error?: string;
+    retryAfterSec?: number;
+  }> {
+    const today = targetDate || this.getTodayString();
+    this.checkRollover(today);
+
+    if (this.isRtdbConfigured()) {
+      try {
+        const url = this.resolveRtdbUrl(`/beeyou/budget_metrics/${today}.json`);
+        const maxRetries = 6;
+        const timeoutMs = this.options.timeoutMs ?? 4000;
+
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          const getRes = await this.fetchRtdb(
+            url,
+            {
+              method: 'GET',
+              headers: { 'X-Firebase-ETag': 'true' },
+            },
+            timeoutMs
+          );
+          const etag = getRes.headers.get('etag');
+
+          let existing: DailyUsageMetrics | null = null;
+          if (getRes.ok && getRes.status !== 204) {
+            const text = await getRes.text();
+            if (text && text.trim() !== 'null') {
+              try {
+                existing = JSON.parse(text);
+              } catch {}
+            }
+          }
+
+          // If document exists, an ETag is mandatory for concurrency safety
+          if (existing && !etag) {
+            const backoff = 20 * Math.pow(2, attempt) + Math.floor(Math.random() * 15);
+            await new Promise((r) => setTimeout(r, backoff));
+            continue;
+          }
+
+          if (!existing || existing.date !== today) {
+            existing = {
+              date: today,
+              ttsUpstreamCalls: 0,
+              translateUpstreamCalls: 0,
+              ttsCacheHits: this.currentMetrics.ttsCacheHits,
+              translateCacheHits: this.currentMetrics.translateCacheHits,
+            };
+          }
+
+          if (existing.ttsUpstreamCalls >= this.dailyTtsCap) {
+            const retryAfterSec = getSecondsUntilMidnight();
+            return {
+              allowed: false,
+              remaining: 0,
+              date: today,
+              error: 'Daily upstream TTS generation limit reached. Cached audio remains fully available.',
+              retryAfterSec,
+            };
+          }
+
+          const updated: DailyUsageMetrics = {
+            ...existing,
+            ttsUpstreamCalls: existing.ttsUpstreamCalls + 1,
+            ttsCacheHits: Math.max(existing.ttsCacheHits || 0, this.currentMetrics.ttsCacheHits || 0),
+            translateCacheHits: Math.max(existing.translateCacheHits || 0, this.currentMetrics.translateCacheHits || 0),
+          };
+
+          const putHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+          };
+          if (etag) {
+            putHeaders['if-match'] = etag;
+          }
+
+          const putRes = await this.fetchRtdb(
+            url,
+            {
+              method: 'PUT',
+              headers: putHeaders,
+              body: JSON.stringify(updated),
+            },
+            timeoutMs
+          );
+
+          if (putRes.status === 412) {
+            const backoff = 20 * Math.pow(2, attempt) + Math.floor(Math.random() * 15);
+            await new Promise((r) => setTimeout(r, backoff));
+            continue;
+          }
+
+          if (!putRes.ok) {
+            throw new Error(`RTDB PUT budget metric failed with status ${putRes.status}`);
+          }
+
+          this.currentMetrics = updated;
+          this.markDirty();
+          return {
+            allowed: true,
+            remaining: Math.max(0, this.dailyTtsCap - updated.ttsUpstreamCalls),
+            date: today,
+          };
+        }
+      } catch (err: any) {
+        console.warn('[UsageBudgetTracker] RTDB reservation error, using local fallback:', err?.message || err);
+      }
+    }
+
+    // Local fallback atomic check
+    if (this.currentMetrics.ttsUpstreamCalls >= this.dailyTtsCap) {
+      const retryAfterSec = getSecondsUntilMidnight();
+      return {
+        allowed: false,
+        remaining: 0,
+        date: today,
+        error: 'Daily upstream TTS generation limit reached. Cached audio remains fully available.',
+        retryAfterSec,
+      };
+    }
+
+    this.currentMetrics.ttsUpstreamCalls++;
+    this.markDirty();
+    return {
+      allowed: true,
+      remaining: Math.max(0, this.dailyTtsCap - this.currentMetrics.ttsUpstreamCalls),
+      date: today,
+    };
+  }
+
+  /**
+   * Concurrency-safe atomic refund for failed, timed out, or coalesced TTS upstream call.
+   */
+  public async releaseTtsReservation(targetDate?: string): Promise<void> {
+    const today = targetDate || this.getTodayString();
+    if (this.isRtdbConfigured()) {
+      try {
+        const url = this.resolveRtdbUrl(`/beeyou/budget_metrics/${today}.json`);
+        const maxRetries = 4;
+        const timeoutMs = this.options.timeoutMs ?? 4000;
+
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          const getRes = await this.fetchRtdb(
+            url,
+            {
+              method: 'GET',
+              headers: { 'X-Firebase-ETag': 'true' },
+            },
+            timeoutMs
+          );
+          const etag = getRes.headers.get('etag');
+
+          if (!getRes.ok || getRes.status === 204) break;
+          const text = await getRes.text();
+          if (!text || text.trim() === 'null') break;
+
+          const existing: DailyUsageMetrics = JSON.parse(text);
+          if (!existing || existing.ttsUpstreamCalls <= 0) return;
+
+          if (existing && !etag) {
+            const backoff = 15 * Math.pow(2, attempt);
+            await new Promise((r) => setTimeout(r, backoff));
+            continue;
+          }
+
+          const updated: DailyUsageMetrics = {
+            ...existing,
+            ttsUpstreamCalls: Math.max(0, existing.ttsUpstreamCalls - 1),
+          };
+
+          const putHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+          };
+          if (etag) {
+            putHeaders['if-match'] = etag;
+          }
+
+          const putRes = await this.fetchRtdb(
+            url,
+            {
+              method: 'PUT',
+              headers: putHeaders,
+              body: JSON.stringify(updated),
+            },
+            timeoutMs
+          );
+
+          if (putRes.status === 412) {
+            const backoff = 15 * Math.pow(2, attempt);
+            await new Promise((r) => setTimeout(r, backoff));
+            continue;
+          }
+
+          if (putRes.ok) {
+            this.currentMetrics = updated;
+            this.markDirty();
+            return;
+          }
+          break;
+        }
+      } catch (err: any) {
+        console.warn('[UsageBudgetTracker] RTDB release failed, updating local:', err?.message || err);
+      }
+    }
+
+    if (this.currentMetrics.ttsUpstreamCalls > 0) {
+      this.currentMetrics.ttsUpstreamCalls--;
+      this.markDirty();
+    }
+  }
+
+  /**
+   * Concurrency-safe atomic budget reservation for translation upstream call.
+   */
+  public async reserveTranslateBudget(targetDate?: string): Promise<{
+    allowed: boolean;
+    remaining: number;
+    date: string;
+    error?: string;
+    retryAfterSec?: number;
+  }> {
+    const today = targetDate || this.getTodayString();
+    this.checkRollover(today);
+
+    if (this.isRtdbConfigured()) {
+      try {
+        const url = this.resolveRtdbUrl(`/beeyou/budget_metrics/${today}.json`);
+        const maxRetries = 6;
+        const timeoutMs = this.options.timeoutMs ?? 4000;
+
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          const getRes = await this.fetchRtdb(
+            url,
+            {
+              method: 'GET',
+              headers: { 'X-Firebase-ETag': 'true' },
+            },
+            timeoutMs
+          );
+          const etag = getRes.headers.get('etag');
+
+          let existing: DailyUsageMetrics | null = null;
+          if (getRes.ok && getRes.status !== 204) {
+            const text = await getRes.text();
+            if (text && text.trim() !== 'null') {
+              try {
+                existing = JSON.parse(text);
+              } catch {}
+            }
+          }
+
+          // If document exists, an ETag is mandatory for concurrency safety
+          if (existing && !etag) {
+            const backoff = 20 * Math.pow(2, attempt) + Math.floor(Math.random() * 15);
+            await new Promise((r) => setTimeout(r, backoff));
+            continue;
+          }
+
+          if (!existing || existing.date !== today) {
+            existing = {
+              date: today,
+              ttsUpstreamCalls: 0,
+              translateUpstreamCalls: 0,
+              ttsCacheHits: this.currentMetrics.ttsCacheHits,
+              translateCacheHits: this.currentMetrics.translateCacheHits,
+            };
+          }
+
+          if (existing.translateUpstreamCalls >= this.dailyTranslateCap) {
+            const retryAfterSec = getSecondsUntilMidnight();
+            return {
+              allowed: false,
+              remaining: 0,
+              date: today,
+              error: 'Daily upstream translation limit reached. Cached translations remain available.',
+              retryAfterSec,
+            };
+          }
+
+          const updated: DailyUsageMetrics = {
+            ...existing,
+            translateUpstreamCalls: existing.translateUpstreamCalls + 1,
+            ttsCacheHits: Math.max(existing.ttsCacheHits || 0, this.currentMetrics.ttsCacheHits || 0),
+            translateCacheHits: Math.max(existing.translateCacheHits || 0, this.currentMetrics.translateCacheHits || 0),
+          };
+
+          const putHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+          };
+          if (etag) {
+            putHeaders['if-match'] = etag;
+          }
+
+          const putRes = await this.fetchRtdb(
+            url,
+            {
+              method: 'PUT',
+              headers: putHeaders,
+              body: JSON.stringify(updated),
+            },
+            timeoutMs
+          );
+
+          if (putRes.status === 412) {
+            const backoff = 20 * Math.pow(2, attempt) + Math.floor(Math.random() * 15);
+            await new Promise((r) => setTimeout(r, backoff));
+            continue;
+          }
+
+          if (!putRes.ok) {
+            throw new Error(`RTDB PUT budget metric failed with status ${putRes.status}`);
+          }
+
+          this.currentMetrics = updated;
+          this.markDirty();
+          return {
+            allowed: true,
+            remaining: Math.max(0, this.dailyTranslateCap - updated.translateUpstreamCalls),
+            date: today,
+          };
+        }
+      } catch (err: any) {
+        console.warn('[UsageBudgetTracker] RTDB reservation error, using local fallback:', err?.message || err);
+      }
+    }
+
+    // Local fallback atomic check
+    if (this.currentMetrics.translateUpstreamCalls >= this.dailyTranslateCap) {
+      const retryAfterSec = getSecondsUntilMidnight();
+      return {
+        allowed: false,
+        remaining: 0,
+        date: today,
+        error: 'Daily upstream translation limit reached. Cached translations remain available.',
+        retryAfterSec,
+      };
+    }
+
+    this.currentMetrics.translateUpstreamCalls++;
+    this.markDirty();
+    return {
+      allowed: true,
+      remaining: Math.max(0, this.dailyTranslateCap - this.currentMetrics.translateUpstreamCalls),
+      date: today,
+    };
+  }
+
+  /**
+   * Concurrency-safe atomic refund for failed or timed out translation upstream call.
+   */
+  public async releaseTranslateReservation(targetDate?: string): Promise<void> {
+    const today = targetDate || this.getTodayString();
+    if (this.isRtdbConfigured()) {
+      try {
+        const url = this.resolveRtdbUrl(`/beeyou/budget_metrics/${today}.json`);
+        const maxRetries = 4;
+        const timeoutMs = this.options.timeoutMs ?? 4000;
+
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          const getRes = await this.fetchRtdb(
+            url,
+            {
+              method: 'GET',
+              headers: { 'X-Firebase-ETag': 'true' },
+            },
+            timeoutMs
+          );
+          const etag = getRes.headers.get('etag');
+
+          if (!getRes.ok || getRes.status === 204) break;
+          const text = await getRes.text();
+          if (!text || text.trim() === 'null') break;
+
+          const existing: DailyUsageMetrics = JSON.parse(text);
+          if (!existing || existing.translateUpstreamCalls <= 0) return;
+
+          if (existing && !etag) {
+            const backoff = 15 * Math.pow(2, attempt);
+            await new Promise((r) => setTimeout(r, backoff));
+            continue;
+          }
+
+          const updated: DailyUsageMetrics = {
+            ...existing,
+            translateUpstreamCalls: Math.max(0, existing.translateUpstreamCalls - 1),
+          };
+
+          const putHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+          };
+          if (etag) {
+            putHeaders['if-match'] = etag;
+          }
+
+          const putRes = await this.fetchRtdb(
+            url,
+            {
+              method: 'PUT',
+              headers: putHeaders,
+              body: JSON.stringify(updated),
+            },
+            timeoutMs
+          );
+
+          if (putRes.status === 412) {
+            const backoff = 15 * Math.pow(2, attempt);
+            await new Promise((r) => setTimeout(r, backoff));
+            continue;
+          }
+
+          if (putRes.ok) {
+            this.currentMetrics = updated;
+            this.markDirty();
+            return;
+          }
+          break;
+        }
+      } catch (err: any) {
+        console.warn('[UsageBudgetTracker] RTDB release failed, updating local:', err?.message || err);
+      }
+    }
+
+    if (this.currentMetrics.translateUpstreamCalls > 0) {
+      this.currentMetrics.translateUpstreamCalls--;
+      this.markDirty();
+    }
+  }
+
+  public recordTtsCacheHit(targetDate?: string): void {
+    const today = targetDate || this.getTodayString();
+    this.checkRollover(today);
+    this.currentMetrics.ttsCacheHits++;
+    this.markDirty();
+  }
+
+  public recordTranslateCacheHit(targetDate?: string): void {
+    const today = targetDate || this.getTodayString();
+    this.checkRollover(today);
     this.currentMetrics.translateCacheHits++;
-    this.saveMetrics();
+    this.markDirty();
   }
 
   public canMakeTtsUpstream(): { allowed: boolean; remaining: number; error?: string } {
@@ -166,23 +685,13 @@ export class UsageBudgetTracker {
         error: 'Daily upstream TTS generation limit reached. Cached audio remains fully available.',
       };
     }
-
-    // Check warning threshold
-    if (this.currentMetrics.ttsUpstreamCalls >= this.dailyTtsCap * this.warningThreshold) {
-      const now = Date.now();
-      if (!this.currentMetrics.lastBudgetAlertSent || now - this.currentMetrics.lastBudgetAlertSent > 3600000) {
-        console.warn(`[Budget Alert] TTS upstream usage at ${this.currentMetrics.ttsUpstreamCalls}/${this.dailyTtsCap} (${Math.round((this.currentMetrics.ttsUpstreamCalls / this.dailyTtsCap) * 100)}%) for ${this.currentMetrics.date}`);
-        this.currentMetrics.lastBudgetAlertSent = now;
-      }
-    }
-
     return { allowed: true, remaining: this.dailyTtsCap - this.currentMetrics.ttsUpstreamCalls };
   }
 
   public recordTtsUpstream(): void {
     this.checkRollover();
     this.currentMetrics.ttsUpstreamCalls++;
-    this.saveMetrics();
+    this.markDirty();
   }
 
   public canMakeTranslateUpstream(): { allowed: boolean; remaining: number; error?: string } {
@@ -200,7 +709,7 @@ export class UsageBudgetTracker {
   public recordTranslateUpstream(): void {
     this.checkRollover();
     this.currentMetrics.translateUpstreamCalls++;
-    this.saveMetrics();
+    this.markDirty();
   }
 
   public getMetrics(): DailyUsageMetrics {
@@ -208,15 +717,61 @@ export class UsageBudgetTracker {
     return { ...this.currentMetrics };
   }
 
-  public resetForTesting(): void {
+  public async getMetricsAsync(targetDate?: string): Promise<DailyUsageMetrics> {
+    const today = targetDate || this.getTodayString();
+    this.checkRollover(today);
+
+    if (this.isRtdbConfigured()) {
+      try {
+        const url = this.resolveRtdbUrl(`/beeyou/budget_metrics/${today}.json`);
+        const res = await this.fetchRtdb(url, { method: 'GET' }, 3000);
+        if (res.ok && res.status !== 204) {
+          const text = await res.text();
+          if (text && text.trim() !== 'null') {
+            const data = JSON.parse(text);
+            if (data && data.date === today) {
+              this.currentMetrics = {
+                date: today,
+                ttsUpstreamCalls: Number(data.ttsUpstreamCalls) || 0,
+                translateUpstreamCalls: Number(data.translateUpstreamCalls) || 0,
+                ttsCacheHits: Number(data.ttsCacheHits) || 0,
+                translateCacheHits: Number(data.translateCacheHits) || 0,
+                lastBudgetAlertSent: data.lastBudgetAlertSent,
+              };
+            }
+          }
+        }
+      } catch {}
+    }
+
+    return { ...this.currentMetrics };
+  }
+
+  public async resetForTesting(targetDate?: string): Promise<void> {
+    const today = targetDate || this.getTodayString();
     this.currentMetrics = {
-      date: this.getTodayString(),
+      date: today,
       ttsUpstreamCalls: 0,
       translateUpstreamCalls: 0,
       ttsCacheHits: 0,
       translateCacheHits: 0,
     };
-    this.saveMetrics();
+    this.markDirty();
+    await this.flushToDisk();
+
+    if (this.isRtdbConfigured()) {
+      try {
+        const url = this.resolveRtdbUrl(`/beeyou/budget_metrics/${today}.json`);
+        await this.fetchRtdb(url, { method: 'DELETE' }, 3000);
+      } catch {}
+    }
+  }
+
+  public destroy(): void {
+    if (this.flushTimer) {
+      clearTimeout(this.flushTimer);
+      this.flushTimer = null;
+    }
   }
 }
 
@@ -798,7 +1353,7 @@ const TTS_TIMEOUT_MS = 4500; // 4.5-second strict timeout for fast, non-blocking
 /**
  * Handle Translation Requests with Validation, Timeouts, Multi-Tier Caching, and Abuse Protection.
  */
-export async function handleTranslateRequest(req: Request, res: Response): Promise<void> {
+export async function handleTranslateRequest(req: Request, res: ExpressResponse): Promise<void> {
   const rawText = req.query.text;
   const rawTo = req.query.to || 'es';
 
@@ -838,19 +1393,17 @@ export async function handleTranslateRequest(req: Request, res: Response): Promi
     return;
   }
 
-  // 4. L2 Persistent Disk Cache Check
-  if (fs.existsSync(diskPath)) {
-    try {
-      const cachedRaw = await fs.promises.readFile(diskPath, 'utf-8');
-      const cached = JSON.parse(cachedRaw);
-      if (cached?.translated) {
-        translateTextCache.set(cacheKey, cached.translated);
-        usageBudgetTracker.recordTranslateCacheHit();
-        res.json({ translated: cached.translated });
-        return;
-      }
-    } catch {}
-  }
+  // 4. L2 Persistent Disk Cache Check (Non-blocking async)
+  try {
+    const cachedRaw = await fs.promises.readFile(diskPath, 'utf-8');
+    const cached = JSON.parse(cachedRaw);
+    if (cached?.translated) {
+      translateTextCache.set(cacheKey, cached.translated);
+      usageBudgetTracker.recordTranslateCacheHit();
+      res.json({ translated: cached.translated });
+      return;
+    }
+  } catch {}
 
   // 5. Per-User Quota Check (Only charged on cache miss that would trigger upstream call)
   const minuteQuota = await defaultRateLimitStore.hit(`translate:burst:${clientIp}`, TRANSLATE_BURST_LIMIT_PER_MIN, 60 * 1000, 'ip');
@@ -875,14 +1428,21 @@ export async function handleTranslateRequest(req: Request, res: Response): Promi
     return;
   }
 
-  // 6. Global Daily Budget & Circuit Breaker Check
-  const budgetCheck = usageBudgetTracker.canMakeTranslateUpstream();
-  if (!budgetCheck.allowed) {
-    res.status(429).json({ error: 'Too Many Requests', message: budgetCheck.error });
+  // 6. Global Daily Budget & Circuit Breaker Check (Atomic Concurrency-Safe Reservation)
+  const budgetReservation = await usageBudgetTracker.reserveTranslateBudget();
+  if (!budgetReservation.allowed) {
+    const retryAfter = budgetReservation.retryAfterSec || 3600;
+    res.setHeader('Retry-After', retryAfter);
+    res.status(429).json({
+      error: 'Too Many Requests',
+      message: budgetReservation.error || 'Daily upstream translation limit reached. Cached translations remain available.',
+      retryAfter,
+    });
     return;
   }
 
   // 7. Upstream Translation Request with AbortSignal Timeout
+  let reservationKept = false;
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl=en&tl=${encodeURIComponent(toLang)}&dt=t&q=${encodeURIComponent(cleanText)}`;
     const response = await fetch(url, {
@@ -892,8 +1452,6 @@ export async function handleTranslateRequest(req: Request, res: Response): Promi
       signal: AbortSignal.timeout(TRANSLATE_TIMEOUT_MS),
     });
 
-    usageBudgetTracker.recordTranslateUpstream();
-
     if (!response.ok) {
       res.json({ translated: cleanText });
       return;
@@ -901,6 +1459,7 @@ export async function handleTranslateRequest(req: Request, res: Response): Promi
 
     const data: any = await response.json();
     const translated = data?.[0]?.[0]?.[0] || cleanText;
+    reservationKept = true;
 
     // Cache translated response in memory and disk
     if (translateTextCache.size > 2000) {
@@ -914,14 +1473,32 @@ export async function handleTranslateRequest(req: Request, res: Response): Promi
   } catch (err: any) {
     // If upstream timed out or failed, gracefully fallback to original text without breaking UI
     res.json({ translated: cleanText });
+  } finally {
+    if (!reservationKept) {
+      usageBudgetTracker.releaseTranslateReservation(budgetReservation.date).catch(() => {});
+    }
   }
+}
+
+/**
+ * Asynchronously locates the first matching audio file on disk without blocking the event loop.
+ */
+async function findExistingDiskFile(candidates: (string | null | undefined)[]): Promise<string | null> {
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      await fs.promises.access(candidate, fs.constants.R_OK);
+      return candidate;
+    } catch {}
+  }
+  return null;
 }
 
 /**
  * Handle Text-to-Speech Requests with Validation, Timeouts, Multi-Tier Caching, and Abuse Protection.
  * Supports neural persona streaming across Kids, Teens, Caring, and Professional categories.
  */
-export async function handleTtsRequest(req: Request, res: Response): Promise<void> {
+export async function handleTtsRequest(req: Request, res: ExpressResponse): Promise<void> {
   const rawText = req.query.text;
   const rawLang = req.query.lang || 'en';
   const rawVoice = (req.query.voice || 'puck').toString().trim().toLowerCase();
@@ -967,7 +1544,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   const isApproved = isApprovedVocabulary(cleanText);
   const cacheControlDirective = getTtsCacheControlDirective(cleanText);
 
-  const applyTtsHeaders = (targetRes: Response, contentType?: string) => {
+  const applyTtsHeaders = (targetRes: ExpressResponse, contentType?: string) => {
     if (contentType) {
       targetRes.setHeader('Content-Type', contentType);
     }
@@ -994,9 +1571,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     return;
   }
 
-  // 3b. Single-Flight Coalescing Early Check
-  // If another concurrent request is currently generating this exact voice/phrase, join and await its completion
-  // This avoids duplicate disk/cloud reads and ensures zero duplicate Gemini calls
+  // 4. Single-Flight Coalescing: Join in-flight generation if already in progress
   if (inFlightTtsGenerations.has(cacheKey)) {
     console.log(`[TTS Single-Flight JOIN] Concurrent request joined in-flight generation: "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 extra Gemini calls ($0.00)`);
     try {
@@ -1013,7 +1588,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
         return;
       }
     } catch (joinErr) {
-      console.warn('[TTS Single-Flight Early Join Error]:', joinErr);
+      console.warn('[TTS Single-Flight Join Error]:', joinErr);
     }
 
     if (voiceKey !== 'system') {
@@ -1027,154 +1602,118 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
     return;
   }
 
-  // 4. L3 Persistent Disk Cache Check
-  let diskFile = fs.existsSync(diskPathWav)
-    ? diskPathWav
-    : (fs.existsSync(literalDiskPathWav)
-      ? literalDiskPathWav
-      : (fs.existsSync(diskPathMp3)
-        ? diskPathMp3
-        : (fs.existsSync(literalDiskPathMp3)
-          ? literalDiskPathMp3
-          : (fs.existsSync(legacyDiskPathMp3) ? legacyDiskPathMp3 : null))));
+  // Not in flight: This request is the designated LEADER for this phrase!
+  // Register leader promise IMMEDIATELY and SYNCHRONOUSLY before any async operations!
+  let resolveLeader!: (val: { buffer: Buffer; contentType: string } | null) => void;
+  let rejectLeader!: (err: any) => void;
+  const leaderPromise = new Promise<{ buffer: Buffer; contentType: string } | null>((res, rej) => {
+    resolveLeader = res;
+    rejectLeader = rej;
+  });
 
-  // High-performance baseline fallback: If requested voice file is missing on disk,
-  // instantly serve the pre-baked audio for this exact phrase and language from disk
-  if (!diskFile && voiceKey !== 'puck') {
-    const puckHash = crypto.createHash('md5').update(`${ttsVersion}_puck_${normalizedLang}_${cacheKeyText}`).digest('hex');
-    const puckLitHash = crypto.createHash('md5').update(`${ttsVersion}_puck_${normalizedLang}_${literalKeyText}`).digest('hex');
-    const puckWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckHash}.wav`);
-    const puckLitWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckLitHash}.wav`);
-    const puckMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckHash}.mp3`);
-    const puckLitMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckLitHash}.mp3`);
-    diskFile = fs.existsSync(puckWav) ? puckWav : (fs.existsSync(puckLitWav) ? puckLitWav : (fs.existsSync(puckMp3) ? puckMp3 : (fs.existsSync(puckLitMp3) ? puckLitMp3 : null)));
-  }
+  inFlightTtsGenerations.set(cacheKey, leaderPromise);
 
-  // Fast preloading safeguard: If client passes cachedOnly=1 and file is not on disk, return 404 in 1ms rather than blocking on Gemini
-  if (!diskFile && (req.query.cachedOnly === '1' || req.query.cachedOnly === 'true')) {
-    res.status(404).json({ error: 'NotPreCached', message: 'Audio tile not cached on server disk' });
-    return;
-  }
+  let quotaBlocked: { status: number; message: string; retryAfterSec: number } | null = null;
+  let reservationDate: string | null = null;
+  let reservationKept = false;
 
-  if (diskFile) {
+  (async () => {
     try {
-      let fileBuffer: Buffer = await fs.promises.readFile(diskFile);
-      let contentType = diskFile.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg';
+      // 4a. L3 Persistent Disk Cache Check (Non-blocking async)
+      let diskFile = await findExistingDiskFile([
+        diskPathWav,
+        literalDiskPathWav,
+        diskPathMp3,
+        literalDiskPathMp3,
+        legacyDiskPathMp3,
+      ]);
 
-      // Ensure disk cached WAV has a valid RIFF header
-      if (contentType === 'audio/wav') {
-        const { buffer: validatedBuffer, isNativeWav } = ensureValidWavContainer(fileBuffer);
-        if (!isNativeWav) {
-          fileBuffer = validatedBuffer;
-          fs.promises.writeFile(diskFile, fileBuffer).catch(() => {});
-        }
+      if (!diskFile && voiceKey !== 'puck') {
+        const puckHash = crypto.createHash('md5').update(`${ttsVersion}_puck_${normalizedLang}_${cacheKeyText}`).digest('hex');
+        const puckLitHash = crypto.createHash('md5').update(`${ttsVersion}_puck_${normalizedLang}_${literalKeyText}`).digest('hex');
+        const puckWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckHash}.wav`);
+        const puckLitWav = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckLitHash}.wav`);
+        const puckMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckHash}.mp3`);
+        const puckLitMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_puck_${normalizedLang}_${puckLitHash}.mp3`);
+        diskFile = await findExistingDiskFile([puckWav, puckLitWav, puckMp3, puckLitMp3]);
       }
 
-      ttsAudioCache.set(cacheKey, { buffer: fileBuffer, contentType });
-      usageBudgetTracker.recordTtsCacheHit();
-      console.log(`[TTS Cache HIT L3 Disk] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
-      if (req.headers['if-none-match'] === `"${hashKey}"`) {
-        applyTtsHeaders(res);
-        res.status(304).end();
-        return;
+      if (diskFile) {
+        try {
+          let fileBuffer: Buffer = await fs.promises.readFile(diskFile);
+          let contentType = diskFile.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg';
+
+          if (contentType === 'audio/wav') {
+            const { buffer: validatedBuffer, isNativeWav } = ensureValidWavContainer(fileBuffer);
+            if (!isNativeWav) {
+              fileBuffer = validatedBuffer;
+              fs.promises.writeFile(diskFile, fileBuffer).catch(() => {});
+            }
+          }
+
+          const diskResult = { buffer: fileBuffer, contentType };
+          ttsAudioCache.set(cacheKey, diskResult);
+          usageBudgetTracker.recordTtsCacheHit();
+          console.log(`[TTS Cache HIT L3 Disk] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
+          resolveLeader(diskResult);
+          return;
+        } catch {}
       }
-      applyTtsHeaders(res, contentType);
-      res.send(fileBuffer);
-      return;
-    } catch {}
-  }
 
-  // 4b. Persistent Cloud Object Storage Check (Firebase Storage / GCS / Vercel Durable Cache)
-  // Ensures audio persists across Vercel serverless container recycles and cold starts
-  try {
-    const cloudRaw = await getAudioFromCloudStorage(voiceKey, normalizedLang, hashKey, ttsVersion);
-    if (cloudRaw) {
-      const contentType = 'audio/wav';
-      const { buffer: cloudBuffer } = ensureValidWavContainer(cloudRaw);
-      ttsAudioCache.set(cacheKey, { buffer: cloudBuffer, contentType });
-      // Cache to local container disk/tmp for 0ms subsequent hits on this instance
-      fs.promises.writeFile(diskPathWav, cloudBuffer).then(() => {
-        scheduleDiskCacheLifecycleCheck();
-      }).catch(() => {});
-      usageBudgetTracker.recordTtsCacheHit();
-
-      if (req.headers['if-none-match'] === `"${hashKey}"`) {
-        applyTtsHeaders(res);
-        res.status(304).end();
-        return;
-      }
-      applyTtsHeaders(res, contentType);
-      res.send(cloudBuffer);
-      return;
-    }
-  } catch {}
-
-  // 4c. Single-Flight Coalescing Secondary Check (catches requests that arrived during disk/cloud checks)
-  if (inFlightTtsGenerations.has(cacheKey)) {
-    console.log(`[TTS Single-Flight JOIN] Concurrent request joined in-flight generation: "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 extra Gemini calls ($0.00)`);
-    try {
-      const joined = await inFlightTtsGenerations.get(cacheKey)!;
-      if (joined) {
-        usageBudgetTracker.recordTtsCacheHit();
-        if (req.headers['if-none-match'] === `"${hashKey}"`) {
-          applyTtsHeaders(res);
-          res.status(304).end();
+      // 4b. Persistent Cloud Object Storage Check (Firebase Storage / GCS / Vercel Durable Cache)
+      try {
+        const cloudRaw = await getAudioFromCloudStorage(voiceKey, normalizedLang, hashKey, ttsVersion);
+        if (cloudRaw) {
+          const contentType = 'audio/wav';
+          const { buffer: cloudBuffer } = ensureValidWavContainer(cloudRaw);
+          const cloudResult = { buffer: cloudBuffer, contentType };
+          ttsAudioCache.set(cacheKey, cloudResult);
+          fs.promises.writeFile(diskPathWav, cloudBuffer).then(() => {
+            scheduleDiskCacheLifecycleCheck();
+          }).catch(() => {});
+          usageBudgetTracker.recordTtsCacheHit();
+          resolveLeader(cloudResult);
           return;
         }
-        applyTtsHeaders(res, joined.contentType);
-        res.send(joined.buffer);
+      } catch {}
+
+      // 4c. Per-User Quota Check (Only charged on cache miss for actual upstream generation)
+      const minuteQuota = await defaultRateLimitStore.hit(`tts:burst:${clientIp}`, TTS_BURST_LIMIT_PER_MIN, 60 * 1000, 'ip');
+      if (!minuteQuota.allowed) {
+        quotaBlocked = {
+          status: 429,
+          message: 'Audio generation limit reached. Please wait a moment before requesting more audio.',
+          retryAfterSec: minuteQuota.retryAfterSec,
+        };
+        resolveLeader(null);
         return;
       }
-    } catch (joinErr) {
-      console.warn('[TTS Single-Flight Secondary Join Error]:', joinErr);
-    }
 
-    if (voiceKey !== 'system') {
-      res.status(503).json({
-        error: 'VoiceStreamUnavailable',
-        message: 'Voice stream unavailable. Falling back to on-device Piper or system speech.',
-      });
-      return;
-    }
-    res.status(500).send('TTS internal error');
-    return;
-  }
+      const dailyQuota = await defaultRateLimitStore.hit(`tts:daily:${clientIp}`, TTS_DAILY_LIMIT_PER_USER, 24 * 60 * 60 * 1000, 'ip');
+      if (!dailyQuota.allowed) {
+        quotaBlocked = {
+          status: 429,
+          message: 'Daily audio generation quota exceeded for this device. Please try again tomorrow.',
+          retryAfterSec: dailyQuota.retryAfterSec,
+        };
+        resolveLeader(null);
+        return;
+      }
 
-  // 5. Per-User Quota Check (Only charged on cache miss that would trigger upstream call)
-  const minuteQuota = await defaultRateLimitStore.hit(`tts:burst:${clientIp}`, TTS_BURST_LIMIT_PER_MIN, 60 * 1000, 'ip');
-  if (!minuteQuota.allowed) {
-    res.setHeader('Retry-After', minuteQuota.retryAfterSec);
-    res.status(429).json({
-      error: 'Too Many Requests',
-      message: 'Audio generation limit reached. Please wait a moment before requesting more audio.',
-      retryAfter: minuteQuota.retryAfterSec,
-    });
-    return;
-  }
+      // 4d. Atomic Global Budget Reservation (Only leader reserves budget)
+      const budgetRes = await usageBudgetTracker.reserveTtsBudget();
+      if (!budgetRes.allowed) {
+        quotaBlocked = {
+          status: 429,
+          message: budgetRes.error || 'Daily upstream TTS generation limit reached. Cached audio remains fully available.',
+          retryAfterSec: budgetRes.retryAfterSec || 3600,
+        };
+        resolveLeader(null);
+        return;
+      }
+      reservationDate = budgetRes.date;
 
-  const dailyQuota = await defaultRateLimitStore.hit(`tts:daily:${clientIp}`, TTS_DAILY_LIMIT_PER_USER, 24 * 60 * 60 * 1000, 'ip');
-  if (!dailyQuota.allowed) {
-    res.setHeader('Retry-After', dailyQuota.retryAfterSec);
-    res.status(429).json({
-      error: 'Too Many Requests',
-      message: 'Daily audio generation quota exceeded for this device. Please try again tomorrow.',
-      retryAfter: dailyQuota.retryAfterSec,
-    });
-    return;
-  }
-
-  // 6. Global Daily Budget & Circuit Breaker Check
-  const budgetCheck = usageBudgetTracker.canMakeTtsUpstream();
-  if (!budgetCheck.allowed) {
-    res.status(429).json({ error: 'Too Many Requests', message: budgetCheck.error });
-    return;
-  }
-
-  // 7. Single-Flight Registry: Register Leader Generation Promise
-  // Any concurrent requests arriving during this generation will join the leader promise and share the result
-  const generationPromise = (async (): Promise<{ buffer: Buffer; contentType: string } | null> => {
-    // 7a. Instant Google TTS generation via native fetch (~180ms response time, zero rate limits, all languages)
-    try {
+      // 4e. Instant Google TTS generation via native fetch (~180ms response time, zero rate limits, all languages)
       const lowerNorm = (normalizedLang || '').toLowerCase();
       const normLang = lowerNorm.startsWith('fr')
         ? 'fr'
@@ -1255,7 +1794,7 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
         const combinedBuf = chunkBuffers.length === 1 ? chunkBuffers[0] : Buffer.concat(chunkBuffers);
         const ct = 'audio/mpeg';
         const googleResult = { buffer: combinedBuf, contentType: ct };
-        usageBudgetTracker.recordTtsUpstream();
+        reservationKept = true;
         console.log(`[TTS Instant Stream] Generated: "${cleanText}" (${persona.name}, ${normalizedLang}) [size: ${combinedBuf.length} bytes] - auto-saved to disk cache`);
 
         // Cache in memory for instant reuse
@@ -1265,22 +1804,39 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
         fs.promises.writeFile(diskPathMp3, combinedBuf).catch(() => {});
         fs.promises.writeFile(literalDiskPathMp3, combinedBuf).catch(() => {});
 
-        return googleResult;
+        resolveLeader(googleResult);
+        return;
       }
+
+      resolveLeader(null);
     } catch (googleErr: any) {
       console.warn('[TTS Instant Google Stream Notice]:', googleErr?.message || googleErr);
+      resolveLeader(null);
+    } finally {
+      inFlightTtsGenerations.delete(cacheKey);
+      const resDate = reservationDate as string | null;
+      if (!reservationKept && resDate) {
+        usageBudgetTracker.releaseTtsReservation(resDate).catch(() => {});
+      }
     }
-
-    return null;
   })();
-
-  inFlightTtsGenerations.set(cacheKey, generationPromise);
 
   let result: { buffer: Buffer; contentType: string } | null = null;
   try {
-    result = await generationPromise;
-  } finally {
-    inFlightTtsGenerations.delete(cacheKey);
+    result = await leaderPromise;
+  } catch {
+    result = null;
+  }
+
+  const blockedStatus = quotaBlocked as { status: number; message: string; retryAfterSec: number } | null;
+  if (blockedStatus) {
+    res.setHeader('Retry-After', blockedStatus.retryAfterSec);
+    res.status(blockedStatus.status).json({
+      error: 'Too Many Requests',
+      message: blockedStatus.message,
+      retryAfter: blockedStatus.retryAfterSec,
+    });
+    return;
   }
 
   if (result) {

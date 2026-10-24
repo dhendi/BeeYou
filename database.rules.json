@@ -184,6 +184,22 @@
             ".validate": "newData.isString() && ((data.val() === null && (newData.val() === 'pending' || (auth.token.email === 'demo@beeyou.app' && $pairingCode === 'BEE-DEMO'))) || (data.val() === 'pending' && (newData.val() === 'pending' || ((newData.val() === 'claimed' || newData.val() === 'awaiting_approval') && (newData.parent().child('requestingUid').val() === auth.uid || newData.parent().child('claimedByUid').val() === auth.uid)) || ((newData.val() === 'rejected' || newData.val() === 'expired' || newData.val() === 'revoked') && (newData.parent().child('ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.parent().child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid)))) || ((data.val() === 'claimed' || data.val() === 'awaiting_approval') && (newData.val() === data.val() || ((newData.val() === 'paired' || newData.val() === 'rejected' || newData.val() === 'revoked') && (newData.parent().child('ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.parent().child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid)))) || ((data.val() === 'paired' || data.val() === 'rejected' || data.val() === 'expired' || data.val() === 'revoked') && (newData.val() === data.val() || ((newData.val() === 'revoked' || newData.val() === 'expired') && (newData.parent().child('ownerUid').val() === auth.uid || root.child('beeyou/families/' + newData.parent().child('targetFamilyCode').val() + '/ownerUid').val() === auth.uid)))) || (auth.token.email === 'demo@beeyou.app' && $pairingCode === 'BEE-DEMO'))"
           }
         }
+      },
+
+      "rate_limits": {
+        ".read": "auth != null && (auth.token.admin === true || auth.token.backend === true || auth.token.role === 'admin')",
+        ".write": "auth != null && (auth.token.admin === true || auth.token.backend === true || auth.token.role === 'admin')",
+        "$key": {
+          ".validate": "newData.hasChildren(['count', 'resetAt']) && newData.child('count').isNumber() && newData.child('resetAt').isNumber()"
+        }
+      },
+
+      "budget_metrics": {
+        ".read": "auth != null && (auth.token.admin === true || auth.token.backend === true || auth.token.role === 'admin')",
+        ".write": "auth != null && (auth.token.admin === true || auth.token.backend === true || auth.token.role === 'admin')",
+        "$date": {
+          ".validate": "$date.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.hasChildren(['date']) && newData.child('date').val() === $date"
+        }
       }
     }
   }

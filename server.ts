@@ -199,13 +199,15 @@ export const apiLimiter = createSingleRateLimiter({
   maxRequests: 300,
   message: 'API rate limit exceeded. Please slow down requests.',
   scope: 'ip',
+  keyGenerator: (req) => `api:ip:${getClientIp(req)}`,
 });
 
 export const ttsLimiter = createSingleRateLimiter({
   windowMs: 60 * 1000,
-  maxRequests: 120,
+  maxRequests: 600, // 600 req/min (10 req/s) protects against volumetric abuse while allowing rapid AAC tile communication
   message: 'Audio generation limit reached. Please wait a moment.',
   scope: 'ip',
+  keyGenerator: (req) => `tts:ip:${getClientIp(req)}`,
 });
 
 export const translateLimiter = createSingleRateLimiter({
@@ -213,6 +215,7 @@ export const translateLimiter = createSingleRateLimiter({
   maxRequests: 60,
   message: 'Translation rate limit reached. Please wait a moment.',
   scope: 'ip',
+  keyGenerator: (req) => `translate:ip:${getClientIp(req)}`,
 });
 
 export function extractTargetCode(req: express.Request): string | null {
@@ -240,6 +243,7 @@ export const authLimiter = createCompositeRateLimiter([
     maxRequests: 60,
     message: 'Too many authentication attempts from this IP address. Please wait 15 minutes.',
     keyGenerator: (req) => `auth:ip:${getClientIp(req)}`,
+    failClosed: true,
   },
   {
     scope: 'account',
@@ -257,6 +261,7 @@ export const authLimiter = createCompositeRateLimiter([
       }
       return null;
     },
+    failClosed: true,
   },
 ]);
 
@@ -267,6 +272,7 @@ export const pairingLimiter = createCompositeRateLimiter([
     maxRequests: 30,
     message: 'Too many pairing requests from this IP address. Please wait a while.',
     keyGenerator: (req) => `pairing:ip:${getClientIp(req)}`,
+    failClosed: true,
   },
   {
     scope: 'pairing',
@@ -280,6 +286,7 @@ export const pairingLimiter = createCompositeRateLimiter([
       }
       return null;
     },
+    failClosed: true,
   },
 ]);
 
@@ -290,6 +297,7 @@ export const recoverEmailLimiter = createCompositeRateLimiter([
     maxRequests: 15,
     message: 'Too many recovery attempts from this IP. Please wait 15 minutes.',
     keyGenerator: (req) => `recovery:ip:${getClientIp(req)}`,
+    failClosed: true,
   },
   {
     scope: 'account',
@@ -303,6 +311,7 @@ export const recoverEmailLimiter = createCompositeRateLimiter([
       }
       return null;
     },
+    failClosed: true,
   },
 ]);
 
@@ -416,10 +425,10 @@ function requireAdminAuth() {
 }
 
 // Usage Metrics & Budget Status Endpoint (Admin & Diagnostic Health)
-app.get('/api/admin/usage', requireAdminAuth(), (_req, res) => {
+app.get('/api/admin/usage', requireAdminAuth(), async (_req, res) => {
   res.json({
     success: true,
-    metrics: usageBudgetTracker.getMetrics(),
+    metrics: await usageBudgetTracker.getMetricsAsync(),
     level3DiskCache: sanitizeCacheDiagnostics(verifyLevel3DiskCache()),
     timestamp: new Date().toISOString(),
   });

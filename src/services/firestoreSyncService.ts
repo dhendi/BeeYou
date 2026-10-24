@@ -51,7 +51,7 @@ let cachedAdcConfigured = false;
  * Diagnostic helper to verify Firestore credentials configuration without exposing secrets.
  */
 export function verifyFirestoreConfig(): FirestoreConfigReport {
-  const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
+  const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_DATABASE_EMULATOR_HOST;
   if (emulatorHost) {
     return {
       configured: true,
@@ -163,7 +163,7 @@ export async function getFirestoreAuthHeader(options?: SyncOptions): Promise<str
     return options.customAuthHeader;
   }
 
-  const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
+  const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_DATABASE_EMULATOR_HOST;
   if (emulatorHost) {
     const toBase64Url = (obj: any) =>
       Buffer.from(JSON.stringify(obj))

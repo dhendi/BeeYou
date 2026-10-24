@@ -11,6 +11,7 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test": "tsx scripts/test-tts-abuse-protection.ts",
+    "test:ratelimits": "npx firebase-tools emulators:exec --only database,firestore \"tsx scripts/test-rate-limits-and-quotas.ts\"",
     "test:rules": "npx firebase-tools emulators:exec --only database,firestore,storage \"tsx scripts/test-firebase-rules.ts\"",
     "test:android": "tsx scripts/test-android-network-security.ts",
     "cap:sync": "npm run build && cap sync",
