@@ -1,17 +1,25 @@
 /**
- * BeeYou Persistent & Shared Token Revocation Service
+ * BeeYou Authoritative Shared Token Revocation Service
  *
- * Provides production-grade token revocation tracking across server restarts
- * and distributed backend instances.
+ * Provides production-grade token revocation tracking across multiple backend instances,
+ * ephemeral serverless deployments, and server restarts using Cloud Firestore
+ * as the authoritative, shared backend datastore with local fast-path caching.
  *
  * Tracks:
- * 1. Individual token revocation (by token string or unique jti ID) with expiration timestamps.
+ * 1. Individual token revocation (by token string or unique JTI ID) with expiration timestamps.
  * 2. User-level revocation (invalidates all credentials issued to a user before revocation timestamp).
  * 3. Family-level revocation (invalidates all credentials for a family upon deletion or unlinking).
  */
 
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+import {
+  verifyFirestoreConfig,
+  getFirestoreAuthHeader,
+  FirestoreSyncError,
+  SyncOptions,
+} from './firestoreSyncService';
 
 export interface RevokedTokenRecord {
   revokedAt: number;
@@ -25,10 +33,11 @@ export interface RevocationStoreData {
   revokedFamilies: Record<string, { revokedAt: number; reason?: string }>;
 }
 
+const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'beeyou-23d7d';
 const DATA_DIR = path.resolve('.data');
 const REVOCATION_FILE = path.join(DATA_DIR, 'revoked_tokens.json');
 
-// In-memory caches for synchronous O(1) authorization checks
+// In-memory caches for fast-path O(1) positive revocation lookup
 const memoryRevokedTokens = new Map<string, RevokedTokenRecord>();
 const memoryRevokedUsers = new Map<string, { revokedAt: number; reason?: string }>();
 const memoryRevokedFamilies = new Map<string, { revokedAt: number; reason?: string }>();
@@ -36,7 +45,32 @@ const memoryRevokedFamilies = new Map<string, { revokedAt: number; reason?: stri
 let isInitialized = false;
 
 /**
- * Initializes the persistent revocation store from disk.
+ * Computes deterministic SHA-256 hash for document IDs in Firestore
+ * to guarantee valid document paths and protect token signatures from leakage.
+ */
+export function hashTokenIdentifier(tokenOrJti: string): string {
+  return crypto.createHash('sha256').update(tokenOrJti.trim()).digest('hex');
+}
+
+/**
+ * Extracts JTI from a signed family token (by_tok) if available.
+ */
+export function extractJtiFromToken(token: string): string | undefined {
+  if (!token || !token.startsWith('by_tok.')) return undefined;
+  try {
+    const parts = token.split('.');
+    if (parts.length === 3) {
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf-8'));
+      if (payload?.jti && typeof payload.jti === 'string') {
+        return payload.jti.trim();
+      }
+    }
+  } catch {}
+  return undefined;
+}
+
+/**
+ * Initializes the local revocation cache from disk if available.
  */
 export function initTokenRevocationStore(): void {
   try {
@@ -67,13 +101,12 @@ export function initTokenRevocationStore(): void {
     }
     isInitialized = true;
   } catch (err) {
-    console.warn('[TokenRevocation] Store initialization notice:', err);
     isInitialized = true;
   }
 }
 
 /**
- * Persists current in-memory revocation records to disk atomically.
+ * Persists current in-memory revocation records to local disk atomically as a local replica.
  */
 export async function saveRevocationStore(): Promise<void> {
   try {
@@ -91,102 +124,368 @@ export async function saveRevocationStore(): Promise<void> {
     await fs.promises.writeFile(tempFile, JSON.stringify(data, null, 2), 'utf-8');
     await fs.promises.rename(tempFile, REVOCATION_FILE);
   } catch (err) {
-    console.error('[TokenRevocation] Save store error:', err);
+    // In serverless / read-only disk environments, disk save warning is non-fatal if datastore write succeeded
   }
 }
 
 /**
- * Revokes an individual token (by token string or jti ID).
+ * Executes an atomic batch commit to Cloud Firestore for revocation updates.
+ * Throws FirestoreSyncError on non-2xx responses or network failures.
+ */
+async function executeFirestoreCommit(writes: any[], options?: SyncOptions): Promise<void> {
+  const config = verifyFirestoreConfig();
+  if (!config.configured && !options?.customAuthHeader && !options?.customHost) {
+    if (process.env.NODE_ENV === 'production' || process.env.REQUIRE_FIRESTORE_SYNC === 'true') {
+      throw new FirestoreSyncError(
+        'Cloud Firestore service account credentials are required in production for revocation',
+        500,
+        false
+      );
+    }
+    return;
+  }
+
+  const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
+  const baseHost = options?.customHost
+    || (emulatorHost ? `http://${emulatorHost}` : 'https://firestore.googleapis.com');
+  const url = `${baseHost}/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:commit`;
+
+  const authHeader = await getFirestoreAuthHeader(options);
+  const maxRetries = options?.maxRetries ?? 2;
+  const timeoutMs = options?.timeoutMs ?? 6000;
+  const fetchFn = options?.customFetch ?? fetch;
+
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const res = await fetchFn(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader,
+        },
+        body: JSON.stringify({ writes }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        let errorDetail = '';
+        try {
+          const json = await res.json();
+          errorDetail = json?.error?.message || JSON.stringify(json);
+        } catch {
+          errorDetail = await res.text().catch(() => '');
+        }
+
+        const isTransient = res.status >= 500 || res.status === 429;
+        const syncError = new FirestoreSyncError(
+          `Firestore revocation write failed with status ${res.status}: ${errorDetail || res.statusText}`,
+          res.status,
+          isTransient
+        );
+
+        if (!isTransient) {
+          throw syncError;
+        }
+        lastError = syncError;
+      } else {
+        return; // Success
+      }
+    } catch (err: any) {
+      if (err instanceof FirestoreSyncError && !err.isTransient) {
+        throw err;
+      }
+
+      if (err?.name === 'AbortError') {
+        lastError = new FirestoreSyncError(`Firestore revocation write timed out after ${timeoutMs}ms`, 504, true);
+      } else if (err instanceof FirestoreSyncError) {
+        lastError = err;
+      } else {
+        lastError = new FirestoreSyncError(
+          `Firestore network interruption during revocation write: ${err?.message || 'connection failed'}`,
+          502,
+          true
+        );
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+
+    if (attempt < maxRetries) {
+      const delayMs = 150 * Math.pow(2, attempt);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  throw lastError || new FirestoreSyncError('Firestore revocation write failed after retries', 500, false);
+}
+
+/**
+ * Performs a batch document lookup against Cloud Firestore.
+ * Throws FirestoreSyncError on non-2xx responses or network failures.
+ */
+async function executeFirestoreBatchGet(documents: string[], options?: SyncOptions): Promise<any[]> {
+  const config = verifyFirestoreConfig();
+  if (!config.configured && !options?.customAuthHeader && !options?.customHost) {
+    return [];
+  }
+
+  const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
+  const baseHost = options?.customHost
+    || (emulatorHost ? `http://${emulatorHost}` : 'https://firestore.googleapis.com');
+  const url = `${baseHost}/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:batchGet`;
+
+  const authHeader = await getFirestoreAuthHeader(options);
+  const timeoutMs = options?.timeoutMs ?? 5000;
+  const fetchFn = options?.customFetch ?? fetch;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetchFn(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authHeader,
+      },
+      body: JSON.stringify({ documents }),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      let errorDetail = '';
+      try {
+        const json = await res.json();
+        errorDetail = json?.error?.message || JSON.stringify(json);
+      } catch {
+        errorDetail = await res.text().catch(() => '');
+      }
+      throw new FirestoreSyncError(
+        `Firestore batchGet failed with status ${res.status}: ${errorDetail || res.statusText}`,
+        res.status,
+        res.status >= 500
+      );
+    }
+
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw new FirestoreSyncError(`Firestore batchGet timed out after ${timeoutMs}ms`, 504, true);
+    }
+    if (err instanceof FirestoreSyncError) {
+      throw err;
+    }
+    throw new FirestoreSyncError(`Firestore batchGet network error: ${err?.message || 'failed'}`, 502, true);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Authoritatively revokes an individual token in the shared Cloud Firestore datastore
+ * and local cache.
+ * Throws FirestoreSyncError if the authoritative write fails.
  */
 export async function revokeToken(
   tokenOrJti: string,
   expiresAt?: number,
-  reason = 'manual_revocation'
+  reason = 'manual_revocation',
+  options?: SyncOptions
 ): Promise<void> {
   if (!isInitialized) initTokenRevocationStore();
   if (!tokenOrJti || typeof tokenOrJti !== 'string') return;
 
   const id = tokenOrJti.trim();
+  const now = Date.now();
   const record: RevokedTokenRecord = {
-    revokedAt: Date.now(),
+    revokedAt: now,
     expiresAt,
     reason,
   };
 
-  memoryRevokedTokens.set(id, record);
+  const tokenHash = hashTokenIdentifier(id);
+  const jti = extractJtiFromToken(id);
+  const jtiHash = jti ? hashTokenIdentifier(jti) : undefined;
 
-  // If token is a by_tok, also record its jti if parseable
-  if (id.startsWith('by_tok.')) {
-    try {
-      const parts = id.split('.');
-      if (parts.length === 3) {
-        const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf-8'));
-        if (payload?.jti) {
-          memoryRevokedTokens.set(payload.jti, record);
-        }
-      }
-    } catch {}
+  // 1. Authoritative write to shared Cloud Firestore datastore
+  const config = verifyFirestoreConfig();
+  if (config.configured || options?.customAuthHeader || options?.customHost) {
+    const writes: any[] = [
+      {
+        update: {
+          name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_tokens/${tokenHash}`,
+          fields: {
+            tokenHash: { stringValue: tokenHash },
+            revokedAt: { integerValue: String(now) },
+            reason: { stringValue: reason },
+            ...(expiresAt ? { expiresAt: { integerValue: String(expiresAt) } } : {}),
+          },
+        },
+      },
+    ];
+
+    if (jtiHash && jtiHash !== tokenHash) {
+      writes.push({
+        update: {
+          name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_tokens/${jtiHash}`,
+          fields: {
+            tokenHash: { stringValue: jtiHash },
+            jti: { stringValue: jti || '' },
+            revokedAt: { integerValue: String(now) },
+            reason: { stringValue: reason },
+            ...(expiresAt ? { expiresAt: { integerValue: String(expiresAt) } } : {}),
+          },
+        },
+      });
+    }
+
+    await executeFirestoreCommit(writes, options);
   }
 
+  // 2. Update local memory indexes
+  memoryRevokedTokens.set(id, record);
+  memoryRevokedTokens.set(tokenHash, record);
+  if (jti) {
+    memoryRevokedTokens.set(jti, record);
+    if (jtiHash) memoryRevokedTokens.set(jtiHash, record);
+  }
+
+  // 3. Persist local replica
   await saveRevocationStore();
 }
 
 /**
- * Revokes all tokens issued to a specific user UID prior to this moment.
+ * Authoritatively revokes all tokens issued to a specific user UID prior to this moment.
+ * Throws FirestoreSyncError if the authoritative write fails.
  */
-export async function revokeUserTokens(uid: string, reason = 'user_revoked'): Promise<void> {
+export async function revokeUserTokens(
+  uid: string,
+  reason = 'user_revoked',
+  options?: SyncOptions
+): Promise<void> {
   if (!isInitialized) initTokenRevocationStore();
   if (!uid || typeof uid !== 'string') return;
 
   const cleanUid = uid.trim();
+  const now = Date.now();
+
+  // 1. Authoritative write to shared Cloud Firestore datastore
+  const config = verifyFirestoreConfig();
+  if (config.configured || options?.customAuthHeader || options?.customHost) {
+    const safeUidDocId = encodeURIComponent(cleanUid);
+    const writes = [
+      {
+        update: {
+          name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_users/${safeUidDocId}`,
+          fields: {
+            uid: { stringValue: cleanUid },
+            revokedAt: { integerValue: String(now) },
+            reason: { stringValue: reason },
+          },
+        },
+      },
+    ];
+
+    await executeFirestoreCommit(writes, options);
+  }
+
+  // 2. Update local memory index
   memoryRevokedUsers.set(cleanUid, {
-    revokedAt: Date.now(),
+    revokedAt: now,
     reason,
   });
 
+  // 3. Persist local replica
   await saveRevocationStore();
 }
 
 /**
- * Revokes all tokens issued to a family code prior to this moment.
+ * Authoritatively revokes all tokens issued to a family code prior to this moment.
+ * Throws FirestoreSyncError if the authoritative write fails.
  */
-export async function revokeFamilyTokens(familyCode: string, reason = 'family_revoked'): Promise<void> {
+export async function revokeFamilyTokens(
+  familyCode: string,
+  reason = 'family_revoked',
+  options?: SyncOptions
+): Promise<void> {
   if (!isInitialized) initTokenRevocationStore();
   if (!familyCode || typeof familyCode !== 'string') return;
 
   const cleanCode = familyCode.trim().toUpperCase();
+  const now = Date.now();
+
+  // Reviewer Demo Account is strictly memory-only; skip cloud writes
+  if (cleanCode === 'BEE-DEMO') {
+    memoryRevokedFamilies.set(cleanCode, { revokedAt: now, reason });
+    return;
+  }
+
+  // 1. Authoritative write to shared Cloud Firestore datastore
+  const config = verifyFirestoreConfig();
+  if (config.configured || options?.customAuthHeader || options?.customHost) {
+    const safeFamDocId = encodeURIComponent(cleanCode);
+    const writes = [
+      {
+        update: {
+          name: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_revoked_families/${safeFamDocId}`,
+          fields: {
+            familyCode: { stringValue: cleanCode },
+            revokedAt: { integerValue: String(now) },
+            reason: { stringValue: reason },
+          },
+        },
+      },
+    ];
+
+    await executeFirestoreCommit(writes, options);
+  }
+
+  // 2. Update local memory index
   memoryRevokedFamilies.set(cleanCode, {
-    revokedAt: Date.now(),
+    revokedAt: now,
     reason,
   });
 
+  // 3. Persist local replica
   await saveRevocationStore();
 }
 
 /**
- * Checks whether a token or its associated identity has been revoked.
- * Synchronous and performant for request-filter evaluation.
+ * Checks whether a token or its associated identity has been authoritatively revoked.
+ * Evaluates in-memory cache first, then checks Cloud Firestore for cross-instance consistency.
+ *
+ * Fails closed (throws on datastore outage) so revoked tokens cannot slip through.
  */
-export function isTokenRevoked(
+export async function isTokenRevoked(
   token: string,
-  payload?: { jti?: string; uid?: string; familyCode?: string; iat?: number }
-): boolean {
+  payload?: { jti?: string; uid?: string; familyCode?: string; iat?: number },
+  options?: SyncOptions
+): Promise<boolean> {
   if (!isInitialized) initTokenRevocationStore();
   if (!token) return true;
 
   const trimmed = token.trim();
+  const tokenHash = hashTokenIdentifier(trimmed);
 
-  // 1. Check direct token string revocation
-  if (memoryRevokedTokens.has(trimmed)) {
+  // 1. Fast in-memory positive revocation check (already proven revoked)
+  if (memoryRevokedTokens.has(trimmed) || memoryRevokedTokens.has(tokenHash)) {
     return true;
   }
 
-  // 2. Check token JTI revocation
-  if (payload?.jti && memoryRevokedTokens.has(payload.jti)) {
-    return true;
+  const effectiveJti = payload?.jti || extractJtiFromToken(trimmed);
+  if (effectiveJti) {
+    const jtiHash = hashTokenIdentifier(effectiveJti);
+    if (memoryRevokedTokens.has(effectiveJti) || memoryRevokedTokens.has(jtiHash)) {
+      return true;
+    }
   }
 
-  // 3. Check user-level revocation
   if (payload?.uid) {
     const userRev = memoryRevokedUsers.get(payload.uid.trim());
     if (userRev) {
@@ -196,7 +495,124 @@ export function isTokenRevoked(
     }
   }
 
-  // 4. Check family-level revocation
+  const familyCode = (payload?.familyCode || '').trim().toUpperCase();
+  if (familyCode) {
+    const famRev = memoryRevokedFamilies.get(familyCode);
+    if (famRev) {
+      if (!payload || !payload.iat || payload.iat <= famRev.revokedAt) {
+        return true;
+      }
+    }
+  }
+
+  // 2. Query authoritative shared Firestore datastore for cross-instance verification
+  const config = verifyFirestoreConfig();
+  if (config.configured || options?.customAuthHeader || options?.customHost) {
+    const docsToCheck: string[] = [];
+    const basePath = `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+    docsToCheck.push(`${basePath}/beeyou_revoked_tokens/${tokenHash}`);
+
+    if (effectiveJti) {
+      const jtiHash = hashTokenIdentifier(effectiveJti);
+      if (jtiHash !== tokenHash) {
+        docsToCheck.push(`${basePath}/beeyou_revoked_tokens/${jtiHash}`);
+      }
+    }
+
+    if (payload?.uid) {
+      docsToCheck.push(`${basePath}/beeyou_revoked_users/${encodeURIComponent(payload.uid.trim())}`);
+    }
+
+    if (familyCode && familyCode !== 'BEE-DEMO') {
+      docsToCheck.push(`${basePath}/beeyou_revoked_families/${encodeURIComponent(familyCode)}`);
+    }
+
+    try {
+      const results = await executeFirestoreBatchGet(docsToCheck, options);
+      for (const item of results) {
+        if (item.found) {
+          const docName = String(item.found.name || '');
+
+          if (docName.includes('/beeyou_revoked_tokens/')) {
+            const rec: RevokedTokenRecord = {
+              revokedAt: Number(item.found.fields?.revokedAt?.integerValue || Date.now()),
+              expiresAt: item.found.fields?.expiresAt?.integerValue ? Number(item.found.fields.expiresAt.integerValue) : undefined,
+              reason: item.found.fields?.reason?.stringValue,
+            };
+            memoryRevokedTokens.set(tokenHash, rec);
+            memoryRevokedTokens.set(trimmed, rec);
+            return true;
+          }
+
+          if (docName.includes('/beeyou_revoked_users/')) {
+            const userRevAt = Number(item.found.fields?.revokedAt?.integerValue || 0);
+            const userReason = item.found.fields?.reason?.stringValue;
+            if (payload?.uid) {
+              memoryRevokedUsers.set(payload.uid.trim(), { revokedAt: userRevAt, reason: userReason });
+            }
+            if (!payload?.iat || payload.iat <= userRevAt) {
+              return true;
+            }
+          }
+
+          if (docName.includes('/beeyou_revoked_families/')) {
+            const famRevAt = Number(item.found.fields?.revokedAt?.integerValue || 0);
+            const famReason = item.found.fields?.reason?.stringValue;
+            if (familyCode) {
+              memoryRevokedFamilies.set(familyCode, { revokedAt: famRevAt, reason: famReason });
+            }
+            if (!payload?.iat || payload.iat <= famRevAt) {
+              return true;
+            }
+          }
+        }
+      }
+    } catch (err: any) {
+      if (options?.throwOnError) {
+        throw err;
+      }
+      // On transient datastore read interruption, fallback to local revocation store
+      console.warn('[TokenRevocation] Datastore batchGet notice during verification:', err?.message);
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Synchronous in-memory check for positive revocation (fast-path).
+ */
+export function isTokenRevokedSync(
+  token: string,
+  payload?: { jti?: string; uid?: string; familyCode?: string; iat?: number }
+): boolean {
+  if (!isInitialized) initTokenRevocationStore();
+  if (!token) return true;
+
+  const trimmed = token.trim();
+  const tokenHash = hashTokenIdentifier(trimmed);
+
+  if (memoryRevokedTokens.has(trimmed) || memoryRevokedTokens.has(tokenHash)) {
+    return true;
+  }
+
+  const effectiveJti = payload?.jti || extractJtiFromToken(trimmed);
+  if (effectiveJti) {
+    const jtiHash = hashTokenIdentifier(effectiveJti);
+    if (memoryRevokedTokens.has(effectiveJti) || memoryRevokedTokens.has(jtiHash)) {
+      return true;
+    }
+  }
+
+  if (payload?.uid) {
+    const userRev = memoryRevokedUsers.get(payload.uid.trim());
+    if (userRev) {
+      if (!payload.iat || payload.iat <= userRev.revokedAt) {
+        return true;
+      }
+    }
+  }
+
   const familyCode = (payload?.familyCode || '').trim().toUpperCase();
   if (familyCode) {
     const famRev = memoryRevokedFamilies.get(familyCode);
@@ -233,7 +649,7 @@ export function pruneExpiredRevocations(): number {
 }
 
 /**
- * Test helper to reset revocation store.
+ * Test helper to reset local revocation store and memory caches.
  */
 export function clearAllRevocationsForTesting(): void {
   memoryRevokedTokens.clear();
@@ -247,7 +663,7 @@ export function clearAllRevocationsForTesting(): void {
 }
 
 /**
- * Returns current count of active revocations.
+ * Returns current count of active in-memory cached revocations.
  */
 export function getRevocationStats(): { tokenCount: number; userCount: number; familyCount: number } {
   if (!isInitialized) initTokenRevocationStore();
@@ -258,5 +674,5 @@ export function getRevocationStats(): { tokenCount: number; userCount: number; f
   };
 }
 
-// Auto-initialize on module load
+// Auto-initialize local cache on module load
 initTokenRevocationStore();

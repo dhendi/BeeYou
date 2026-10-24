@@ -1509,7 +1509,7 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
 
   // 1. App Store & Google Play reviewer demo token
   if (trimmed === 'by_demo_reviewer_token_2026' || trimmed === 'DEMO-APPSTORE-REVIEWER-2026') {
-    if (isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
+    if (await isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
     return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid: 'B5wSQd95KbYRuL79L6I3wNMgSxP2', isDemo: true };
   }
 
@@ -1552,7 +1552,11 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
         }
 
         // Check persistent and shared revocation state
-        if (isTokenRevoked(trimmed, parsed as FamilyTokenPayload) || revokedFamilyTokens.has(trimmed)) {
+        try {
+          if (await isTokenRevoked(trimmed, parsed as FamilyTokenPayload) || revokedFamilyTokens.has(trimmed)) {
+            return null;
+          }
+        } catch {
           return null;
         }
 
@@ -1597,7 +1601,11 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
 
   // 3. Active pairing session token (tok-...)
   if (trimmed.startsWith('tok-')) {
-    if (isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
+    try {
+      if (await isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
+    } catch {
+      return null;
+    }
 
     const now = Date.now();
     for (const [code, session] of pairingSessions.entries()) {
@@ -1614,7 +1622,11 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
 
         const effectiveFamilyCode = session.targetFamilyCode || code;
         const cleanCode = sanitizeFamilyCode(effectiveFamilyCode);
-        if (!cleanCode || revokedFamilyCodes.has(cleanCode) || isTokenRevoked(cleanCode)) continue;
+        try {
+          if (!cleanCode || revokedFamilyCodes.has(cleanCode) || await isTokenRevoked(cleanCode)) continue;
+        } catch {
+          continue;
+        }
 
         return {
           familyCode: cleanCode,
@@ -1635,12 +1647,16 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
 
       // Demo reviewer bypass
       if (email === 'demo@beeyou.app' || uid === 'B5wSQd95KbYRuL79L6I3wNMgSxP2') {
-        if (isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
+        if (await isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
         return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid, isDemo: true };
       }
 
       const tokenIatMs = verified.iat ? verified.iat * 1000 : undefined;
-      if (isTokenRevoked(trimmed, { uid, iat: tokenIatMs }) || revokedFamilyTokens.has(trimmed)) {
+      try {
+        if (await isTokenRevoked(trimmed, { uid, iat: tokenIatMs }) || revokedFamilyTokens.has(trimmed)) {
+          return null;
+        }
+      } catch {
         return null;
       }
 
@@ -1659,7 +1675,11 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
       // Check authoritative family accounts
       const acc = findFamilyAccount({ uid, email });
       if (acc) {
-        if (isTokenRevoked(trimmed, { uid, familyCode: acc.familyCode, iat: tokenIatMs })) {
+        try {
+          if (await isTokenRevoked(trimmed, { uid, familyCode: acc.familyCode, iat: tokenIatMs })) {
+            return null;
+          }
+        } catch {
           return null;
         }
 
@@ -1668,7 +1688,14 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
           return null;
         }
 
-        if (!revokedFamilyCodes.has(acc.familyCode) && !isTokenRevoked(acc.familyCode)) {
+        let isFamRevoked = false;
+        try {
+          isFamRevoked = await isTokenRevoked(acc.familyCode);
+        } catch {
+          isFamRevoked = true;
+        }
+
+        if (!revokedFamilyCodes.has(acc.familyCode) && !isFamRevoked) {
           const role = acc.ownerUid === uid ? 'caregiver' : (acc.members?.[uid]?.role || 'caregiver');
           return {
             familyCode: acc.familyCode,
@@ -1985,8 +2012,17 @@ app.post('/api/family/auth/token', async (req, res) => {
 app.post(['/api/caregiver/logout', '/api/family/auth/logout'], async (req, res) => {
   const token = extractAuthToken(req);
   if (token) {
-    revokedFamilyTokens.add(token);
-    await revokeToken(token, undefined, 'user_logout');
+    try {
+      await revokeToken(token, undefined, 'user_logout');
+      revokedFamilyTokens.add(token);
+    } catch (err: any) {
+      console.error('[Logout] Authoritative revocation failed:', err?.message);
+      return res.status(502).json({
+        error: 'RevocationSyncError',
+        message: 'Failed to record authoritative logout revocation with security datastore. Token remains active. Please retry.',
+        detail: err?.message,
+      });
+    }
   }
   return res.json({ success: true, message: 'Logged out successfully. Authentication token revoked.' });
 });
@@ -2252,7 +2288,16 @@ app.post('/api/caregiver/pairing/reject', async (req, res) => {
   if (session) {
     session.status = 'rejected';
     if (session.token) {
-      await revokeToken(session.token, session.expiresAt, 'pairing_rejected');
+      try {
+        await revokeToken(session.token, session.expiresAt, 'pairing_rejected');
+      } catch (err: any) {
+        console.error('[Pairing Reject] Authoritative revocation failed:', err?.message);
+        return res.status(502).json({
+          error: 'RevocationSyncError',
+          message: 'Failed to record pairing rejection revocation with security datastore. Please retry.',
+          detail: err?.message,
+        });
+      }
     }
     savePairingSessions().catch(() => {});
   }
@@ -2275,14 +2320,29 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), async (req, res) =
     return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
   }
 
-  // Revoke the caller's auth token
+  // Revoke the caller's auth token and pairing token authoritatively
   const callerToken = extractAuthToken(req);
-  if (callerToken) {
-    revokedFamilyTokens.add(callerToken);
-    await revokeToken(callerToken, undefined, 'device_unlinked');
+  const session = getCaregiverSession(code);
+  const pairing = pairingSessions.get(code);
+
+  try {
+    if (callerToken) {
+      await revokeToken(callerToken, undefined, 'device_unlinked');
+      revokedFamilyTokens.add(callerToken);
+    }
+    if (pairing?.token) {
+      await revokeToken(pairing.token, undefined, 'device_unlinked');
+      revokedFamilyTokens.add(pairing.token);
+    }
+  } catch (err: any) {
+    console.error('[Device Unlink] Authoritative revocation failed:', err?.message);
+    return res.status(502).json({
+      error: 'RevocationSyncError',
+      message: 'Failed to record device unlinking revocation with security datastore. Device remains linked. Please retry.',
+      detail: err?.message,
+    });
   }
 
-  const session = getCaregiverSession(code);
   if (session) {
     session.unlinked = true;
     session.activeAlert = null;
@@ -2290,13 +2350,8 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), async (req, res) =
     setCaregiverSession(code, session);
   }
 
-  const pairing = pairingSessions.get(code);
   if (pairing) {
     pairing.status = 'revoked';
-    if (pairing.token) {
-      revokedFamilyTokens.add(pairing.token);
-      await revokeToken(pairing.token, undefined, 'device_unlinked');
-    }
     savePairingSessions().catch(() => {});
   }
 
@@ -3312,7 +3367,17 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
   await saveFamilyAccounts();
 
   // Persistently invalidate all active credentials and sessions for revoked user
-  await revokeUserTokens(targetUid, reason?.trim() || 'Revoked by family owner');
+  try {
+    await revokeUserTokens(targetUid, reason?.trim() || 'Revoked by family owner');
+  } catch (revErr: any) {
+    console.error(`[Member Revoke] Authoritative token revocation failed for ${targetUid}:`, revErr?.message);
+    const statusCode = revErr?.statusCode && revErr.statusCode >= 400 && revErr.statusCode < 600 ? revErr.statusCode : 502;
+    return res.status(statusCode).json({
+      error: 'SecuritySyncError',
+      message: 'Failed to record authoritative revocation with cloud security store. Member remains unrevoked. Please retry.',
+      detail: revErr?.message,
+    });
+  }
 
   // Remove member from Firebase Realtime Database and record revocation with response verification and reconciliation
   let rtdbReconciliationPending = false;

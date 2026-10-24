@@ -39,6 +39,7 @@ export interface SyncOptions {
   customFetch?: typeof fetch;
   customAuthHeader?: string;
   customHost?: string;
+  throwOnError?: boolean;
 }
 
 const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'beeyou-23d7d';
