@@ -3,6 +3,7 @@ import './utils/migrateLegacyStorage';
 import { ensurePersistentStorage } from './utils/offlineStorage';
 import { purgeLegacyApiCaches } from './utils/pwaCacheCleaner';
 import { preloadAllStickersOnIdle } from './utils/stickerPreloader';
+import { initServiceWorkerUpdates } from './utils/serviceWorkerUpdate';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -16,20 +17,8 @@ if (typeof window !== 'undefined') {
 }
 
 // Automatically check and activate the latest PWA bundle on load
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const registration of registrations) {
-      registration.update();
-    }
-  });
-
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      refreshing = true;
-      window.location.reload();
-    }
-  });
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
+  initServiceWorkerUpdates();
 }
 
 createRoot(document.getElementById('root')!).render(

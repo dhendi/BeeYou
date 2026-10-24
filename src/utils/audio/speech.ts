@@ -561,7 +561,8 @@ export function getBestSystemVoice(langPrefix = 'en', persona?: string): SpeechS
     return l.startsWith(targetPrefix);
   });
 
-  const candidates = matchingVoices.length > 0 ? matchingVoices : voices;
+  // Never fall back to English voices if a non-English language was requested
+  const candidates = matchingVoices.length > 0 ? matchingVoices : (targetPrefix === 'en' ? voices : []);
   if (candidates.length === 0) return null;
 
   const personaObj = getVoicePersonaById(persona);
@@ -961,8 +962,11 @@ export async function speakText(
   const personaObj = getVoicePersonaById(rawPersona);
   let selectedPersonaId = personaObj.id;
 
-  // Dynamically resolve active application language from options or global translation state
-  const activeAppLang = (options?.lang && options.lang !== 'en') ? options.lang : (getLanguage() || options?.lang || 'en');
+  // Dynamically resolve active application language from options, dedicated persona, or global translation state
+  const personaLang = personaObj.language && personaObj.language !== 'all' ? personaObj.language : undefined;
+  const activeAppLang = (options?.lang && options.lang !== 'en')
+    ? options.lang
+    : (options?.lang || (personaLang && personaLang !== 'en' ? personaLang : getLanguage()) || 'en');
   const lang = (activeAppLang || 'en').toLowerCase();
   const normalizedLang = 
     (lang === 'fr_ca' || lang === 'fr-ca') ? 'fr_ca' :
@@ -1049,19 +1053,25 @@ export async function speakText(
 
     // 1b. On-device Piper neural preview
     if (selectedPersonaId !== 'system') {
-      try {
-        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 3500);
-        if (speechId !== latestSpeechRequestId) return;
-        if (piperBuf && isAudioPayload(piperBuf)) {
-          const previewKey = `preview_piper_${selectedPersonaId}_${normalizedLang}`;
-          const { onnxInferenceMs, phonemizeMs } = getLastPiperTimings();
-          const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId, undefined, previewKey, (t) => {
-            recordReport('piper', false, 0, phonemizeMs, onnxInferenceMs, t.audioDecodeMs, t.playbackSchedulingMs);
+      const piperVoiceId = resolvePiperVoiceId(selectedPersonaId, normalizedLang);
+      if (piperVoiceId) {
+        try {
+          const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, {
+            timeoutMs: 3500,
+            isCancelled: () => speechId !== latestSpeechRequestId,
           });
-          if (played || speechId !== latestSpeechRequestId) return;
+          if (speechId !== latestSpeechRequestId) return;
+          if (piperBuf && isAudioPayload(piperBuf)) {
+            const previewKey = `preview_piper_${selectedPersonaId}_${normalizedLang}`;
+            const { onnxInferenceMs, phonemizeMs } = getLastPiperTimings();
+            const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId, undefined, previewKey, (t) => {
+              recordReport('piper', false, 0, phonemizeMs, onnxInferenceMs, t.audioDecodeMs, t.playbackSchedulingMs);
+            });
+            if (played || speechId !== latestSpeechRequestId) return;
+          }
+        } catch (piperErr) {
+          console.warn('[AAC Speech] Preview Piper synthesis notice:', piperErr);
         }
-      } catch (piperErr) {
-        console.warn('[AAC Speech] Preview Piper synthesis notice:', piperErr);
       }
     }
 
@@ -1130,10 +1140,14 @@ export async function speakText(
 
     // Priority 1: Piper On-Device Neural Synthesis (Preferred whole-sentence neural engine)
     if (selectedPersonaId !== 'system') {
-      const piperReady = isPiperVoiceReadySync(selectedPersonaId, normalizedLang);
+      const piperVoiceId = resolvePiperVoiceId(selectedPersonaId, normalizedLang);
+      const piperReady = piperVoiceId ? isPiperVoiceReadySync(selectedPersonaId, normalizedLang) : false;
       if (piperReady) {
         try {
-          const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 4500);
+          const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, {
+            timeoutMs: 4500,
+            isCancelled: () => speechId !== latestSpeechRequestId,
+          });
           if (speechId !== latestSpeechRequestId) return;
           if (piperBuf && isAudioPayload(piperBuf)) {
             console.log(`[AAC Speech] Playing multi-word sentence via Piper on-device neural engine (${selectedPersonaId})`);
@@ -1161,7 +1175,7 @@ export async function speakText(
         } catch (piperErr) {
           console.warn('[AAC Speech] Piper sentence synthesis error:', piperErr);
         }
-      } else {
+      } else if (piperVoiceId) {
         // Cold model not yet in OPFS: kick off background preload so future sentences use Piper
         preloadPiperVoice(selectedPersonaId, normalizedLang).catch(() => {});
       }
@@ -1250,10 +1264,14 @@ export async function speakText(
 
   // 3c. Piper On-Device Neural Synthesis for Single Word
   if (selectedPersonaId !== 'system') {
-    const piperReady = isPiperVoiceReadySync(selectedPersonaId, normalizedLang);
+    const piperVoiceId = resolvePiperVoiceId(selectedPersonaId, normalizedLang);
+    const piperReady = piperVoiceId ? isPiperVoiceReadySync(selectedPersonaId, normalizedLang) : false;
     if (piperReady) {
       try {
-        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 3500);
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, {
+          timeoutMs: 3500,
+          isCancelled: () => speechId !== latestSpeechRequestId,
+        });
         if (speechId !== latestSpeechRequestId) return;
         if (piperBuf && isAudioPayload(piperBuf)) {
           console.log(`[AAC Speech] Playing single word via Piper neural synthesis (${selectedPersonaId})`);
@@ -1279,7 +1297,7 @@ export async function speakText(
       } catch (piperErr) {
         console.warn('[AAC Speech] Piper word synthesis error:', piperErr);
       }
-    } else {
+    } else if (piperVoiceId) {
       // Cold model not yet in OPFS: kick off background preload so future words use Piper
       preloadPiperVoice(selectedPersonaId, normalizedLang).catch(() => {});
     }
@@ -2045,15 +2063,18 @@ function speakWithBrowserSpeechSynthesis(
         if (bestVoice) {
           utterance.voice = bestVoice;
           utterance.lang = bestVoice.lang; // Synchronize utterance.lang with voice to fix iOS WebKit voice override
-        } else if (voices.length > 0) {
-          // If the device does not have a foreign language pack installed,
-          // fall back to the highest rated available voice so speech is never completely silenced
+        } else if (targetPrefix === 'en' && voices.length > 0) {
+          // If English was requested and no specific persona match was found, use best available English voice
           const fallbackVoice = getBestSystemVoice('en', options?.voicePersona || 'amy') || voices[0];
           if (fallbackVoice) {
             utterance.voice = fallbackVoice;
             utterance.lang = fallbackVoice.lang;
           }
         }
+        // For non-English languages (ja, ko, etc.) without an installed voice object in getVoices(),
+        // keep utterance.lang = targetLang (e.g. 'ja-JP', 'ko-KR') and leave utterance.voice unset.
+        // The operating system's native speech synthesis engine uses utterance.lang to speak in the
+        // requested language without silently switching to English.
       }
 
       let started = false;
@@ -2297,7 +2318,10 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
         if (existing) continue;
 
         try {
-          const buf = await synthesizeWithPiper(formatted, voiceToUse, normalizedLang, 2000);
+          const buf = await synthesizeWithPiper(formatted, voiceToUse, normalizedLang, {
+            timeoutMs: 2000,
+            isCancelled: () => Boolean(activeUtterance || activeAudioElement || activeSourceNode),
+          });
           if (buf && isAudioPayload(buf)) {
             const blob = new Blob([buf], { type: 'audio/wav' });
             const blobUrl = URL.createObjectURL(blob);

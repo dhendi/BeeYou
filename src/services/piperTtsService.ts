@@ -130,11 +130,37 @@ let activeLoadedVoiceId: string | null = null;
 // Tracks in-flight preload promises to coalesce concurrent model downloads/warm-ups
 const inFlightPiperPreloads = new Map<string, Promise<boolean>>();
 
+export interface PiperLockOptions {
+  isCancelled?: () => boolean;
+  signal?: AbortSignal;
+}
+
 // Serial execution queue / mutex ensuring only one WebAssembly ONNX operation executes at a time
 let piperExecutionQueue = Promise.resolve<any>(null);
 
-function runWithPiperLock<T>(task: () => Promise<T>): Promise<T> {
-  const current = piperExecutionQueue.then(task, task);
+export function runWithPiperLock<T>(
+  task: () => Promise<T>,
+  options?: PiperLockOptions
+): Promise<T | null> {
+  const isCancelled = () => Boolean(
+    options?.isCancelled?.() || options?.signal?.aborted
+  );
+
+  // Fast path: if already cancelled before enqueuing, avoid touching the queue
+  if (isCancelled()) {
+    return Promise.resolve(null);
+  }
+
+  const executeIfActive = async (): Promise<T | null> => {
+    // If request was superseded or cancelled while waiting in queue,
+    // yield the lock immediately in 0ms without starting WebAssembly inference.
+    if (isCancelled()) {
+      return null;
+    }
+    return task();
+  };
+
+  const current = piperExecutionQueue.then(executeIfActive, executeIfActive);
   piperExecutionQueue = current.catch(() => {});
   return current;
 }
@@ -249,10 +275,24 @@ async function getPiperModule(): Promise<typeof import('@mintplex-labs/piper-tts
 
 /**
  * Resolves the canonical Piper VoiceId based on persona ID and language.
+ * Returns empty string if no Piper voice model is available for the given language or persona.
  */
 export function resolvePiperVoiceId(personaId?: string, lang: string = 'en'): string {
   const normLang = (lang || 'en').toLowerCase().trim();
   const normPersona = (personaId || '').toLowerCase().trim();
+
+  // If persona explicitly has no Piper voice (e.g. system, Japanese, Korean personas)
+  if (normPersona) {
+    const persona = getVoicePersonaById(normPersona);
+    if (persona && (persona.piperVoice === '' || persona.language === 'ja' || persona.language === 'ko')) {
+      return '';
+    }
+  }
+
+  // Explicit check for languages with NO Piper models (e.g. Japanese, Korean)
+  if (normLang.startsWith('ja') || normLang.startsWith('ko')) {
+    return '';
+  }
 
   // If specific persona is in PIPER_VOICE_MAP
   if (normPersona && PIPER_VOICE_MAP[normPersona]) {
@@ -270,7 +310,13 @@ export function resolvePiperVoiceId(personaId?: string, lang: string = 'en'): st
   if (normLang.startsWith('vi')) return PIPER_VOICE_MAP.vais;
   if (normLang.startsWith('el')) return PIPER_VOICE_MAP.rapunzelina;
 
-  return PIPER_VOICE_MAP.amy;
+  // English fallback for English or unspecified requests
+  if (normLang.startsWith('en')) {
+    return PIPER_VOICE_MAP.amy;
+  }
+
+  // For any other language not supported by Piper, return empty string so system speech handles it
+  return '';
 }
 
 /**
@@ -279,6 +325,7 @@ export function resolvePiperVoiceId(personaId?: string, lang: string = 'en'): st
 export function isPiperVoiceReadySync(personaId?: string, lang: string = 'en'): boolean {
   if (typeof window === 'undefined') return false;
   const voiceId = resolvePiperVoiceId(personaId, lang);
+  if (!voiceId) return false;
   try {
     return localStorage.getItem(`beeyou_piper_ready_${voiceId}`) === '1';
   } catch {
@@ -292,6 +339,7 @@ export function isPiperVoiceReadySync(personaId?: string, lang: string = 'en'): 
 export async function isPiperVoiceReady(personaId?: string, lang: string = 'en'): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   const voiceId = resolvePiperVoiceId(personaId, lang);
+  if (!voiceId) return false;
 
   // Check localStorage flag for fast synchronous query
   try {
@@ -356,6 +404,7 @@ export async function preloadPiperVoice(
   onProgress?: (info: PiperProgressInfo) => void
 ): Promise<boolean> {
   const voiceId = resolvePiperVoiceId(personaId, lang);
+  if (!voiceId) return false;
 
   // Single-flight deduplication: if preload is already active for this voice, join it
   if (inFlightPiperPreloads.has(voiceId)) {
@@ -451,20 +500,39 @@ export function clearPiperAudioMemoryCache(): void {
   piperAudioMemoryCache.clear();
 }
 
+export interface SynthesizeWithPiperOptions {
+  timeoutMs?: number;
+  isCancelled?: () => boolean;
+  signal?: AbortSignal;
+}
+
 /**
  * Synthesizes arbitrary text using Piper on-device.
- * Returns ArrayBuffer of canonical WAV audio, or null if synthesis failed.
+ * Returns ArrayBuffer of canonical WAV audio, or null if synthesis failed or was cancelled.
  */
 export async function synthesizeWithPiper(
   text: string,
   personaId?: string,
   lang: string = 'en',
-  timeoutMs: number = 3500
+  timeoutOrOptions?: number | SynthesizeWithPiperOptions,
+  optionsArg?: SynthesizeWithPiperOptions
 ): Promise<ArrayBuffer | null> {
+  const opts: SynthesizeWithPiperOptions =
+    typeof timeoutOrOptions === 'object' && timeoutOrOptions !== null
+      ? timeoutOrOptions
+      : (optionsArg || (typeof timeoutOrOptions === 'number' ? { timeoutMs: timeoutOrOptions } : {}));
+
+  const isCancelled = () => Boolean(opts.isCancelled?.() || opts.signal?.aborted);
+
+  // Fast return if already superseded before starting
+  if (isCancelled()) return null;
+
   const cleanText = text.trim();
   if (!cleanText) return null;
 
   const voiceId = resolvePiperVoiceId(personaId, lang);
+  if (!voiceId) return null;
+
   const cacheKey = `piper_${voiceId}_${cleanText.toLowerCase()}`;
 
   // 1. Check in-memory audio cache for 0ms instant replay
@@ -472,14 +540,27 @@ export async function synthesizeWithPiper(
     return piperAudioMemoryCache.get(cacheKey)!;
   }
 
-  // 2. Coalesce concurrent requests for the same text
+  if (isCancelled()) return null;
+
+  // 2. Coalesce concurrent requests for the exact same text
   if (inFlightPiperPredictions.has(cacheKey)) {
-    return inFlightPiperPredictions.get(cacheKey)!;
+    const existing = inFlightPiperPredictions.get(cacheKey)!;
+    if (opts.signal) {
+      return Promise.race([
+        existing,
+        new Promise<null>((resolve) => {
+          opts.signal!.addEventListener('abort', () => resolve(null), { once: true });
+        }),
+      ]);
+    }
+    return existing;
   }
 
   // 3. Fast-guard: If voice model is not yet in OPFS, do NOT stall user gesture with a 60MB on-the-fly download.
   // Kick off silent background download and return null so instant speech fallback sounds immediately.
   const isReady = await isPiperVoiceReady(personaId, lang);
+  if (isCancelled()) return null;
+
   if (!isReady) {
     console.log(`[AAC Speech] Piper model not ready for voice ${voiceId}, triggering background preload`);
     preloadPiperVoice(personaId, lang).catch(() => {});
@@ -487,19 +568,25 @@ export async function synthesizeWithPiper(
   }
 
   const predictionPromise = (async () => {
+    if (isCancelled()) return null;
+
     const piper = await getPiperModule();
     if (!piper) {
       console.warn(`[AAC Speech] Piper WebAssembly module unavailable for voice ${voiceId}`);
       return null;
     }
 
-    const effectiveTimeout = timeoutMs || 4500;
+    if (isCancelled()) return null;
+
+    const effectiveTimeout = opts.timeoutMs || 4500;
 
     const timeoutPromise = new Promise<null>((resolve) =>
       setTimeout(() => resolve(null), effectiveTimeout)
     );
 
     const executionPromise = runWithPiperLock(async () => {
+      if (isCancelled()) return null;
+
       // If changing active voice, clear previous singleton instance so new ONNX model is loaded
       if (activeLoadedVoiceId !== voiceId && (piper as any).TtsSession?._instance) {
         (piper as any).TtsSession._instance = null;
@@ -550,10 +637,10 @@ export async function synthesizeWithPiper(
         activeLoadedVoiceId = null;
         return null;
       }
-    });
+    }, { isCancelled });
 
     const result = await Promise.race([executionPromise, timeoutPromise]);
-    if (!result) {
+    if (!result && !isCancelled()) {
       console.warn(`[AAC Speech] Piper synthesis timed out or lock busy after ${effectiveTimeout}ms for voice ${voiceId}`);
     }
     return result;
