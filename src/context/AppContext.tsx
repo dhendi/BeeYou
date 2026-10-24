@@ -857,6 +857,12 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       subscriptionState.triggerUpgrade('Piper on-device neural voices are a BeeYou Plus feature! Start your 15-day free trial.');
     }
 
+    // Basic tier restriction: Only the primary default installed device voice is available for basic users
+    if (!subscriptionState.isPremium && newSettings.selectedVoiceURI) {
+      newSettings.selectedVoiceURI = '';
+      subscriptionState.triggerUpgrade('Selecting alternate device voices is a BeeYou Plus feature! Start your 15-day free trial.');
+    }
+
     if (newSettings.language) {
       setLanguage(newSettings.language).catch(() => {});
 

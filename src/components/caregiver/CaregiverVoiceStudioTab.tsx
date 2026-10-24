@@ -336,19 +336,29 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                 {t('Choose Installed Device Voice')}:
               </span>
               <span className="text-[11px] font-semibold text-emerald-800">
-                {offlineVoices.length} {t('voices available on device')}
+                {!isPremium
+                  ? `1 ${t('free voice')} • ${Math.max(0, offlineVoices.length - 1)} ${t('Plus voices')}`
+                  : `${offlineVoices.length} ${t('voices available on device')}`}
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1">
-              {offlineVoices.map((v) => {
+              {offlineVoices.map((v, index) => {
+                const isDefaultVoice = index === 0;
+                const isLocked = !isPremium && !isDefaultVoice;
                 const isVoiceSelected =
-                  settings.selectedVoiceURI === v.voiceURI ||
-                  settings.selectedVoiceURI === v.name ||
-                  (!settings.selectedVoiceURI && v === offlineVoices[0]);
+                  !isLocked &&
+                  (settings.selectedVoiceURI === v.voiceURI ||
+                    settings.selectedVoiceURI === v.name ||
+                    (!settings.selectedVoiceURI && isDefaultVoice));
+
                 return (
                   <div
                     key={v.voiceURI}
                     onClick={() => {
+                      if (isLocked) {
+                        triggerUpgrade('Selecting alternate device voices is a BeeYou Plus feature! Start your 15-day free trial.');
+                        return;
+                      }
                       updateSettings({ voicePersona: 'system', selectedVoiceURI: v.voiceURI });
                       triggerHaptic('light', true);
                       onShowNotification(`Selected on-device voice: ${v.name}`);
@@ -356,11 +366,26 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                     className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all flex items-center justify-between gap-2 ${
                       isVoiceSelected
                         ? 'bg-emerald-100/90 border-emerald-500 font-bold text-emerald-950 shadow-2xs'
+                        : isLocked
+                        ? 'bg-stone-50/80 hover:bg-amber-50/60 border-stone-200 hover:border-amber-300 text-slate-700'
                         : 'bg-white hover:bg-stone-50 border-stone-200 text-slate-700'
                     }`}
                   >
                     <div className="min-w-0">
-                      <div className="text-xs font-bold truncate">{v.name}</div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-bold truncate">{v.name}</span>
+                        {isDefaultVoice && (
+                          <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-950 text-[9px] font-black shrink-0">
+                            {t('Free Default')}
+                          </span>
+                        )}
+                        {isLocked && (
+                          <span className="px-1.5 py-0.2 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-[9px] font-black flex items-center gap-0.5 shrink-0">
+                            <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                            {t('Plus')}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[10px] text-stone-500 truncate">{v.lang}</div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -375,12 +400,26 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                             force: true,
                           });
                         }}
-                        className="px-2 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-[10px] font-bold"
+                        className="px-2 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-[10px] font-bold cursor-pointer"
                       >
                         {t('Test')}
                       </button>
-                      {isVoiceSelected && (
-                        <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                      {isLocked ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            triggerUpgrade('Selecting alternate device voices is a BeeYou Plus feature! Start your 15-day free trial.');
+                          }}
+                          className="px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-950 text-[10px] font-black flex items-center gap-1 cursor-pointer"
+                        >
+                          <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                          <span>{t('Plus')}</span>
+                        </button>
+                      ) : (
+                        isVoiceSelected && (
+                          <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                        )
                       )}
                     </div>
                   </div>

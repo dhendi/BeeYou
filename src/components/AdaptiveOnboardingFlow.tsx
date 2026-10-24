@@ -504,9 +504,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       {t('Warm honey palette, claymorphism cards, friendly bee mascot, playful icons.')}
                     </p>
                   </div>
-                  <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-3 uppercase tracking-wider">
-                    {t('Playful & Gentle')}
-                  </span>
                 </button>
 
                 {/* Teen Option */}
@@ -535,9 +532,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       {t('Lo-fi muted aesthetic, minimal shadows, quick sensory resets, zero juvenile illustrations.')}
                     </p>
                   </div>
-                  <span className="text-[11px] font-bold text-violet-600 dark:text-violet-400 mt-3 uppercase tracking-wider">
-                    {t('Lo-Fi & Discreet')}
-                  </span>
                 </button>
 
                 {/* Adult Option */}
@@ -566,9 +560,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       {t('High-efficiency Executive Minimal UI, Spoon Theory energy budget, medication tracker, passport.')}
                     </p>
                   </div>
-                  <span className="text-[11px] font-bold text-teal-600 dark:text-teal-400 mt-3 uppercase tracking-wider">
-                    {t('Executive Minimal')}
-                  </span>
                 </button>
               </div>
 

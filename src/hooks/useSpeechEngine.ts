@@ -101,7 +101,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     await speakText(spoken, {
       rate: settings.voiceRate,
       pitch: settings.voicePitch,
-      voiceURI: options?.voiceURI || (personaToUse === 'system' ? settings.selectedVoiceURI : undefined),
+      voiceURI: options?.voiceURI || (personaToUse === 'system' ? (!isPremium && !options?.previewAudio ? (offlineVoices[0]?.voiceURI) : settings.selectedVoiceURI) : undefined),
       voicePersona: personaToUse,
       lang: currentActiveLang,
       force: options?.force,

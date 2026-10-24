@@ -168,13 +168,13 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
   // Gentle transition banner message
   const getTransitionMessage = () => {
     if (secondsLeft === 0) {
-      return { text: t('Step complete! Great job! 🎉'), tone: 'emerald' };
+      return { text: t('Step complete! Great job!'), tone: 'emerald' };
     }
     if (secondsLeft <= 30) {
       return { text: t('Almost time to switch! Finishing up'), tone: 'amber' };
     }
     if (secondsLeft <= 120) {
-      return { text: t('2 minutes left — you are doing wonderful! 💛'), tone: 'blue' };
+      return { text: t('2 minutes left — you are doing wonderful!'), tone: 'blue' };
     }
     return null;
   };
@@ -212,10 +212,10 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
           </div>
           <div className="min-w-0">
             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-300 block truncate">
-              {routine.title} • {t('Step')} {stepIndex + 1} of {routine.steps.length}
+              {routine.title ? t(routine.title) : ''} • {t('Step')} {stepIndex + 1} {t('of')} {routine.steps.length}
             </span>
             <h3 className="text-base sm:text-lg font-black text-white truncate flex items-center gap-1.5">
-              <span>{activeStep?.title || t('In Progress')}</span>
+              <span>{(activeStep?.title ? t(activeStep.title) : '') || t('In Progress')}</span>
               {isStepDone && (
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black border border-emerald-500/30">
                   ✓ {t('Completed')}
@@ -319,17 +319,17 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
           </div>
 
           <h2 className="text-xl sm:text-2xl font-black text-white leading-tight">
-            {activeStep?.title}
+            {activeStep?.title ? t(activeStep.title) : ''}
           </h2>
           {activeStep?.instruction && (
             <p className="text-xs sm:text-sm text-stone-300 font-medium mt-1 leading-snug">
-              {activeStep.instruction}
+              {t(activeStep.instruction)}
             </p>
           )}
           {activeStep?.sensoryNote && (
             <div className="mt-2.5 py-1 px-3 rounded-xl bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-semibold flex items-center gap-1.5">
               <span>💡</span>
-              <span>{activeStep.sensoryNote}</span>
+              <span>{t(activeStep.sensoryNote)}</span>
             </div>
           )}
         </div>
@@ -651,10 +651,10 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
             </div>
             <span className="text-sm font-black text-white capitalize mt-3 tracking-wide">
               {breathPhase === 'inhale'
-                ? t('🌬️ Breathe in gently...')
+                ? t('Breathe in gently...')
                 : breathPhase === 'hold'
-                ? t('🫧 Hold softly...')
-                : t('🍃 Breathe out slowly...')}
+                ? t('Hold softly...')
+                : t('Breathe out slowly...')}
             </span>
           </div>
         </div>
@@ -747,7 +747,7 @@ export const VisualStepPacer: React.FC<VisualStepPacerProps> = ({
             <span>
               {stepIndex + 1 < routine.steps.length
                 ? t('Step Done → Next')
-                : t('Finish Routine 🎉')}
+                : t('Finish Routine')}
             </span>
           </button>
         </div>

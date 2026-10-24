@@ -835,28 +835,61 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         {/* On-Device System Voice Sub-Selector */}
                         {persona.id === 'system' && isSelected && offlineVoices && offlineVoices.length > 0 && (
                           <div className="pt-2.5 border-t border-[#E0D8CB]/80 space-y-1.5 w-full">
-                            <div className="text-[11px] font-black text-[#7A6C60]">
-                              {t("Installed Device Voices")} ({offlineVoices.length}):
+                            <div className="flex items-center justify-between flex-wrap gap-1">
+                              <span className="text-[11px] font-black text-[#7A6C60]">
+                                {t("Installed Device Voices")}:
+                              </span>
+                              <span className="text-[10px] font-bold text-emerald-800">
+                                {!isPremium
+                                  ? `1 ${t('free voice')} • ${Math.max(0, offlineVoices.length - 1)} ${t('Plus')}`
+                                  : `(${offlineVoices.length})`}
+                              </span>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
-                              {offlineVoices.map((v) => {
-                                const isVoiceActive = settings.selectedVoiceURI === v.voiceURI || settings.selectedVoiceURI === v.name || (!settings.selectedVoiceURI && v === offlineVoices[0]);
+                              {offlineVoices.map((v, index) => {
+                                const isDefaultVoice = index === 0;
+                                const isLocked = !isPremium && !isDefaultVoice;
+                                const isVoiceActive =
+                                  !isLocked &&
+                                  (settings.selectedVoiceURI === v.voiceURI ||
+                                    settings.selectedVoiceURI === v.name ||
+                                    (!settings.selectedVoiceURI && isDefaultVoice));
+
                                 return (
                                   <div
                                     key={v.voiceURI}
                                     onClick={(e) => {
                                       e.stopPropagation();
+                                      if (isLocked) {
+                                        triggerUpgrade('Selecting alternate device voices is a BeeYou Plus feature! Start your 15-day free trial.');
+                                        return;
+                                      }
                                       updateSettings({ voicePersona: 'system', selectedVoiceURI: v.voiceURI });
                                       playChime('tap');
                                     }}
-                                    className={`p-2 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+                                    className={`p-2 rounded-xl border text-xs flex items-center justify-between gap-2 cursor-pointer transition-colors ${
                                       isVoiceActive
                                         ? 'bg-emerald-50 border-emerald-400 font-bold text-emerald-950'
+                                        : isLocked
+                                        ? 'bg-stone-50/80 hover:bg-amber-50/60 border-[#E0D8CB] hover:border-amber-300 text-[#2D241E]'
                                         : 'bg-white border-[#E0D8CB] text-[#2D241E] hover:bg-[#FAF7F2]'
                                     }`}
                                   >
                                     <div className="min-w-0">
-                                      <span className="truncate block font-bold">{v.name}</span>
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        <span className="truncate block font-bold">{v.name}</span>
+                                        {isDefaultVoice && (
+                                          <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-950 text-[9px] font-black shrink-0">
+                                            {t("Free Default")}
+                                          </span>
+                                        )}
+                                        {isLocked && (
+                                          <span className="px-1.5 py-0.2 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-[9px] font-black flex items-center gap-0.5 shrink-0">
+                                            <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                                            <span>{t("Plus")}</span>
+                                          </span>
+                                        )}
+                                      </div>
                                       <span className="text-[10px] text-[#7A6C60] block">{v.lang}</span>
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
@@ -871,11 +904,25 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                                             force: true,
                                           });
                                         }}
-                                        className="px-2 py-0.5 rounded-lg bg-[#EFE9DF] text-[#4A2F0F] text-[10px] font-bold"
+                                        className="px-2 py-0.5 rounded-lg bg-[#EFE9DF] text-[#4A2F0F] text-[10px] font-bold cursor-pointer"
                                       >
                                         {t("Test")}
                                       </button>
-                                      {isVoiceActive && <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />}
+                                      {isLocked ? (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            triggerUpgrade('Selecting alternate device voices is a BeeYou Plus feature! Start your 15-day free trial.');
+                                          }}
+                                          className="px-1.5 py-0.5 rounded-lg bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-950 text-[10px] font-black flex items-center gap-0.5 cursor-pointer"
+                                        >
+                                          <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                                          <span>{t("Plus")}</span>
+                                        </button>
+                                      ) : (
+                                        isVoiceActive && <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
+                                      )}
                                     </div>
                                   </div>
                                 );
