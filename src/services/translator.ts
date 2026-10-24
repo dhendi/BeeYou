@@ -3,7 +3,7 @@
  * Uses static public/locales/*.json + localStorage cache + dynamic background translation
  */
 
-import { normalizeAacSentenceToEnglish } from '../utils/aacGrammar';
+import { normalizeAacSentenceToEnglish, normalizeDualLabel } from '../utils/aacGrammar';
 
 let currentLang = typeof window !== 'undefined' ? localStorage.getItem('beeyou_lang') || 'en' : 'en';
 let dictionary: Record<string, string> = {};
@@ -148,15 +148,12 @@ export function t(text: string, targetLang?: string): string {
   const lower = trimmed.toLowerCase();
   if (lowerDict[lower]) return lowerDict[lower];
 
-  // Handle slash compounds like "I / Me", "My/Mine", "Hurt / Pain", "Toilet / Potty"
-  // Return only the primary word so it never speaks "slash" or repeats both options
-  if (trimmed.includes(' / ')) {
-    const parts = trimmed.split(' / ').map(p => t(p.trim(), effectiveLang));
-    return parts[0] || englishKey;
-  }
-  if (trimmed.includes('/') && !trimmed.startsWith('http')) {
-    const parts = trimmed.split('/').map(p => t(p.trim(), effectiveLang));
-    return parts[0] || englishKey;
+  // Handle recognized built-in dual-label AAC vocabulary (e.g. "I / Me", "My/Mine", "Hurt / Pain", "Toilet / Potty")
+  // Return only the primary word so it never speaks "slash" or repeats both options.
+  // Custom user phrases and unknown slash combinations (e.g. "red/blue", "coffee/tea") are strictly preserved.
+  const normalizedDual = normalizeDualLabel(trimmed);
+  if (normalizedDual.toLowerCase() !== lower) {
+    return t(normalizedDual, effectiveLang);
   }
 
   // Multi-word compound translation fallback for AAC phrases

@@ -146,9 +146,12 @@ export const LANGUAGE_SUBJECT_PRONOUNS: Record<string, Record<string, string>> =
 
 /**
  * Canonical dictionary of built-in AAC dual-label vocabulary.
- * Maps slash compounds to their primary word for consistent visual display and speech.
+ * Maps recognized built-in dual-label compounds to their primary word for consistent visual display and speech.
+ * Only explicitly listed built-in labels are normalized; all custom user phrases and unknown
+ * slash compounds are strictly preserved.
  */
 export const DUAL_LABEL_VOCABULARY: Record<string, string> = {
+  // Core Pronouns & Affirmations
   'i / me': 'I',
   'i/me': 'I',
   'yes / good': 'Yes',
@@ -157,32 +160,58 @@ export const DUAL_LABEL_VOCABULARY: Record<string, string> = {
   'no/stop': 'No',
   'my / mine': 'My',
   'my/mine': 'My',
+
+  // Core Actions & Inflections
+  'see / look': 'See',
+  'see/look': 'See',
+  'draw / color': 'Draw',
+  'draw/color': 'Draw',
+  'sleep / nap': 'Sleep',
+  'sleep/nap': 'Sleep',
+  'buy / pay': 'Buy',
+  'buy/pay': 'Buy',
+
+  // Medical, Physical & Sensory States
   'hurt / pain': 'Hurt',
   'hurt/pain': 'Hurt',
-  'toilet / potty': 'Toilet',
-  'toilet/potty': 'Toilet',
-  'mom / dad': 'Mom',
-  'mom/dad': 'Mom',
-  'shot / vaccine': 'Shot',
-  'shot/vaccine': 'Shot',
+  'hurt / fell': 'Hurt',
+  'hurt/fell': 'Hurt',
   'hot / fever': 'Hot',
   'hot/fever': 'Hot',
   'cold / chills': 'Cold',
   'cold/chills': 'Cold',
-  'draw / color': 'Draw',
-  'draw/color': 'Draw',
+  'shot / vaccine': 'Shot',
+  'shot/vaccine': 'Shot',
+  'toilet / potty': 'Toilet',
+  'toilet/potty': 'Toilet',
+  'doctor / clinic': 'Doctor',
+  'doctor/clinic': 'Doctor',
+
+  // Objects, Places & People
+  'mom / dad': 'Mom',
+  'mom/dad': 'Mom',
   'ipad / tablet': 'Tablet',
   'ipad/tablet': 'Tablet',
-  'lunch / snack': 'Lunch',
-  'lunch/snack': 'Lunch',
-  'bill / check': 'Check',
-  'bill/check': 'Check',
-  'sleep / nap': 'Sleep',
-  'sleep/nap': 'Sleep',
+  'tablet / ipad': 'Tablet',
+  'tablet/ipad': 'Tablet',
   'tablet / video': 'Tablet',
   'tablet/video': 'Tablet',
-  'hurt / fell': 'Hurt',
-  'hurt/fell': 'Hurt',
+  'lunch / snack': 'Lunch',
+  'lunch/snack': 'Lunch',
+  'fruit / apples': 'Fruit',
+  'fruit/apples': 'Fruit',
+  'bill / check': 'Check',
+  'bill/check': 'Check',
+  'blocks / lego': 'Blocks',
+  'blocks/lego': 'Blocks',
+  'lego / blocks': 'Lego',
+  'lego/blocks': 'Lego',
+  'outside / walk': 'Outside',
+  'outside/walk': 'Outside',
+  'outside / recess': 'Outside',
+  'outside/recess': 'Outside',
+  'car / bus': 'Car',
+  'car/bus': 'Car',
 };
 
 const LEGITIMATE_SLASH_ABBREVIATIONS = new Set([
@@ -196,43 +225,49 @@ const LEGITIMATE_SLASH_ABBREVIATIONS = new Set([
 ]);
 
 /**
- * Normalizes dual-label AAC vocabulary (such as "I / Me" or "Yes / Good")
- * to its primary word while safely preserving user-authored phrases with legitimate slashes
- * (e.g., "tea and/or coffee", "w/o ice", "1/2 cup").
+ * Normalizes recognized built-in dual-label AAC vocabulary (such as "I / Me" or "Yes / Good")
+ * to its primary word while safely preserving user-authored phrases and custom tiles.
+ *
+ * Requirements:
+ * 1. Normalize ONLY explicitly recognized built-in dual-label vocabulary.
+ * 2. Preserve all other slash-containing text exactly, including custom tiles, phrases, abbreviations, and fractions
+ *    (e.g., "red/blue", "mother/father", "coffee/tea", "tea and/or coffee", "w/o ice", "1/2 cup").
+ * 3. Never guess from arbitrary text using generic regular expressions.
+ * 4. Respect explicit tile metadata (e.g. isCustom, symbolSource: 'custom') when provided.
  */
-export function normalizeDualLabel(text: string): string {
+export function normalizeDualLabel(
+  text: string,
+  metadata?: AACItem | { isCustom?: boolean; symbolSource?: string; id?: string }
+): string {
   if (!text || typeof text !== 'string') return '';
   const trimmed = text.trim();
-  const lower = trimmed.toLowerCase();
+  if (!trimmed) return '';
 
-  // 1. Direct dictionary match for known dual-label AAC tiles
+  // 1. Explicit tile metadata check: if tile is custom, preserve its text exactly
+  if (metadata && (metadata.isCustom === true || metadata.symbolSource === 'custom')) {
+    return trimmed;
+  }
+
+  // 2. Direct dictionary lookup for explicitly recognized built-in dual-label vocabulary
+  const lower = trimmed.toLowerCase();
   if (DUAL_LABEL_VOCABULARY[lower]) {
     return DUAL_LABEL_VOCABULARY[lower];
   }
 
-  // 2. Ignore known abbreviations, fractions, and dates
-  if (
-    LEGITIMATE_SLASH_ABBREVIATIONS.has(lower) ||
-    /^\d+\/\d+/.test(trimmed) || // fractions (1/2) or dates (5/10/2026)
-    /^[a-zA-Z]\/[a-zA-Z]$/.test(trimmed) // single-letter slashes like w/o, c/o
-  ) {
-    return trimmed;
+  // Check normalized whitespace around slash (e.g. "I   /   Me" -> "i / me")
+  const canonicalKey = lower.replace(/\s*\/\s*/g, ' / ');
+  if (DUAL_LABEL_VOCABULARY[canonicalKey]) {
+    return DUAL_LABEL_VOCABULARY[canonicalKey];
   }
 
-  // 3. Match standalone dual-label vocabulary tile patterns:
-  // Must be exactly two words separated by " / " or "/" where each is a single alphabetic word
-  // e.g., "Word1 / Word2" or "Word1/Word2", but NOT multi-word phrases like "tea and/or coffee"
-  const dualMatch = trimmed.match(/^([a-zA-Z\u00C0-\u024F]+)\s*\/\s*([a-zA-Z\u00C0-\u024F]+)$/);
-  if (dualMatch) {
-    const first = dualMatch[1];
-    const second = dualMatch[2].toLowerCase();
-    // Verify it's not a known compound like "and/or"
-    if (second === 'or' && first.toLowerCase() === 'and') {
-      return trimmed;
-    }
-    return first;
+  // Check compact slash without spaces (e.g. "I/Me" -> "i/me")
+  const compactKey = lower.replace(/\s*\/\s*/g, '/');
+  if (DUAL_LABEL_VOCABULARY[compactKey]) {
+    return DUAL_LABEL_VOCABULARY[compactKey];
   }
 
+  // 3. For any other slash-containing text (custom tiles, user phrases, abbreviations, fractions):
+  // Strictly preserve the text exactly as entered without guessing or truncating.
   return trimmed;
 }
 
@@ -242,7 +277,8 @@ export function normalizeDualLabel(text: string): string {
 function cleanToken(token: string | AACItem): string {
   if (!token) return '';
   const raw = typeof token === 'string' ? token : (token.speechText || token.label || '');
-  const normalized = normalizeDualLabel(raw.trim());
+  const metadata = typeof token !== 'string' ? token : undefined;
+  const normalized = normalizeDualLabel(raw.trim(), metadata);
   return normalized.toLowerCase();
 }
 

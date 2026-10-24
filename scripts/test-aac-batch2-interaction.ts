@@ -206,6 +206,65 @@ async function main() {
     assert.strictEqual(normalizeDualLabel('my / mine'), 'My');
     assert.strictEqual(normalizeDualLabel('Hurt / Pain'), 'Hurt');
     assert.strictEqual(normalizeDualLabel('Toilet / Potty'), 'Toilet');
+    assert.strictEqual(normalizeDualLabel('Mom / Dad'), 'Mom');
+    assert.strictEqual(normalizeDualLabel('Shot / Vaccine'), 'Shot');
+    assert.strictEqual(normalizeDualLabel('Hot / Fever'), 'Hot');
+    assert.strictEqual(normalizeDualLabel('Cold / Chills'), 'Cold');
+    assert.strictEqual(normalizeDualLabel('Draw / Color'), 'Draw');
+    assert.strictEqual(normalizeDualLabel('iPad / Tablet'), 'Tablet');
+    assert.strictEqual(normalizeDualLabel('Lunch / Snack'), 'Lunch');
+    assert.strictEqual(normalizeDualLabel('Bill / Check'), 'Check');
+    assert.strictEqual(normalizeDualLabel('Sleep / Nap'), 'Sleep');
+    assert.strictEqual(normalizeDualLabel('Doctor / Clinic'), 'Doctor');
+    assert.strictEqual(normalizeDualLabel('See / Look'), 'See');
+    assert.strictEqual(normalizeDualLabel('Fruit / Apples'), 'Fruit');
+    assert.strictEqual(normalizeDualLabel('Blocks / Lego'), 'Blocks');
+    assert.strictEqual(normalizeDualLabel('Lego / Blocks'), 'Lego');
+    assert.strictEqual(normalizeDualLabel('Outside / Walk'), 'Outside');
+    assert.strictEqual(normalizeDualLabel('Outside / Recess'), 'Outside');
+    assert.strictEqual(normalizeDualLabel('Buy / Pay'), 'Buy');
+    assert.strictEqual(normalizeDualLabel('Car / Bus'), 'Car');
+  });
+
+  runTest('Dual-Label: Preserves user-created slash phrases without regex guessing', () => {
+    // Custom phrases with slashes must be preserved exactly
+    assert.strictEqual(normalizeDualLabel('red/blue'), 'red/blue');
+    assert.strictEqual(normalizeDualLabel('red / blue'), 'red / blue');
+    assert.strictEqual(normalizeDualLabel('mother/father'), 'mother/father');
+    assert.strictEqual(normalizeDualLabel('mother / father'), 'mother / father');
+    assert.strictEqual(normalizeDualLabel('coffee/tea'), 'coffee/tea');
+    assert.strictEqual(normalizeDualLabel('coffee / tea'), 'coffee / tea');
+    assert.strictEqual(normalizeDualLabel('yes/no/maybe'), 'yes/no/maybe');
+    assert.strictEqual(normalizeDualLabel('cats/dogs'), 'cats/dogs');
+    assert.strictEqual(normalizeDualLabel('apple/orange/banana'), 'apple/orange/banana');
+  });
+
+  runTest('Dual-Label: Preserves explicit custom tile metadata', () => {
+    // If tile is marked isCustom or custom symbolSource, it must never be normalized
+    assert.strictEqual(normalizeDualLabel('I / Me', { isCustom: true } as any), 'I / Me');
+    assert.strictEqual(normalizeDualLabel('red/blue', { isCustom: true } as any), 'red/blue');
+    assert.strictEqual(normalizeDualLabel('coffee/tea', { symbolSource: 'custom' } as any), 'coffee/tea');
+    assert.strictEqual(normalizeDualLabel('mother/father', { id: 'custom-1', isCustom: true } as any), 'mother/father');
+  });
+
+  runTest('Dual-Label: Custom phrases in sentences display and speak consistently', () => {
+    // Sentence display with custom "red/blue"
+    const sentenceWithRedBlue = autocorrectAacGrammar(['I / Me', 'WANT', 'RED/BLUE']);
+    assert.strictEqual(sentenceWithRedBlue, 'I want red/blue');
+    const spokenRedBlue = formatForNaturalSpeech(sentenceWithRedBlue);
+    assert.strictEqual(spokenRedBlue, 'I want red/blue.');
+
+    // Sentence display with custom "coffee/tea"
+    const sentenceWithCoffeeTea = autocorrectAacGrammar(['I / Me', 'WANT', 'COFFEE/TEA']);
+    assert.strictEqual(sentenceWithCoffeeTea, 'I want coffee/tea');
+    const spokenCoffeeTea = formatForNaturalSpeech(sentenceWithCoffeeTea);
+    assert.strictEqual(spokenCoffeeTea, 'I want coffee/tea.');
+
+    // Sentence display with custom "mother/father"
+    const sentenceWithMotherFather = autocorrectAacGrammar(['I / Me', 'LOVE', 'MOTHER/FATHER']);
+    assert.strictEqual(sentenceWithMotherFather, 'I love mother/father');
+    const spokenMotherFather = formatForNaturalSpeech(sentenceWithMotherFather);
+    assert.strictEqual(spokenMotherFather, 'I love mother/father.');
   });
 
   runTest('Dual-Label: Preserves legitimate user-authored slashes and abbreviations', () => {
