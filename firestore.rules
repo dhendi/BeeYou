@@ -12,7 +12,6 @@ service cloud.firestore {
         request.auth.token.get('admin', false) == true
         || request.auth.token.get('role', '') == 'admin'
         || request.auth.token.get('backend', false) == true
-        || request.auth.uid == 'owner'
         || (request.auth.token.familyCode == familyCode && request.auth.uid == resource.data.ownerUid)
       );
       // Writes strictly restricted to backend / admin
@@ -20,7 +19,6 @@ service cloud.firestore {
         request.auth.token.get('admin', false) == true
         || request.auth.token.get('role', '') == 'admin'
         || request.auth.token.get('backend', false) == true
-        || request.auth.uid == 'owner'
       );
 
       // Members subcollection
@@ -90,7 +88,6 @@ service cloud.firestore {
         request.auth.token.get('admin', false) == true
         || request.auth.token.get('role', '') == 'admin'
         || request.auth.token.get('backend', false) == true
-        || request.auth.uid == 'owner'
         || (resource.data.get('ownerUid', '') != '' && resource.data.get('ownerUid', '') == request.auth.uid)
         || (resource.data.keys().hasAll(['members']) && resource.data.members[request.auth.uid] != null)
         || (request.auth.token.get('familyCode', '') != '' && request.auth.token.get('familyCode', '') == resource.data.get('familyCode', ''))
@@ -100,7 +97,6 @@ service cloud.firestore {
         request.auth.token.get('admin', false) == true
         || request.auth.token.get('role', '') == 'admin'
         || request.auth.token.get('backend', false) == true
-        || request.auth.uid == 'owner'
       );
     }
 
@@ -109,7 +105,6 @@ service cloud.firestore {
         request.auth.token.get('admin', false) == true
         || request.auth.token.get('role', '') == 'admin'
         || request.auth.token.get('backend', false) == true
-        || request.auth.uid == 'owner'
         || (request.auth.token.get('familyCode', '') != '' && request.auth.token.get('familyCode', '') == code)
         || (resource.data.get('email', '') != '' && request.auth.token.get('email', '') == resource.data.get('email', ''))
       );
@@ -117,7 +112,6 @@ service cloud.firestore {
         request.auth.token.get('admin', false) == true
         || request.auth.token.get('role', '') == 'admin'
         || request.auth.token.get('backend', false) == true
-        || request.auth.uid == 'owner'
       );
     }
   }

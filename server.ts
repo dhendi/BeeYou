@@ -1384,10 +1384,12 @@ export async function saveFamilyStateAsync(
     if (syncRes && syncRes.lastUpdated) {
       stateToSync.lastUpdated = syncRes.lastUpdated;
     }
-    activeFamilyStates.set(cleanCode, stateToSync);
+    const finalState = syncRes?.mergedState || stateToSync;
+    activeFamilyStates.set(cleanCode, finalState);
+    saveFamilyState(cleanCode, finalState, optObj.immediate ?? false);
+  } else {
+    saveFamilyState(cleanCode, undefined, optObj.immediate ?? false);
   }
-
-  saveFamilyState(cleanCode, stateToSync, optObj.immediate ?? false);
 }
 
 // Periodic non-blocking flush interval (flushes batches every 1000ms)

@@ -580,6 +580,34 @@ async function runTests() {
       }
       assert(clientWriteBlocked, 'Ordinary authenticated client write to beeyou_family_accounts is denied');
 
+      // 9.6 User with literal UID 'owner' cannot read Family 1 account
+      const ownerLiteralCtx = rulesEnv.authenticatedContext('owner', { email: 'stranger@test.com' });
+      let ownerLiteralReadBlocked = false;
+      try {
+        await ownerLiteralCtx.firestore().doc(`beeyou_family_accounts/${fam1Email}`).get();
+      } catch {
+        ownerLiteralReadBlocked = true;
+      }
+      assert(ownerLiteralReadBlocked, 'User with literal UID owner cannot read Family 1 account');
+
+      // 9.7 User with literal UID 'owner' cannot write Family 1 account
+      let ownerLiteralWriteBlocked = false;
+      try {
+        await ownerLiteralCtx.firestore().doc(`beeyou_family_accounts/${fam1Email}`).set({ ownerUid: 'owner' });
+      } catch {
+        ownerLiteralWriteBlocked = true;
+      }
+      assert(ownerLiteralWriteBlocked, 'User with literal UID owner cannot write Family 1 account');
+
+      // 9.8 User with literal UID 'owner' cannot read Family 1 code index
+      let ownerLiteralIndexBlocked = false;
+      try {
+        await ownerLiteralCtx.firestore().doc(`beeyou_family_code_index/${fam1Code}`).get();
+      } catch {
+        ownerLiteralIndexBlocked = true;
+      }
+      assert(ownerLiteralIndexBlocked, 'User with literal UID owner cannot read Family 1 code index');
+
       await rulesEnv.cleanup();
     } catch (rulesErr: any) {
       console.error('[Test 9 Error]:', rulesErr?.message);
@@ -616,8 +644,8 @@ async function runTests() {
     const effectiveConcurToken = regConcurRes.json().token;
 
     // Both servers concurrently update unrelated fields on the same family:
-    // Server A updates routines: [{ id: 'rt-concur-1', title: 'Deep Breathing' }]
-    // Server B updates childState: { currentMood: 'focused', stars: 75 }
+    // Server A updates childProfile: { name: 'Alice New Name', pronouns: 'she/her' }
+    // Server B updates childState: { currentMood: 'joyful', stars: 75 }
     const postServerA = httpRequest(`${baseUrlA}/api/family/state/${effectiveConcurCode}`, {
       method: 'POST',
       headers: {
@@ -625,7 +653,7 @@ async function runTests() {
         Authorization: `Bearer ${effectiveConcurToken}`,
       },
       body: JSON.stringify({
-        routines: [{ id: 'rt-concur-1', title: 'Deep Breathing' }],
+        childProfile: { name: 'Alice New Name', pronouns: 'she/her' },
       }),
     });
 
@@ -636,7 +664,7 @@ async function runTests() {
         Authorization: `Bearer ${effectiveConcurToken}`,
       },
       body: JSON.stringify({
-        childState: { currentMood: 'focused', stars: 75 },
+        childState: { currentMood: 'joyful', stars: 75 },
       }),
     });
 
@@ -651,17 +679,60 @@ async function runTests() {
     const finalConcurData = await directConcurCheck.json();
 
     assert(
-      Array.isArray(finalConcurData.routines) && finalConcurData.routines[0]?.id === 'rt-concur-1',
-      'Server A routines update was preserved in concurrent write'
+      finalConcurData.childProfile?.name === 'Alice New Name' && finalConcurData.childProfile?.pronouns === 'she/her',
+      'Server A childProfile update was preserved in concurrent write'
     );
     assert(
-      finalConcurData.childState?.stars === 75 && finalConcurData.childState?.currentMood === 'focused',
-      'Server B childState update was preserved in concurrent write'
+      finalConcurData.childState?.stars === 75 && finalConcurData.childState?.currentMood === 'joyful',
+      'Server B childState mood update was preserved in concurrent write'
     );
     assert(
       finalConcurData.ownerUid === concurUid,
       'Security ownerUid node was preserved during atomic conditional updates'
     );
+
+    // Verify missing or mismatched ETag cannot silently turn conditional write into unconditional write
+    let missingEtagErrorThrown = false;
+    try {
+      await syncFamilyStateToRtdb(effectiveConcurCode, {
+        ...finalConcurData,
+        childState: { ...finalConcurData.childState, currentMood: 'unconditional_test' },
+      }, {
+        ifMatchEtag: 'stale-or-mismatched-etag',
+      });
+    } catch (err: any) {
+      if (err instanceof PersistenceError && (err.statusCode === 409 || err.statusCode === 500)) {
+        missingEtagErrorThrown = true;
+      }
+    }
+    assert(missingEtagErrorThrown, 'Conditional write with mismatched or missing ETag fails closed (no unconditional write)');
+
+    // Verify updating an existing node when remote fetch yields no ETag throws PersistenceError
+    let noEtagUpdateBlocked = false;
+    const mockFetchWithoutEtag: any = async (url: string, init?: any) => {
+      if (init?.method === 'GET') {
+        return new Response(JSON.stringify(finalConcurData), {
+          status: 200,
+          headers: {},
+        });
+      }
+      return new Response(JSON.stringify({ success: true }), { status: 200 });
+    };
+
+    try {
+      await syncFamilyStateToRtdb(effectiveConcurCode, {
+        ...finalConcurData,
+        childState: { ...finalConcurData.childState, currentMood: 'should_fail_without_etag' },
+      }, {
+        customFetch: mockFetchWithoutEtag,
+        ifMatchEtag: 'required-etag-abc',
+      });
+    } catch (err: any) {
+      if (err instanceof PersistenceError && (err.operation === 'rtdb_missing_etag' || err.statusCode === 409)) {
+        noEtagUpdateBlocked = true;
+      }
+    }
+    assert(noEtagUpdateBlocked, 'Conditional update without remote ETag fails closed (no silent unconditional write)');
 
     // Test conflicting write: Client provides stale ifMatchLastUpdated
     const currentTimestamp = finalConcurData.lastUpdated;

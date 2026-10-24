@@ -1330,6 +1330,77 @@ async function runRulesVerification() {
       assert(false, 'Backend service can authoritatively read and write family account registries', e?.message);
     }
 
+    // 10.11 User with literal UID 'owner' CANNOT read unrelated family account
+    const literalOwnerContext = testEnv.authenticatedContext('owner', { email: 'unrelated_owner@stranger.com' });
+    try {
+      await assertFails(literalOwnerContext.firestore().doc(`beeyou_family_accounts/${famAEmail}`).get());
+      assert(true, 'User with literal UID owner CANNOT read unrelated family account');
+    } catch (e: any) {
+      assert(false, 'User with literal UID owner CANNOT read unrelated family account', e?.message);
+    }
+
+    // 10.12 User with literal UID 'owner' CANNOT write unrelated family account
+    try {
+      await assertFails(
+        literalOwnerContext.firestore().doc(`beeyou_family_accounts/${famAEmail}`).set({
+          ownerUid: 'owner',
+          email: famAEmail,
+        })
+      );
+      assert(true, 'User with literal UID owner CANNOT write unrelated family account');
+    } catch (e: any) {
+      assert(false, 'User with literal UID owner CANNOT write unrelated family account', e?.message);
+    }
+
+    // 10.13 User with literal UID 'owner' CANNOT read unrelated family code index
+    try {
+      await assertFails(literalOwnerContext.firestore().doc(`beeyou_family_code_index/${famACode}`).get());
+      assert(true, 'User with literal UID owner CANNOT read unrelated family code index');
+    } catch (e: any) {
+      assert(false, 'User with literal UID owner CANNOT read unrelated family code index', e?.message);
+    }
+
+    // 10.14 User with literal UID 'owner' CANNOT write unrelated family code index
+    try {
+      await assertFails(
+        literalOwnerContext.firestore().doc(`beeyou_family_code_index/${famACode}`).set({
+          familyCode: famACode,
+          email: 'unrelated_owner@stranger.com',
+        })
+      );
+      assert(true, 'User with literal UID owner CANNOT write unrelated family code index');
+    } catch (e: any) {
+      assert(false, 'User with literal UID owner CANNOT write unrelated family code index', e?.message);
+    }
+
+    // 10.15 User with literal UID 'owner' CANNOT read unrelated family document in beeyou_families
+    try {
+      await assertFails(literalOwnerContext.firestore().doc(`beeyou_families/${famACode}`).get());
+      assert(true, 'User with literal UID owner CANNOT read unrelated family document');
+    } catch (e: any) {
+      assert(false, 'User with literal UID owner CANNOT read unrelated family document', e?.message);
+    }
+
+    // 10.16 User with literal UID 'owner' CAN read their own document where ownerUid matches
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const fs = context.firestore();
+      await fs.doc('beeyou_family_accounts/legit_owner@test.com').set({
+        ownerUid: 'owner',
+        familyCode: 'BEE-OWN1',
+        email: 'legit_owner@test.com',
+      });
+    });
+    const legitOwnerContext = testEnv.authenticatedContext('owner', {
+      email: 'legit_owner@test.com',
+      familyCode: 'BEE-OWN1',
+    });
+    try {
+      await assertSucceeds(legitOwnerContext.firestore().doc('beeyou_family_accounts/legit_owner@test.com').get());
+      assert(true, 'User with UID owner CAN read their own document where ownerUid matches');
+    } catch (e: any) {
+      assert(false, 'User with UID owner CAN read their own document where ownerUid matches', e?.message);
+    }
+
     // Cleanup environment
     await testEnv.cleanup();
 

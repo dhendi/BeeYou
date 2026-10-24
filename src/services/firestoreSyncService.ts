@@ -165,7 +165,27 @@ export async function getFirestoreAuthHeader(options?: SyncOptions): Promise<str
 
   const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
   if (emulatorHost) {
-    return 'Bearer owner';
+    const toBase64Url = (obj: any) =>
+      Buffer.from(JSON.stringify(obj))
+        .toString('base64')
+        .replace(/=/g, '')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_');
+
+    const header = toBase64Url({ alg: 'none', typ: 'JWT' });
+    const payload = toBase64Url({
+      user_id: 'beeyou-backend-worker',
+      sub: 'beeyou-backend-worker',
+      backend: true,
+      admin: true,
+      role: 'admin',
+      iss: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`,
+      aud: FIREBASE_PROJECT_ID,
+      auth_time: Math.floor(Date.now() / 1000),
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    });
+    return `Bearer ${header}.${payload}.`;
   }
 
   // Resolve service account credentials if provided via environment

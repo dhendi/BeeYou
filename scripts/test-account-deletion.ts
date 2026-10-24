@@ -12,17 +12,12 @@
  * 7. Granular step-by-step reporting and action required if deletion fails partway through
  */
 
+process.env.VERCEL = '1';
+process.env.NODE_ENV = 'test';
+
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import serverApp, {
-  familyAccounts,
-  caregiverSessions,
-  pairingSessions,
-  revokedFamilyCodes,
-  signFamilyToken,
-  DATA_DIR,
-} from '../server';
 
 let server: http.Server;
 let baseUrl: string;
@@ -44,6 +39,18 @@ async function runTests() {
   console.log('🐝 BeeYou Finding 7: Account Deletion & Subscription Handling');
   console.log('======================================================\n');
 
+  const serverModule = await import('../server');
+  const serverApp = serverModule.default;
+  const {
+    familyAccounts,
+    caregiverSessions,
+    pairingSessions,
+    revokedFamilyCodes,
+    signFamilyToken,
+    DATA_DIR,
+    saveFamilyAccountToFirestore,
+  } = serverModule;
+
   // Start test server on ephemeral port
   server = http.createServer(serverApp);
   await new Promise<void>((resolve) => {
@@ -64,7 +71,7 @@ async function runTests() {
   const testFamilyCode = `BEE-DEL${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
   // 1. Setup active family account and session
-  familyAccounts.set(testEmail, {
+  const testAccount = {
     id: `fam-${Date.now()}`,
     email: testEmail,
     familyCode: testFamilyCode,
@@ -77,10 +84,12 @@ async function runTests() {
       interests: ['Trains'],
       pronouns: 'he/him',
     },
-    subscriptionTier: 'premium',
+    subscriptionTier: 'premium' as const,
     createdAt: new Date().toISOString(),
     lastSyncedAt: new Date().toISOString(),
-  });
+  };
+  familyAccounts.set(testEmail, testAccount);
+  await saveFamilyAccountToFirestore(testAccount).catch(() => {});
 
   caregiverSessions.set(testFamilyCode, {
     pairingCode: testFamilyCode,

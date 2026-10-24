@@ -102,6 +102,7 @@ async function runTests() {
     caregiverSessions,
     saveFamilyAccounts,
     savePairingSessions,
+    saveFamilyAccountToFirestore,
   } = serverModule;
 
   const {
@@ -196,17 +197,24 @@ async function runTests() {
     console.log('\n--- Suite 2: Real Multi-Instance Verification with Independent Memory ---');
 
     const multiFamilyCode = 'BEE-MULTI1';
-    familyAccounts.set('caregiver@multi.com', {
+    const multiAccount: any = {
+      id: 'acc-multi-1',
       familyCode: multiFamilyCode,
       email: 'caregiver@multi.com',
       ownerUid: 'uid-owner-multi',
       caregiverName: 'Caregiver',
+      caregiverRole: 'Parent',
       createdAt: new Date().toISOString(),
+      lastSyncedAt: new Date().toISOString(),
+      subscriptionTier: 'free',
+      childProfile: { name: 'MultiChild', ageGroup: 'kid', interests: [], pronouns: 'they/them' },
       members: {
-        'uid-owner-multi': { uid: 'uid-owner-multi', email: 'caregiver@multi.com', role: 'caregiver', addedAt: Date.now() },
+        'uid-owner-multi': { uid: 'uid-owner-multi', email: 'caregiver@multi.com', role: 'owner', addedAt: Date.now() },
         'uid-child-multi': { uid: 'uid-child-multi', email: 'child@multi.com', role: 'child', addedAt: Date.now() },
       },
-    });
+    };
+    familyAccounts.set('caregiver@multi.com', multiAccount);
+    await saveFamilyAccountToFirestore(multiAccount).catch(() => {});
     await saveFamilyAccounts();
 
     const unlinkPairingCode = 'PAIR-CROSS1';

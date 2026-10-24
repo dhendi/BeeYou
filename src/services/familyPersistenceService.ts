@@ -411,14 +411,15 @@ export async function syncFamilyStateToRtdb(
   familyCode: string,
   state: SharedFamilyState,
   options?: PersistenceSyncOptions
-): Promise<{ success: boolean; lastUpdated: number; etag?: string | null }> {
+): Promise<{ success: boolean; lastUpdated: number; etag?: string | null; mergedState?: SharedFamilyState }> {
   const cleanCode = sanitizeFamilyCode(familyCode);
   if (!cleanCode || cleanCode === 'BEE-DEMO') {
-    return { success: true, lastUpdated: state.lastUpdated || Date.now() };
+    return { success: true, lastUpdated: state.lastUpdated || Date.now(), mergedState: state };
   }
 
   const url = resolveRtdbUrl(`/beeyou/families/${encodeURIComponent(cleanCode)}.json`, options);
-  const maxConcurrencyRetries = options?.ifMatchLastUpdated !== undefined || options?.ifMatchEtag !== undefined ? 0 : 3;
+  const isConditionalWrite = options?.ifMatchLastUpdated !== undefined || options?.ifMatchEtag !== undefined;
+  const maxConcurrencyRetries = isConditionalWrite ? 0 : 3;
 
   for (let attempt = 0; attempt <= maxConcurrencyRetries; attempt++) {
     // 1. Fetch current remote node and ETag
@@ -437,9 +438,9 @@ export async function syncFamilyStateToRtdb(
     }
 
     if (options?.ifMatchEtag !== undefined) {
-      if (etag && etag !== options.ifMatchEtag) {
+      if (!etag || etag !== options.ifMatchEtag) {
         throw new PersistenceError(
-          `Concurrency conflict: Remote ETag mismatch (${etag} !== ${options.ifMatchEtag})`,
+          `Concurrency conflict: Remote ETag mismatch (${etag || 'null'} !== ${options.ifMatchEtag})`,
           409,
           false,
           'rtdb_patch_conflict'
@@ -447,33 +448,80 @@ export async function syncFamilyStateToRtdb(
       }
     }
 
+    // A missing ETag cannot silently turn an intended conditional write into an unconditional write
+    if (isConditionalWrite && !etag) {
+      throw new PersistenceError(
+        'RTDB conditional write failed: Missing ETag for intended conditional write',
+        409,
+        false,
+        'rtdb_missing_etag'
+      );
+    }
+
     // 3. Build merged payload starting from rawNode to preserve security and untouched nodes
     const merged: Record<string, any> = rawNode && typeof rawNode === 'object' ? { ...rawNode } : {};
 
     merged.familyCode = cleanCode;
-    merged.email = state.email || merged.email || '';
-    if (state.backupEmail) merged.backupEmail = state.backupEmail;
-    merged.caregiverName = state.caregiverName || merged.caregiverName || 'Caregiver';
-    merged.caregiverRole = state.caregiverRole || merged.caregiverRole || 'Parent';
 
-    // Merge childProfile
-    merged.childProfile = state.childProfile || merged.childProfile || { name: 'Child', ageGroup: 'kid', interests: [], pronouns: 'they/them' };
-
-    // Selective or full field merge
-    if (options?.fieldsToUpdate && Array.isArray(options.fieldsToUpdate)) {
+    if (!rawNode) {
+      // Initial node creation: apply default state structure
+      merged.email = state.email || '';
+      if (state.backupEmail) merged.backupEmail = state.backupEmail;
+      merged.caregiverName = state.caregiverName || 'Caregiver';
+      merged.caregiverRole = state.caregiverRole || 'Parent';
+      merged.childProfile = state.childProfile || { name: 'Child', ageGroup: 'kid', interests: [], pronouns: 'they/them' };
+      merged.childState = state.childState || {
+        lastActiveTime: new Date().toISOString(),
+        currentActivity: 'Using BeeYou',
+        currentMood: 'calm',
+        habitsCompletedToday: 0,
+        totalHabits: 4,
+        stars: 0,
+        isOnline: true,
+      };
+      merged.routines = state.routines || [];
+      merged.aacItems = state.aacItems || [];
+      merged.plansChanged = state.plansChanged || { active: false };
+      merged.activeAlert = state.activeAlert || null;
+      merged.alertHistory = state.alertHistory || [];
+      merged.messages = state.messages || [];
+    } else if (options?.fieldsToUpdate && Array.isArray(options.fieldsToUpdate) && options.fieldsToUpdate.length > 0) {
+      // Selective field merge: apply ONLY intentionally modified fields specified by request
       for (const f of options.fieldsToUpdate) {
         if ((state as any)[f] !== undefined) {
-          merged[f] = (state as any)[f];
+          if (f === 'childProfile' && (state as any).childProfile && typeof (state as any).childProfile === 'object') {
+            merged.childProfile = { ...(merged.childProfile || {}), ...(state as any).childProfile };
+          } else if (f === 'childState' && (state as any).childState && typeof (state as any).childState === 'object') {
+            merged.childState = { ...(merged.childState || {}), ...(state as any).childState };
+          } else if (f === 'plansChanged' && (state as any).plansChanged && typeof (state as any).plansChanged === 'object') {
+            merged.plansChanged = { ...(merged.plansChanged || {}), ...(state as any).plansChanged };
+          } else {
+            merged[f] = (state as any)[f];
+          }
         }
       }
     } else {
-      if (state.childState !== undefined) merged.childState = state.childState;
+      // When fieldsToUpdate is not specified, merge all defined fields provided in state
+      if (state.childProfile !== undefined) {
+        merged.childProfile = typeof state.childProfile === 'object' && merged.childProfile
+          ? { ...merged.childProfile, ...state.childProfile }
+          : state.childProfile;
+      }
+      if (state.childState !== undefined) {
+        merged.childState = typeof state.childState === 'object' && merged.childState
+          ? { ...merged.childState, ...state.childState }
+          : state.childState;
+      }
+      if (state.caregiverName !== undefined) merged.caregiverName = state.caregiverName;
+      if (state.caregiverRole !== undefined) merged.caregiverRole = state.caregiverRole;
       if (state.routines !== undefined) merged.routines = state.routines;
       if (state.aacItems !== undefined) merged.aacItems = state.aacItems;
       if (state.plansChanged !== undefined) merged.plansChanged = state.plansChanged;
       if (state.activeAlert !== undefined) merged.activeAlert = state.activeAlert;
       if (state.alertHistory !== undefined) merged.alertHistory = state.alertHistory;
       if (state.messages !== undefined) merged.messages = state.messages;
+      if (state.backupEmail !== undefined) merged.backupEmail = state.backupEmail;
+      if (state.email !== undefined) merged.email = state.email;
     }
 
     // MANDATORY SECURITY NODE PRESERVATION:
@@ -490,7 +538,9 @@ export async function syncFamilyStateToRtdb(
     const putHeaders: Record<string, string> = {
       'X-Firebase-ETag': 'true',
     };
-    if (etag) {
+    if (options?.ifMatchEtag !== undefined) {
+      putHeaders['if-match'] = options.ifMatchEtag;
+    } else if (etag) {
       putHeaders['if-match'] = etag;
     }
 
@@ -500,11 +550,12 @@ export async function syncFamilyStateToRtdb(
         success: true,
         lastUpdated: merged.lastUpdated,
         etag: putRes.etag || etag,
+        mergedState: merged as SharedFamilyState,
       };
     } catch (err: any) {
       if (err instanceof PersistenceError && err.statusCode === 412) {
         // Stale ETag / Precondition Failed
-        if (options?.ifMatchLastUpdated !== undefined || options?.ifMatchEtag !== undefined) {
+        if (isConditionalWrite) {
           throw new PersistenceError(
             `Concurrency conflict: Remote state changed during write (${err.message})`,
             409,
@@ -526,11 +577,11 @@ export async function syncFamilyStateToRtdb(
         );
       }
 
-      if (isProductionEnvironment() || options?.customFetch || options?.ifMatchLastUpdated !== undefined) {
+      if (isProductionEnvironment() || options?.customFetch || isConditionalWrite) {
         throw err;
       }
       console.warn(`[Family State] Non-fatal RTDB sync notice for ${cleanCode}:`, err?.message);
-      return { success: false, lastUpdated: merged.lastUpdated };
+      return { success: false, lastUpdated: merged.lastUpdated, mergedState: merged as SharedFamilyState };
     }
   }
 

@@ -30,7 +30,7 @@ async function runVerification() {
 
   const serverModule = await import('../server');
   const app = serverModule.default;
-  const { signFamilyToken, familyAccounts, findFamilyAccount } = serverModule;
+  const { signFamilyToken, familyAccounts, findFamilyAccount, saveFamilyAccountToFirestore } = serverModule;
 
   const server = http.createServer(app);
   await new Promise<void>((resolve) => server.listen(0, resolve));
@@ -153,6 +153,7 @@ async function runVerification() {
       lastSyncedAt: new Date().toISOString(),
     };
     familyAccounts.set(testOwnerEmail, existingFamily);
+    await saveFamilyAccountToFirestore(existingFamily).catch(() => {});
 
     // Device 1: Authenticates as owner
     const ownerToken = signFamilyToken(testFamilyCode, 'caregiver', testOwnerEmail, testOwnerUid);
@@ -180,6 +181,22 @@ async function runVerification() {
 
     const tokenAlpha = signFamilyToken('BEE-ALPHA', 'caregiver', 'alpha@example.com', 'uid-alpha');
     const tokenBeta = signFamilyToken('BEE-BETA', 'caregiver', 'beta@example.com', 'uid-beta');
+
+    const alphaAccount = {
+      id: 'fam-alpha',
+      email: 'alpha@example.com',
+      familyCode: 'BEE-ALPHA',
+      ownerUid: 'uid-alpha',
+      members: { 'uid-alpha': { role: 'caregiver', email: 'alpha@example.com', approvedAt: Date.now() } },
+      caregiverName: 'Alpha Parent',
+      caregiverRole: 'Parent',
+      childProfile: { name: 'Alpha Child', ageGroup: 'kid', interests: [], pronouns: 'they/them' },
+      subscriptionTier: 'free' as const,
+      createdAt: new Date().toISOString(),
+      lastSyncedAt: new Date().toISOString(),
+    };
+    familyAccounts.set('alpha@example.com', alphaAccount as any);
+    await saveFamilyAccountToFirestore(alphaAccount as any).catch(() => {});
 
     // Alpha token trying to read Beta state
     res = await fetch(`${baseUrl}/api/family/state/BEE-BETA`, {
@@ -213,6 +230,7 @@ async function runVerification() {
     const memberUid = 'uid-member-normal';
     const memberEmail = 'helper@securefamily.com';
     (existingFamily.members as any)[memberUid] = { role: 'caregiver', email: memberEmail, approvedAt: Date.now() };
+    await saveFamilyAccountToFirestore(existingFamily).catch(() => {});
 
     const memberToken = signFamilyToken(testFamilyCode, 'caregiver', memberEmail, memberUid);
 
