@@ -6,17 +6,18 @@
  * Gemini voice references upon a new app release.
  */
 
-import { purgeLegacyApiCaches, PRESERVED_OFFLINE_CACHE_PATTERNS } from './pwaCacheCleaner';
+import { purgeLegacyApiCaches } from './pwaCacheCleaner';
 
 export const APP_RELEASE_VERSION = 'v12-pwa-cache-security-20261024';
 const RELEASE_KEY = 'beeyou_release_version';
 
-export function runReleaseAutoCacheBust(): void {
+export async function runReleaseAutoCacheBust(): Promise<void> {
   if (typeof window === 'undefined') return;
 
   try {
     const currentInstalled = localStorage.getItem(RELEASE_KEY);
     if (currentInstalled === APP_RELEASE_VERSION) {
+      await purgeLegacyApiCaches();
       return;
     }
 
@@ -77,39 +78,16 @@ export function runReleaseAutoCacheBust(): void {
       console.warn('Storage migration notice:', e);
     }
 
-    // 3. Purge obsolete API caches while strictly preserving offline assets, locales, sounds, and symbols
+    // 3. Purge only explicitly identified obsolete or sensitive caches
+    // Keeps service-worker registration, offline AAC artwork, routines, locales, sounds,
+    // symbols, and precached app-shell assets 100% intact without breaking offline usage.
     if ('caches' in window) {
-      purgeLegacyApiCaches().catch(() => {});
-      caches.keys().then((names) => {
-        for (const name of names) {
-          const isPreserved = PRESERVED_OFFLINE_CACHE_PATTERNS.some((pattern) => name.includes(pattern));
-          if (!isPreserved) {
-            caches.delete(name).catch(() => {});
-          }
-        }
-      }).catch(() => {});
-    }
-
-    // 4. Unregister all existing Service Workers to evict obsolete script graphs
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        for (const reg of registrations) {
-          reg.unregister().catch(() => {});
-        }
-      }).catch(() => {});
-    }
-
-    // 5. If this is an upgrade from an older version, force a clean hard reload once
-    if (isReturningUser && currentInstalled !== APP_RELEASE_VERSION) {
-      console.info(`[BeeYou] Upgrading client to ${APP_RELEASE_VERSION}. Reloading for fresh bundle.`);
-      setTimeout(() => {
-        window.location.reload();
-      }, 50);
+      await purgeLegacyApiCaches();
     }
   } catch (err) {
     console.warn('[BeeYou] Cache bust notice:', err);
   }
 }
 
-runReleaseAutoCacheBust();
+runReleaseAutoCacheBust().catch(() => {});
 purgeLegacyApiCaches().catch(() => {});

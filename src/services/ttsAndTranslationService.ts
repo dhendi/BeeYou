@@ -11,6 +11,7 @@ import {
   saveAudioToCloudStorage,
   getCloudStorageStatus,
 } from './cloudStorageTtsCache';
+import { getTtsCacheControlDirective, isApprovedVocabulary } from './approvedVocabularyService';
 
 // Strict allowlist of supported application languages
 export const ALLOWED_LANGUAGES = new Set([
@@ -960,20 +961,35 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
   const literalDiskPathMp3 = path.join(TTS_CACHE_DIR, `${ttsVersion}_${voiceKey}_${normalizedLang}_${literalHashKey}.mp3`);
   const legacyDiskPathMp3 = path.join(TTS_CACHE_DIR, `${normalizedLang}_${hashKey}.mp3`);
 
+  // Determine appropriate HTTP caching policy based on vocabulary sensitivity
+  // Approved built-in AAC vocabulary receives public edge caching
+  // Arbitrary custom user phrases receive private no-store headers to prevent CDN/shared-cache storage
+  const isApproved = isApprovedVocabulary(cleanText);
+  const cacheControlDirective = getTtsCacheControlDirective(cleanText);
+
+  const applyTtsHeaders = (targetRes: Response, contentType?: string) => {
+    if (contentType) {
+      targetRes.setHeader('Content-Type', contentType);
+    }
+    targetRes.setHeader('Cache-Control', cacheControlDirective);
+    targetRes.setHeader('ETag', `"${hashKey}"`);
+    if (!isApproved) {
+      targetRes.setHeader('Pragma', 'no-cache');
+      targetRes.setHeader('Expires', '0');
+    }
+  };
+
   // 3. L1 In-Memory Cache Check (0ms latency, zero upstream calls)
   const cached = ttsAudioCache.get(cacheKey) || ttsAudioCache.get(`${ttsVersion}_${voiceKey}_${normalizedLang}_${literalKeyText}`);
   if (cached) {
     usageBudgetTracker.recordTtsCacheHit();
     console.log(`[TTS Cache HIT L1] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
     if (req.headers['if-none-match'] === `"${hashKey}"`) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-      res.setHeader('ETag', `"${hashKey}"`);
+      applyTtsHeaders(res);
       res.status(304).end();
       return;
     }
-    res.setHeader('Content-Type', cached.contentType);
-    res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-    res.setHeader('ETag', `"${hashKey}"`);
+    applyTtsHeaders(res, cached.contentType);
     res.send(cached.buffer);
     return;
   }
@@ -988,14 +1004,11 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       if (joined) {
         usageBudgetTracker.recordTtsCacheHit();
         if (req.headers['if-none-match'] === `"${hashKey}"`) {
-          res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-          res.setHeader('ETag', `"${hashKey}"`);
+          applyTtsHeaders(res);
           res.status(304).end();
           return;
         }
-        res.setHeader('Content-Type', joined.contentType);
-        res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-        res.setHeader('ETag', `"${hashKey}"`);
+        applyTtsHeaders(res, joined.contentType);
         res.send(joined.buffer);
         return;
       }
@@ -1061,14 +1074,11 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       usageBudgetTracker.recordTtsCacheHit();
       console.log(`[TTS Cache HIT L3 Disk] "${cleanText}" (${persona.name}, ${normalizedLang}) - 0 API calls ($0.00)`);
       if (req.headers['if-none-match'] === `"${hashKey}"`) {
-        res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-        res.setHeader('ETag', `"${hashKey}"`);
+        applyTtsHeaders(res);
         res.status(304).end();
         return;
       }
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-      res.setHeader('ETag', `"${hashKey}"`);
+      applyTtsHeaders(res, contentType);
       res.send(fileBuffer);
       return;
     } catch {}
@@ -1089,14 +1099,11 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       usageBudgetTracker.recordTtsCacheHit();
 
       if (req.headers['if-none-match'] === `"${hashKey}"`) {
-        res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-        res.setHeader('ETag', `"${hashKey}"`);
+        applyTtsHeaders(res);
         res.status(304).end();
         return;
       }
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-      res.setHeader('ETag', `"${hashKey}"`);
+      applyTtsHeaders(res, contentType);
       res.send(cloudBuffer);
       return;
     }
@@ -1110,14 +1117,11 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
       if (joined) {
         usageBudgetTracker.recordTtsCacheHit();
         if (req.headers['if-none-match'] === `"${hashKey}"`) {
-          res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-          res.setHeader('ETag', `"${hashKey}"`);
+          applyTtsHeaders(res);
           res.status(304).end();
           return;
         }
-        res.setHeader('Content-Type', joined.contentType);
-        res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-        res.setHeader('ETag', `"${hashKey}"`);
+        applyTtsHeaders(res, joined.contentType);
         res.send(joined.buffer);
         return;
       }
@@ -1281,14 +1285,11 @@ export async function handleTtsRequest(req: Request, res: Response): Promise<voi
 
   if (result) {
     if (req.headers['if-none-match'] === `"${hashKey}"`) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-      res.setHeader('ETag', `"${hashKey}"`);
+      applyTtsHeaders(res);
       res.status(304).end();
       return;
     }
-    res.setHeader('Content-Type', result.contentType);
-    res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400');
-    res.setHeader('ETag', `"${hashKey}"`);
+    applyTtsHeaders(res, result.contentType);
     res.send(result.buffer);
     return;
   }
