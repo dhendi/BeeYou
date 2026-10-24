@@ -42,7 +42,7 @@ export interface SyncOptions {
   throwOnError?: boolean;
 }
 
-const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'beeyou-23d7d';
+export const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'beeyou-23d7d';
 
 let cachedGoogleAuth: GoogleAuth | null = null;
 let cachedAdcConfigured = false;

@@ -43,6 +43,25 @@ import {
   clearAllRevocationsForTesting,
   getRevocationStats,
 } from './src/services/tokenRevocationService';
+import {
+  PersistenceError,
+  isProductionEnvironment,
+  syncFamilyStateToRtdb,
+  fetchFamilyStateFromRtdb,
+  deleteFamilyStateFromRtdb,
+  syncCaregiverSessionToRtdb,
+  fetchCaregiverSessionFromRtdb,
+  deleteCaregiverSessionFromRtdb,
+  syncPairingSessionToRtdb,
+  fetchPairingSessionFromRtdb,
+  deletePairingSessionFromRtdb,
+  saveFamilyAccountToFirestore,
+  fetchFamilyAccountFromFirestore,
+  deleteFamilyAccountFromFirestore,
+  reconcileLegacyLocalData,
+  createLocalDataBackup,
+  resolveRtdbUrl,
+} from './src/services/familyPersistenceService';
 
 export type { FirestoreConfigReport };
 export {
@@ -57,6 +76,23 @@ export {
   initTokenRevocationStore,
   clearAllRevocationsForTesting,
   getRevocationStats,
+  PersistenceError,
+  isProductionEnvironment,
+  syncFamilyStateToRtdb,
+  fetchFamilyStateFromRtdb,
+  deleteFamilyStateFromRtdb,
+  syncCaregiverSessionToRtdb,
+  fetchCaregiverSessionFromRtdb,
+  deleteCaregiverSessionFromRtdb,
+  syncPairingSessionToRtdb,
+  fetchPairingSessionFromRtdb,
+  deletePairingSessionFromRtdb,
+  saveFamilyAccountToFirestore,
+  fetchFamilyAccountFromFirestore,
+  deleteFamilyAccountFromFirestore,
+  reconcileLegacyLocalData,
+  createLocalDataBackup,
+  resolveRtdbUrl,
 };
 
 dotenv.config();
@@ -549,6 +585,42 @@ export function findFamilyAccount(criteria: { uid?: string; email?: string; fami
   return null;
 }
 
+/**
+ * Authoritatively retrieves a family account by UID, Email, or familyCode across instances.
+ * Evaluates fast in-memory cache first, then reads from Cloud Firestore if absent.
+ */
+export async function findFamilyAccountAsync(
+  criteria: { uid?: string; email?: string; familyCode?: string },
+  options?: any
+): Promise<ServerFamilyAccount | null> {
+  const cleanEmail = criteria.email ? criteria.email.trim().toLowerCase() : undefined;
+  const cleanCode = criteria.familyCode ? sanitizeFamilyCode(criteria.familyCode) : undefined;
+
+  // 1. In-memory check (fast-path)
+  const cached = findFamilyAccount(criteria);
+  if (cached) return cached;
+
+  if (cleanEmail === 'demo@beeyou.app' || cleanCode === 'BEE-DEMO') {
+    return familyAccounts.get('demo@beeyou.app') || null;
+  }
+
+  // 2. Authoritative Cloud Firestore lookup
+  try {
+    const cloudAccount = await fetchFamilyAccountFromFirestore(criteria, options);
+    if (cloudAccount) {
+      familyAccounts.set(cloudAccount.email.toLowerCase().trim(), cloudAccount);
+      return cloudAccount;
+    }
+  } catch (err: any) {
+    if (err instanceof PersistenceError && !err.isTransient) {
+      throw err;
+    }
+    console.warn('[Session Store] Firestore account lookup notice:', err?.message);
+  }
+
+  return null;
+}
+
 export function seedDemoFamilyAccount(): void {
   familyAccounts.set('demo@beeyou.app', {
     id: 'fam-demo-2026',
@@ -955,7 +1027,28 @@ export function getCaregiverSession(code: string): CaregiverSessionData | null {
   return caregiverSessions.get(cleanCode) || null;
 }
 
-export function setCaregiverSession(code: string, session: CaregiverSessionData): void {
+export async function getCaregiverSessionAsync(code: string, options?: any): Promise<CaregiverSessionData | null> {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode) return null;
+  if (cleanCode === 'BEE-DEMO') {
+    return demoSandboxedSession;
+  }
+  const cached = caregiverSessions.get(cleanCode);
+  if (cached) return cached;
+
+  try {
+    const cloudSession = await fetchCaregiverSessionFromRtdb(cleanCode, options);
+    if (cloudSession) {
+      caregiverSessions.set(cleanCode, cloudSession);
+      return cloudSession;
+    }
+  } catch (err: any) {
+    console.warn(`[Caregiver Session] RTDB fetch notice for ${cleanCode}:`, err?.message);
+  }
+  return null;
+}
+
+export function setCaregiverSession(code: string, session: CaregiverSessionData, options?: any): void {
   const cleanCode = sanitizeFamilyCode(code);
   if (!cleanCode) return;
   if (cleanCode === 'BEE-DEMO') {
@@ -963,25 +1056,68 @@ export function setCaregiverSession(code: string, session: CaregiverSessionData)
     return;
   }
   caregiverSessions.set(cleanCode, session);
+  syncCaregiverSessionToRtdb(cleanCode, session, options).catch((err: any) => {
+    console.warn(`[Caregiver Session] RTDB background sync notice for ${cleanCode}:`, err?.message);
+  });
   saveCaregiverSessions().catch(() => {});
 }
 
-// Asynchronous background mirror to Firebase Realtime Database
-async function syncFamilyToFirebase(code: string): Promise<void> {
+export async function setCaregiverSessionAsync(code: string, session: CaregiverSessionData, options?: any): Promise<void> {
   const cleanCode = sanitizeFamilyCode(code);
-  if (!cleanCode || cleanCode === 'BEE-DEMO' || !FIREBASE_DB_URL) return;
+  if (!cleanCode) return;
+  if (cleanCode === 'BEE-DEMO') {
+    demoSandboxedSession = session;
+    return;
+  }
+  caregiverSessions.set(cleanCode, session);
+  await syncCaregiverSessionToRtdb(cleanCode, session, options);
+  saveCaregiverSessions().catch(() => {});
+}
+
+export async function getPairingSessionAsync(code: string, options?: any): Promise<TemporaryPairingSessionData | null> {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode || cleanCode === 'BEE-DEMO') return null;
+
+  const cached = pairingSessions.get(cleanCode);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const cloudSession = await fetchPairingSessionFromRtdb(cleanCode, options);
+    if (cloudSession) {
+      pairingSessions.set(cleanCode, cloudSession);
+      return cloudSession;
+    }
+  } catch (err: any) {
+    console.warn(`[Pairing Session] RTDB fetch notice for ${cleanCode}:`, err?.message);
+  }
+  return null;
+}
+
+export async function setPairingSessionAsync(code: string, session: TemporaryPairingSessionData, options?: any): Promise<void> {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode || cleanCode === 'BEE-DEMO') return;
+
+  pairingSessions.set(cleanCode, session);
+  await syncPairingSessionToRtdb(cleanCode, session, options);
+  savePairingSessions().catch(() => {});
+}
+
+// Durable shared sync to Firebase Realtime Database
+// Uses PATCH to guarantee security nodes (ownerUid, members, revokedMembers) are NEVER overwritten
+export async function syncFamilyToFirebase(code: string, options?: any): Promise<void> {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode || cleanCode === 'BEE-DEMO') return;
 
   const state = activeFamilyStates.get(cleanCode);
   if (!state) return;
 
   try {
-    const url = `${FIREBASE_DB_URL}/beeyou/families/${encodeURIComponent(cleanCode)}.json`;
-    await fetch(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(state),
-    });
-  } catch {}
+    await syncFamilyStateToRtdb(cleanCode, state, options);
+  } catch (err: any) {
+    console.warn(`[Family State] RTDB sync notice for ${cleanCode}:`, err?.message);
+  }
 }
 
 export interface SyncMemberRtdbOptions {
@@ -1191,6 +1327,33 @@ function saveFamilyState(code: string, state?: SharedFamilyState, immediate = fa
   }
 }
 
+export async function saveFamilyStateAsync(
+  code: string,
+  state?: SharedFamilyState,
+  options?: any
+): Promise<void> {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode) return;
+
+  if (cleanCode === 'BEE-DEMO') {
+    if (state) demoSandboxedState = state;
+    return;
+  }
+
+  if (state) {
+    activeFamilyStates.set(cleanCode, state);
+  }
+
+  const stateToSync = state || activeFamilyStates.get(cleanCode);
+  if (stateToSync) {
+    await syncFamilyStateToRtdb(cleanCode, stateToSync, options);
+  }
+
+  try {
+    saveFamilyState(cleanCode, state, false);
+  } catch {}
+}
+
 // Periodic non-blocking flush interval (flushes batches every 1000ms)
 setInterval(() => {
   if (dirtyFamilyCodes.size > 0) {
@@ -1281,6 +1444,78 @@ export function getOrCreateFamilyState(code: string, email?: string): SharedFami
     activeFamilyStates.set(cleanCode, state);
     saveFamilyState(cleanCode, state, true);
   }
+  return state;
+}
+
+export async function getOrCreateFamilyStateAsync(
+  code: string,
+  email?: string,
+  options?: any
+): Promise<SharedFamilyState | null> {
+  const cleanCode = sanitizeFamilyCode(code);
+  if (!cleanCode) return null;
+
+  if (cleanCode === 'BEE-DEMO') {
+    return demoSandboxedState;
+  }
+
+  let state = activeFamilyStates.get(cleanCode);
+  if (state) {
+    return state;
+  }
+
+  try {
+    const cloudState = await fetchFamilyStateFromRtdb(cleanCode, options);
+    if (cloudState) {
+      activeFamilyStates.set(cleanCode, cloudState);
+      return cloudState;
+    }
+  } catch (err: any) {
+    console.warn(`[State Store] RTDB lookup notice for ${cleanCode}:`, err?.message);
+  }
+
+  const account =
+    (await findFamilyAccountAsync({ familyCode: cleanCode }, options)) ||
+    (email ? await findFamilyAccountAsync({ email }, options) : null);
+  const session = await getCaregiverSessionAsync(cleanCode, options);
+  const pairing = await getPairingSessionAsync(cleanCode, options);
+
+  if (!account && !session && !pairing) {
+    return null;
+  }
+
+  state = {
+    familyCode: cleanCode,
+    email: account?.email || pairing?.caregiverEmail || email || `${cleanCode.toLowerCase()}@family.beeyou.app`,
+    caregiverName: account?.caregiverName || pairing?.caregiverName || 'Caregiver',
+    caregiverRole: account?.caregiverRole || 'Parent',
+    childProfile: {
+      name: account?.childProfile?.name || session?.childName || pairing?.childName || 'Child',
+      ageGroup: account?.childProfile?.ageGroup || pairing?.ageGroup || 'kid',
+      pin: account?.childProfile?.pin,
+      interests: account?.childProfile?.interests || ['Visual schedules', 'Creative play'],
+      pronouns: account?.childProfile?.pronouns || 'they/them',
+    },
+    childState: {
+      lastActiveTime: new Date().toISOString(),
+      currentActivity: 'Using BeeYou',
+      currentMood: 'calm',
+      habitsCompletedToday: 0,
+      totalHabits: 4,
+      stars: 0,
+      isOnline: true,
+    },
+    routines: [],
+    aacItems: [],
+    plansChanged: { ...DEFAULT_DEMO_PLANS_CHANGED, active: false },
+    activeAlert: null,
+    alertHistory: [],
+    messages: [],
+    lastUpdated: Date.now(),
+  };
+
+  activeFamilyStates.set(cleanCode, state);
+  await saveFamilyStateAsync(cleanCode, state, options);
   return state;
 }
 
@@ -1567,7 +1802,7 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
         let effectiveRole: 'caregiver' | 'child' | 'demo' | 'admin' = cleanCode === 'BEE-DEMO' ? 'demo' : (parsed.role || 'caregiver');
 
         if (cleanCode !== 'BEE-DEMO' && parsed.uid) {
-          const acc = findFamilyAccount({ familyCode: cleanCode });
+          const acc = await findFamilyAccountAsync({ familyCode: cleanCode });
           if (acc) {
             // Check member revocation
             if (acc.revokedMembers && acc.revokedMembers[parsed.uid]) {
@@ -1673,7 +1908,7 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
       }
 
       // Check authoritative family accounts
-      const acc = findFamilyAccount({ uid, email });
+      const acc = await findFamilyAccountAsync({ uid, email });
       if (acc) {
         try {
           if (await isTokenRevoked(trimmed, { uid, familyCode: acc.familyCode, iat: tokenIatMs })) {
@@ -2077,14 +2312,15 @@ app.post('/api/caregiver/pairing/create', async (req, res) => {
   };
 
   pairingSessions.set(pairingCode, session);
+  syncPairingSessionToRtdb(pairingCode, session).catch(() => {});
   savePairingSessions().catch(() => {});
   return res.json({ success: true, session });
 });
 
 // Check status of a pairing code (for live polling during setup)
-app.get('/api/caregiver/pairing/status/:code', (req, res) => {
+app.get('/api/caregiver/pairing/status/:code', async (req, res) => {
   const code = (req.params.code || '').trim().toUpperCase();
-  const session = pairingSessions.get(code);
+  const session = await getPairingSessionAsync(code);
 
   if (!session) {
     return res.status(404).json({ error: 'Pairing session not found or expired', status: 'not_found' });
@@ -2098,13 +2334,13 @@ app.get('/api/caregiver/pairing/status/:code', (req, res) => {
 });
 
 // Request to pair (submits claiming device details and enters awaiting_approval state)
-app.post('/api/caregiver/pairing/claim', (req, res) => {
+app.post('/api/caregiver/pairing/claim', async (req, res) => {
   const { pairingCode, claimerRole, childName, childAge, ageGroup, caregiverName, caregiverPhone, caregiverEmail, permissions } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code || code === 'BEE-DEMO') {
     return res.status(400).json({ error: 'Invalid pairing code format.' });
   }
-  const session = pairingSessions.get(code);
+  const session = await getPairingSessionAsync(code);
 
   if (!session) {
     return res.status(404).json({ error: 'Invalid or expired pairing code.' });
@@ -2138,6 +2374,7 @@ app.post('/api/caregiver/pairing/claim', (req, res) => {
 
   // Status transitions to awaiting_approval: requires intended account confirmation
   session.status = 'awaiting_approval';
+  syncPairingSessionToRtdb(code, session).catch(() => {});
   savePairingSessions().catch(() => {});
 
   // Broadcast PAIRING_APPROVAL_REQUESTED to the host device
@@ -2165,7 +2402,7 @@ app.post('/api/caregiver/pairing/approve', async (req, res) => {
     return res.status(400).json({ error: 'Invalid pairing code.' });
   }
 
-  const session = pairingSessions.get(code);
+  const session = await getPairingSessionAsync(code);
   if (!session) {
     return res.status(404).json({ error: 'Pairing session not found.' });
   }
@@ -2212,6 +2449,7 @@ app.post('/api/caregiver/pairing/approve', async (req, res) => {
 
   session.targetFamilyCode = effectiveFamilyCode;
   session.status = 'paired';
+  await syncPairingSessionToRtdb(code, session).catch(() => {});
   savePairingSessions().catch(() => {});
 
   // Initialize the permanent live caregiver session for this linked pairing
@@ -2284,9 +2522,10 @@ app.post('/api/caregiver/pairing/reject', async (req, res) => {
     return res.status(400).json({ error: 'Invalid pairing code.' });
   }
 
-  const session = pairingSessions.get(code);
+  const session = await getPairingSessionAsync(code);
   if (session) {
     session.status = 'rejected';
+    await syncPairingSessionToRtdb(code, session).catch(() => {});
     if (session.token) {
       try {
         await revokeToken(session.token, session.expiresAt, 'pairing_rejected');
@@ -2322,8 +2561,8 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), async (req, res) =
 
   // Revoke the caller's auth token and pairing token authoritatively
   const callerToken = extractAuthToken(req);
-  const session = getCaregiverSession(code);
-  const pairing = pairingSessions.get(code);
+  const session = await getCaregiverSessionAsync(code);
+  const pairing = await getPairingSessionAsync(code);
 
   try {
     if (callerToken) {
@@ -2352,6 +2591,7 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), async (req, res) =
 
   if (pairing) {
     pairing.status = 'revoked';
+    await syncPairingSessionToRtdb(code, pairing).catch(() => {});
     savePairingSessions().catch(() => {});
   }
 
@@ -2383,7 +2623,7 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), async (req, res) =
 // -------------------------------------------------------------
 
 // Universal Event Publisher (Child <-> Caregiver bidirectional relay)
-app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
+app.post('/api/caregiver/event', requireFamilyAuth(), async (req, res) => {
   const envelope = req.body || {};
   const pairingCode = sanitizeFamilyCode(envelope.pairingCode || envelope.code);
   if (!pairingCode) {
@@ -2398,8 +2638,8 @@ app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
   }
   envelope.pairingCode = pairingCode;
 
-  // Auto-sync session state in server memory
-  let session = getCaregiverSession(pairingCode);
+  // Auto-sync session state in server memory and shared datastore
+  let session = await getCaregiverSessionAsync(pairingCode);
   if (!session) {
     session = {
       pairingCode,
@@ -2415,11 +2655,11 @@ app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
       messages: [],
       unlinked: false,
     };
-    setCaregiverSession(pairingCode, session);
+    await setCaregiverSessionAsync(pairingCode, session);
   }
 
   if (envelope.type === 'CAREGIVER_ALERT' && envelope.alert) {
-    const familyState = getOrCreateFamilyState(pairingCode);
+    const familyState = await getOrCreateFamilyStateAsync(pairingCode);
     if (familyState) {
       if (envelope.alert.childName && envelope.alert.childName !== 'Leo') {
         session.childName = envelope.alert.childName;
@@ -2432,14 +2672,14 @@ app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
       familyState.activeAlert = envelope.alert;
       familyState.alertHistory = [envelope.alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== envelope.alert.id)].slice(0, 50);
       familyState.lastUpdated = Date.now();
-      saveFamilyState(pairingCode, familyState, true);
+      await saveFamilyStateAsync(pairingCode, familyState, true);
     }
   } else if (envelope.type === 'CAREGIVER_ALERT_ACK' && envelope.ack) {
     if (session.activeAlert) {
       session.activeAlert.status = 'acknowledged';
       session.activeAlert.acknowledgedBy = envelope.ack.by;
     }
-    const familyState = getOrCreateFamilyState(pairingCode);
+    const familyState = await getOrCreateFamilyStateAsync(pairingCode);
     if (familyState) {
       if (familyState.activeAlert) {
         familyState.activeAlert.status = 'acknowledged';
@@ -2449,12 +2689,12 @@ app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
       }
       session.lastCaregiverActiveTime = new Date().toISOString();
       familyState.lastUpdated = Date.now();
-      saveFamilyState(pairingCode, familyState, true);
+      await saveFamilyStateAsync(pairingCode, familyState, true);
     }
   } else if (envelope.type === 'ALERT_RESOLVED') {
     session.activeAlert = null;
     session.quickAlert = null;
-    const familyState = getOrCreateFamilyState(pairingCode);
+    const familyState = await getOrCreateFamilyStateAsync(pairingCode);
     if (familyState) {
       familyState.activeAlert = null;
       if (Array.isArray(familyState.alertHistory)) {
@@ -2466,7 +2706,7 @@ app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
         });
       }
       familyState.lastUpdated = Date.now();
-      saveFamilyState(pairingCode, familyState, true);
+      await saveFamilyStateAsync(pairingCode, familyState, true);
     }
   } else if (envelope.type === 'CAREGIVER_MESSAGE' && envelope.message) {
     let msg = { ...envelope.message };
@@ -2498,10 +2738,10 @@ app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
     }
   }
 
-  setCaregiverSession(pairingCode, session);
+  await setCaregiverSessionAsync(pairingCode, session);
 
   // Update persistent state timestamp
-  const familyState = getOrCreateFamilyState(pairingCode);
+  const familyState = await getOrCreateFamilyStateAsync(pairingCode);
   if (familyState) {
     familyState.lastUpdated = Date.now();
   }
@@ -2511,9 +2751,9 @@ app.post('/api/caregiver/event', requireFamilyAuth(), (req, res) => {
 });
 
 // Live Server-Sent Events (SSE) Stream for real-time 0ms delivery
-app.get('/api/caregiver/events/:code', requireFamilyAuth(), (req, res) => {
+app.get('/api/caregiver/events/:code', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const familyState = getOrCreateFamilyState(code);
+  const familyState = await getOrCreateFamilyStateAsync(code);
   if (!familyState) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
@@ -2591,12 +2831,12 @@ app.get('/api/caregiver/poll/:code', requireFamilyAuth(), async (req, res) => {
     } catch {}
   }
 
-  const familyState = getOrCreateFamilyState(code);
+  const familyState = await getOrCreateFamilyStateAsync(code);
   if (!familyState) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
 
-  const session = getCaregiverSession(code);
+  const session = await getCaregiverSessionAsync(code);
 
   const rawActiveAlert = familyState.activeAlert || session?.activeAlert || null;
   const mergedSession = {
@@ -2624,9 +2864,9 @@ app.get('/api/caregiver/poll/:code', requireFamilyAuth(), async (req, res) => {
 // -------------------------------------------------------------
 
 // 1. Fetch entire family state
-app.get('/api/family/state/:code', requireFamilyAuth(), (req, res) => {
+app.get('/api/family/state/:code', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const state = getOrCreateFamilyState(code);
+  const state = await getOrCreateFamilyStateAsync(code);
   if (!state) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
@@ -2634,9 +2874,9 @@ app.get('/api/family/state/:code', requireFamilyAuth(), (req, res) => {
 });
 
 // 2. Update family state remotely (routines, aac, plansChanged, childState, childProfile)
-app.post('/api/family/state/:code', requireFamilyAuth(), (req, res) => {
+app.post('/api/family/state/:code', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const current = getOrCreateFamilyState(code);
+  const current = await getOrCreateFamilyStateAsync(code);
   if (!current) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
@@ -2651,7 +2891,7 @@ app.post('/api/family/state/:code', requireFamilyAuth(), (req, res) => {
   if (childProfile && typeof childProfile === 'object') {
     current.childProfile = { ...current.childProfile, ...childProfile };
     if (childProfile.name && childProfile.name !== 'Leo') {
-      const sess = getCaregiverSession(code);
+      const sess = await getCaregiverSessionAsync(code);
       if (sess) {
         sess.childName = childProfile.name;
         setCaregiverSession(code, sess);
@@ -2661,10 +2901,20 @@ app.post('/api/family/state/:code', requireFamilyAuth(), (req, res) => {
   if (caregiverName) current.caregiverName = caregiverName;
   current.lastUpdated = Date.now();
 
-  saveFamilyState(code, current);
+  try {
+    await saveFamilyStateAsync(code, current);
+  } catch (syncErr: any) {
+    if (isProductionEnvironment()) {
+      return res.status(502).json({
+        error: 'PersistenceError',
+        message: 'Failed to durably commit family state update to shared datastore. Please retry.',
+        detail: syncErr?.message,
+      });
+    }
+  }
 
   // Sync with caregiverSessions map for backwards compatibility
-  const session = getCaregiverSession(code);
+  const session = await getCaregiverSessionAsync(code);
   if (session && current.childState) {
     Object.assign(session, current.childState);
     setCaregiverSession(code, session);
@@ -2718,9 +2968,9 @@ app.post('/api/family/recover-email', (req, res) => {
 });
 
 // 3. Child triggers an emergency / sensory overload alert
-app.post('/api/family/alert/:code', requireFamilyAuth(), (req, res) => {
+app.post('/api/family/alert/:code', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const current = getOrCreateFamilyState(code);
+  const current = await getOrCreateFamilyStateAsync(code);
   if (!current) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
@@ -2744,14 +2994,14 @@ app.post('/api/family/alert/:code', requireFamilyAuth(), (req, res) => {
   current.alertHistory = [alert, ...(current.alertHistory || []).filter((a: any) => a.id !== alert.id)].slice(0, 50);
   current.lastUpdated = Date.now();
 
-  saveFamilyState(code, current, true);
+  await saveFamilyStateAsync(code, current, true);
 
   // Sync caregiver session
-  const session = getCaregiverSession(code);
+  const session = await getCaregiverSessionAsync(code);
   if (session) {
     session.activeAlert = alert;
     session.quickAlert = `ALERT: ${alert.label}`;
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   }
 
   broadcastEvent(code, {
@@ -2767,9 +3017,9 @@ app.post('/api/family/alert/:code', requireFamilyAuth(), (req, res) => {
 });
 
 // 4. Caregiver acknowledges alert with reassurance message
-app.post('/api/family/alert/:code/ack', requireFamilyAuth(), (req, res) => {
+app.post('/api/family/alert/:code/ack', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const current = getOrCreateFamilyState(code);
+  const current = await getOrCreateFamilyStateAsync(code);
   if (!current) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
@@ -2815,7 +3065,7 @@ app.post('/api/family/alert/:code/ack', requireFamilyAuth(), (req, res) => {
   }
 
   current.lastUpdated = Date.now();
-  saveFamilyState(code, current, true);
+  await saveFamilyStateAsync(code, current, true);
 
   broadcastEvent(code, {
     eventId: `ev-ack-${Date.now()}`,
@@ -2835,9 +3085,9 @@ app.post('/api/family/alert/:code/ack', requireFamilyAuth(), (req, res) => {
 });
 
 // 5. Caregiver marks alert resolved / all clear
-app.post('/api/family/alert/:code/resolve', requireFamilyAuth(), (req, res) => {
+app.post('/api/family/alert/:code/resolve', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const current = getOrCreateFamilyState(code);
+  const current = await getOrCreateFamilyStateAsync(code);
   if (!current) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
@@ -2854,13 +3104,13 @@ app.post('/api/family/alert/:code/resolve', requireFamilyAuth(), (req, res) => {
   }
 
   current.lastUpdated = Date.now();
-  saveFamilyState(code, current, true);
+  await saveFamilyStateAsync(code, current, true);
 
   // Sync session
-  const session = getCaregiverSession(code);
+  const session = await getCaregiverSessionAsync(code);
   if (session) {
     session.activeAlert = null;
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   }
 
   broadcastEvent(code, {
@@ -2876,9 +3126,9 @@ app.post('/api/family/alert/:code/resolve', requireFamilyAuth(), (req, res) => {
 });
 
 // 6. Caregiver sends instant nudge or reminder message to child
-app.post('/api/family/message/:code', requireFamilyAuth(), (req, res) => {
+app.post('/api/family/message/:code', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const current = getOrCreateFamilyState(code);
+  const current = await getOrCreateFamilyStateAsync(code);
   if (!current) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
@@ -2904,7 +3154,7 @@ app.post('/api/family/message/:code', requireFamilyAuth(), (req, res) => {
 
   current.messages = [...(current.messages || []).slice(-29), newMsg];
   current.lastUpdated = Date.now();
-  saveFamilyState(code, current);
+  await saveFamilyStateAsync(code, current);
 
   broadcastEvent(code, {
     eventId: `ev-msg-${Date.now()}`,
@@ -2941,8 +3191,8 @@ app.post('/api/caregiver/family/register', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
   }
 
-  // Check if an account already exists for this email or uid
-  let existing = findFamilyAccount({ uid: verified.uid, email: cleanEmail });
+  // Check if an account already exists for this email or uid across instances
+  let existing = await findFamilyAccountAsync({ uid: verified.uid, email: cleanEmail });
   if (existing) {
     const signedToken = signFamilyToken(existing.familyCode, 'caregiver', existing.email, verified.uid);
     const safeAccount = {
@@ -2979,10 +3229,11 @@ app.post('/api/caregiver/family/register', async (req, res) => {
     lastSyncedAt: new Date().toISOString(),
   };
 
-  // Authoritatively initialize family in Firestore for Cloud Storage access BEFORE committing local state
+  // Authoritatively initialize family in Firestore for Cloud Storage access & account registry BEFORE committing local state
   if (verified.uid && !verified.isDemo) {
     try {
       await syncFamilyToFirestore(familyCode, 'init_owner', verified.uid, { email: cleanEmail });
+      await saveFamilyAccountToFirestore(account);
     } catch (syncErr: any) {
       console.error(`[Family Register] Authoritative Firestore initialization failed for ${familyCode}:`, syncErr?.message);
       // Clean up in-memory and disk state completely to guarantee zero orphaned records
@@ -3003,29 +3254,35 @@ app.post('/api/caregiver/family/register', async (req, res) => {
         detail: syncErr?.message,
       });
     }
+  } else if (!verified.isDemo) {
+    await saveFamilyAccountToFirestore(account).catch(() => {});
   }
 
   familyAccounts.set(cleanEmail, account);
   await saveFamilyAccounts().catch(() => {});
 
-  // Initialize caregiver session for this familyCode
-  if (!caregiverSessions.has(familyCode)) {
-    caregiverSessions.set(familyCode, {
-      pairingCode: familyCode,
-      childName: account.childProfile.name,
-      lastActiveTime: new Date().toISOString(),
-      currentActivity: 'Active in BeeYou',
-      currentMood: 'calm',
-      habitsCompletedToday: 0,
-      totalHabits: 4,
-      routineProgress: null,
-      stars: 10,
-      isOffline: false,
-      messages: [],
-      unlinked: false,
-    });
-    await saveCaregiverSessions().catch(() => {});
+  // Initialize shared RTDB family state
+  const initialState = await getOrCreateFamilyStateAsync(familyCode, cleanEmail);
+  if (initialState) {
+    await syncFamilyStateToRtdb(familyCode, initialState).catch(() => {});
   }
+
+  // Initialize caregiver session for this familyCode
+  const initSession: CaregiverSessionData = {
+    pairingCode: familyCode,
+    childName: account.childProfile.name,
+    lastActiveTime: new Date().toISOString(),
+    currentActivity: 'Active in BeeYou',
+    currentMood: 'calm',
+    habitsCompletedToday: 0,
+    totalHabits: 4,
+    routineProgress: null,
+    stars: 10,
+    isOffline: false,
+    messages: [],
+    unlinked: false,
+  };
+  await setCaregiverSessionAsync(familyCode, initSession);
 
   const signedToken = signFamilyToken(familyCode, 'caregiver', cleanEmail, verified.uid);
 
@@ -3060,7 +3317,7 @@ app.post('/api/caregiver/family/login', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
   }
 
-  let account = findFamilyAccount({ uid: verified.uid, email: cleanEmail });
+  let account = await findFamilyAccountAsync({ uid: verified.uid, email: cleanEmail });
 
   if (account) {
     // Check if user was revoked by owner
@@ -3075,6 +3332,7 @@ app.post('/api/caregiver/family/login', async (req, res) => {
       if (!account.members) account.members = {};
       account.members[verified.uid] = { role: 'caregiver', email: cleanEmail, approvedAt: Date.now() };
       isRecovering = true;
+      await saveFamilyAccountToFirestore(account).catch(() => {});
       await saveFamilyAccounts().catch(() => {});
     }
 
@@ -3122,6 +3380,7 @@ app.post('/api/caregiver/family/login', async (req, res) => {
     if (verified.uid && !verified.isDemo) {
       try {
         await syncFamilyToFirestore(account.familyCode, 'init_owner', verified.uid, { email: cleanEmail });
+        await saveFamilyAccountToFirestore(account);
       } catch (syncErr: any) {
         console.error(`[Family Login] Authoritative Firestore initialization failed for ${account.familyCode}:`, syncErr?.message);
         familyAccounts.delete(cleanEmail);
@@ -3141,15 +3400,24 @@ app.post('/api/caregiver/family/login', async (req, res) => {
           detail: syncErr?.message,
         });
       }
+    } else if (!verified.isDemo) {
+      await saveFamilyAccountToFirestore(account).catch(() => {});
     }
 
     familyAccounts.set(cleanEmail, account);
     await saveFamilyAccounts().catch(() => {});
+
+    // Initialize shared RTDB family state
+    const initialState = await getOrCreateFamilyStateAsync(account.familyCode, cleanEmail);
+    if (initialState) {
+      await syncFamilyStateToRtdb(account.familyCode, initialState).catch(() => {});
+    }
   }
 
-  // Ensure caregiver session is initialized
-  if (!caregiverSessions.has(account.familyCode)) {
-    caregiverSessions.set(account.familyCode, {
+  // Ensure caregiver session is initialized in shared datastore
+  let session = await getCaregiverSessionAsync(account.familyCode);
+  if (!session) {
+    session = {
       pairingCode: account.familyCode,
       childName: account.childProfile.name,
       lastActiveTime: new Date().toISOString(),
@@ -3162,8 +3430,8 @@ app.post('/api/caregiver/family/login', async (req, res) => {
       isOffline: false,
       messages: [],
       unlinked: false,
-    });
-    await saveCaregiverSessions().catch(() => {});
+    };
+    await setCaregiverSessionAsync(account.familyCode, session);
   }
 
   const signedToken = signFamilyToken(account.familyCode, 'caregiver', cleanEmail, verified.uid);
@@ -3181,14 +3449,14 @@ app.post('/api/caregiver/family/login', async (req, res) => {
 });
 
 // List members of a family
-app.get('/api/family/members/:code', requireFamilyAuth(), (req, res) => {
+app.get('/api/family/members/:code', requireFamilyAuth(), async (req, res) => {
   const code = sanitizeFamilyCode(req.params.code);
   const user = (req as any).user as AuthenticatedUser;
   if (!code || user.familyCode !== code) {
     return res.status(403).json({ error: 'Forbidden', message: 'Access denied.' });
   }
 
-  const account = findFamilyAccount({ familyCode: code });
+  const account = await findFamilyAccountAsync({ familyCode: code });
   if (!account) {
     return res.status(404).json({ error: 'NotFound', message: 'Family account not found.' });
   }
@@ -3214,7 +3482,7 @@ app.post('/api/family/member/request', async (req, res) => {
   const code = sanitizeFamilyCode(familyCode);
   if (!code) return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code.' });
 
-  const account = findFamilyAccount({ familyCode: code });
+  const account = await findFamilyAccountAsync({ familyCode: code });
   if (!account) return res.status(404).json({ error: 'NotFound', message: 'Family not found.' });
 
   if (account.revokedMembers && account.revokedMembers[verified.uid]) {
@@ -3231,6 +3499,7 @@ app.post('/api/family/member/request', async (req, res) => {
     name: name?.trim() || 'Caregiver',
     requestedAt: Date.now(),
   };
+  await saveFamilyAccountToFirestore(account).catch(() => {});
   saveFamilyAccounts().catch(() => {});
 
   return res.json({ success: true, status: 'pending_approval', message: 'Membership request submitted. Awaiting owner approval.' });
@@ -3244,7 +3513,7 @@ app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => 
     return res.status(400).json({ error: 'BadRequest', message: 'targetUid is required.' });
   }
 
-  const account = findFamilyAccount({ familyCode: user.familyCode });
+  const account = await findFamilyAccountAsync({ familyCode: user.familyCode });
   if (!account) {
     return res.status(404).json({ error: 'NotFound', message: 'Family not found.' });
   }
@@ -3284,6 +3553,7 @@ app.post('/api/family/member/approve', requireFamilyAuth(), async (req, res) => 
   if (account.revokedMembers) {
     delete account.revokedMembers[targetUid];
   }
+  await saveFamilyAccountToFirestore(account).catch(() => {});
   await saveFamilyAccounts();
 
   // Sync to Firebase RTDB with HTTP response verification and reliable reconciliation
@@ -3322,7 +3592,7 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
     return res.status(400).json({ error: 'BadRequest', message: 'targetUid is required.' });
   }
 
-  const account = findFamilyAccount({ familyCode: user.familyCode });
+  const account = await findFamilyAccountAsync({ familyCode: user.familyCode });
   if (!account) {
     return res.status(404).json({ error: 'NotFound', message: 'Family not found.' });
   }
@@ -3364,6 +3634,7 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
   if (account.pendingMembers) {
     delete account.pendingMembers[targetUid];
   }
+  await saveFamilyAccountToFirestore(account).catch(() => {});
   await saveFamilyAccounts();
 
   // Persistently invalidate all active credentials and sessions for revoked user
@@ -3417,13 +3688,13 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
 });
 
 // Fetch account details by email (sanitized - strips internal PIN)
-app.get('/api/caregiver/family/:email', requireFamilyAuth(), (req, res) => {
+app.get('/api/caregiver/family/:email', requireFamilyAuth(), async (req, res) => {
   const cleanEmail = (req.params.email || '').trim().toLowerCase();
   if (!cleanEmail || !cleanEmail.includes('@') || cleanEmail.length > 254) {
     return res.status(400).json({ success: false, message: 'Invalid email format' });
   }
   const user = (req as any).user as AuthenticatedUser;
-  const account = familyAccounts.get(cleanEmail);
+  const account = await findFamilyAccountAsync({ email: cleanEmail });
   if (!account) {
     return res.status(404).json({ success: false, message: 'Family account not found' });
   }
@@ -3477,6 +3748,7 @@ app.post('/api/caregiver/family/delete', requireFamilyAuth(), async (req, res) =
     caregiverSessionDeleted: false,
     pairingSessionsDeleted: false,
     diskFilesPurged: false,
+    sharedDatastorePurged: false,
     sseClientsTerminated: false,
   };
 
@@ -3553,7 +3825,18 @@ app.post('/api/caregiver/family/delete', requireFamilyAuth(), async (req, res) =
       console.warn('[Delete] Disk file deletion warning:', fileErr);
     }
 
-    // 7. Revoke family code and tokens
+    // 7. Purge from authoritative shared datastores (Firestore & RTDB)
+    try {
+      await deleteFamilyAccountFromFirestore(cleanEmail, targetCode);
+      await deleteFamilyStateFromRtdb(targetCode);
+      await deleteCaregiverSessionFromRtdb(targetCode);
+      await deletePairingSessionFromRtdb(targetCode);
+      results.sharedDatastorePurged = true;
+    } catch (storeErr) {
+      console.warn('[Delete] Shared datastore deletion warning:', storeErr);
+    }
+
+    // 8. Revoke family code and tokens
     revokedFamilyCodes.add(targetCode);
     await revokeFamilyTokens(targetCode, 'family_deleted');
 
@@ -3578,18 +3861,18 @@ app.post('/api/caregiver/family/delete', requireFamilyAuth(), async (req, res) =
 // -------------------------------------------------------------
 
 // Get caregiver session for a pairing code
-app.get('/api/caregiver/session/:code', requireFamilyAuth(), (req, res) => {
+app.get('/api/caregiver/session/:code', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const familyState = getOrCreateFamilyState(code);
+  const familyState = await getOrCreateFamilyStateAsync(code);
   if (!familyState) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code' });
   }
 
-  let session = getCaregiverSession(code);
+  let session = await getCaregiverSessionAsync(code);
 
   if (!session) {
     // Check if pairing session exists
-    const pairing = pairingSessions.get(code);
+    const pairing = await getPairingSessionAsync(code);
     session = {
       pairingCode: code,
       childName: pairing?.childName || (familyState.childProfile?.name && familyState.childProfile.name !== 'Leo' ? familyState.childProfile.name : 'Child'),
@@ -3607,7 +3890,7 @@ app.get('/api/caregiver/session/:code', requireFamilyAuth(), (req, res) => {
       activeAlert: familyState.activeAlert && familyState.activeAlert.status !== 'resolved' ? familyState.activeAlert : null,
       unlinked: false,
     };
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   } else {
     const rawActiveAlert = familyState.activeAlert || session.activeAlert || null;
     session.activeAlert = rawActiveAlert && rawActiveAlert.status !== 'resolved' ? rawActiveAlert : null;
@@ -3620,7 +3903,7 @@ app.get('/api/caregiver/session/:code', requireFamilyAuth(), (req, res) => {
       session.habitsCompletedToday = familyState.childState.habitsCompletedToday ?? session.habitsCompletedToday;
       session.stars = familyState.childState.stars ?? session.stars;
     }
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   }
 
   if (session.unlinked) {
@@ -3631,7 +3914,7 @@ app.get('/api/caregiver/session/:code', requireFamilyAuth(), (req, res) => {
 });
 
 // Child updates their active state (activity, mood, AAC, habits, routine)
-app.post('/api/caregiver/sync', requireFamilyAuth(), (req, res) => {
+app.post('/api/caregiver/sync', requireFamilyAuth(), async (req, res) => {
   const {
     pairingCode,
     childName,
@@ -3654,7 +3937,7 @@ app.post('/api/caregiver/sync', requireFamilyAuth(), (req, res) => {
   if (!code) {
     return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
   }
-  const existing = getCaregiverSession(code);
+  const existing = await getCaregiverSessionAsync(code);
 
   if (existing && existing.unlinked) {
     return res.status(403).json({ error: 'Device unlinked. Sync halted.' });
@@ -3682,7 +3965,7 @@ app.post('/api/caregiver/sync', requireFamilyAuth(), (req, res) => {
     unlinked: false,
   };
 
-  setCaregiverSession(code, updated);
+  await setCaregiverSessionAsync(code, updated);
 
   broadcastEvent(code, {
     eventId: `ev-sync-${Date.now()}`,
@@ -3696,7 +3979,7 @@ app.post('/api/caregiver/sync', requireFamilyAuth(), (req, res) => {
 });
 
 // Caregiver sends a predefined or custom message to child
-app.post('/api/caregiver/message', requireFamilyAuth(), (req, res) => {
+app.post('/api/caregiver/message', requireFamilyAuth(), async (req, res) => {
   let { pairingCode, senderName, text, emoji, responseId, senderRole } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
 
@@ -3719,7 +4002,7 @@ app.post('/api/caregiver/message', requireFamilyAuth(), (req, res) => {
   const authUser = (req as any).user;
   const determinedRole = authUser?.role === 'child' ? 'child' : (senderRole === 'child' ? 'child' : 'caregiver');
 
-  let session = getCaregiverSession(code);
+  let session = await getCaregiverSessionAsync(code);
   if (!session) {
     session = {
       pairingCode: code,
@@ -3735,7 +4018,7 @@ app.post('/api/caregiver/message', requireFamilyAuth(), (req, res) => {
       messages: [],
       unlinked: false,
     };
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   }
 
   if (session.unlinked) {
@@ -3757,7 +4040,7 @@ app.post('/api/caregiver/message', requireFamilyAuth(), (req, res) => {
   if (session.messages.length > 30) {
     session.messages = session.messages.slice(-30);
   }
-  setCaregiverSession(code, session);
+  await setCaregiverSessionAsync(code, session);
 
   broadcastEvent(code, {
     eventId: `ev-msg-${Date.now()}`,
@@ -3771,9 +4054,9 @@ app.post('/api/caregiver/message', requireFamilyAuth(), (req, res) => {
 });
 
 // Child checks for unread messages from caregiver
-app.get('/api/caregiver/messages/:code', requireFamilyAuth(), (req, res) => {
+app.get('/api/caregiver/messages/:code', requireFamilyAuth(), async (req, res) => {
   const code = req.params.code;
-  const session = getCaregiverSession(code);
+  const session = await getCaregiverSessionAsync(code);
   if (!session || session.unlinked) {
     return res.json({ messages: [], unreadCount: 0 });
   }
@@ -3782,7 +4065,7 @@ app.get('/api/caregiver/messages/:code', requireFamilyAuth(), (req, res) => {
   session.messages.forEach((m) => {
     m.read = true;
   });
-  setCaregiverSession(code, session);
+  await setCaregiverSessionAsync(code, session);
 
   const normalizedMessages = session.messages.map((m) => {
     const rawSender = String(m.senderName || '');
@@ -3799,14 +4082,14 @@ app.get('/api/caregiver/messages/:code', requireFamilyAuth(), (req, res) => {
 });
 
 // Child triggers an alert (predefined 5 options supported)
-app.post('/api/caregiver/alert', requireFamilyAuth(), (req, res) => {
+app.post('/api/caregiver/alert', requireFamilyAuth(), async (req, res) => {
   const { id, pairingCode, childName, emotion, alertId, label, emoji, location, note } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code) {
     return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
   }
 
-  let session = getCaregiverSession(code);
+  let session = await getCaregiverSessionAsync(code);
   if (!session) {
     session = {
       pairingCode: code,
@@ -3822,7 +4105,7 @@ app.post('/api/caregiver/alert', requireFamilyAuth(), (req, res) => {
       messages: [],
       unlinked: false,
     };
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   }
 
   if (session.unlinked) {
@@ -3856,15 +4139,15 @@ app.post('/api/caregiver/alert', requireFamilyAuth(), (req, res) => {
   session.currentMood = emotion;
   session.quickAlert = `ALERT: ${label} (${location ? 'At ' + location : 'Needs help'})`;
   session.lastActiveTime = new Date().toISOString();
-  setCaregiverSession(code, session);
+  await setCaregiverSessionAsync(code, session);
 
   // Also sync persistent family state
-  const familyState = getOrCreateFamilyState(code);
+  const familyState = await getOrCreateFamilyStateAsync(code);
   if (familyState) {
     familyState.activeAlert = alert;
     familyState.alertHistory = [alert, ...(familyState.alertHistory || []).filter((a: any) => a.id !== alert.id)].slice(0, 50);
     familyState.lastUpdated = Date.now();
-    saveFamilyState(code, familyState, true);
+    await saveFamilyStateAsync(code, familyState, true);
   }
 
   broadcastEvent(code, {
@@ -3880,15 +4163,15 @@ app.post('/api/caregiver/alert', requireFamilyAuth(), (req, res) => {
 });
 
 // Caregiver device confirms physical receipt of the alert
-app.post('/api/caregiver/alert/delivered', requireFamilyAuth(), (req, res) => {
+app.post('/api/caregiver/alert/delivered', requireFamilyAuth(), async (req, res) => {
   const { pairingCode, alertId, deviceId } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code) {
     return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
   }
 
-  const session = getCaregiverSession(code);
-  const familyState = getOrCreateFamilyState(code);
+  const session = await getCaregiverSessionAsync(code);
+  const familyState = await getOrCreateFamilyStateAsync(code);
   const deliveredAt = new Date().toISOString();
 
   if (session && session.activeAlert && (!alertId || session.activeAlert.id === alertId)) {
@@ -3896,7 +4179,7 @@ app.post('/api/caregiver/alert/delivered', requireFamilyAuth(), (req, res) => {
       session.activeAlert.deliveryStatus = 'delivered_to_device';
       session.activeAlert.deliveredToDeviceAt = deliveredAt;
     }
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   }
 
   if (familyState && familyState.activeAlert && (!alertId || familyState.activeAlert.id === alertId)) {
@@ -3905,7 +4188,7 @@ app.post('/api/caregiver/alert/delivered', requireFamilyAuth(), (req, res) => {
       familyState.activeAlert.deliveredToDeviceAt = deliveredAt;
     }
     familyState.lastUpdated = Date.now();
-    saveFamilyState(code, familyState, true);
+    await saveFamilyStateAsync(code, familyState, true);
   }
 
   broadcastEvent(code, {
@@ -3925,15 +4208,15 @@ app.post('/api/caregiver/alert/delivered', requireFamilyAuth(), (req, res) => {
 });
 
 // Caregiver acknowledges the alert and sends instant predefined reassurance response
-app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), (req, res) => {
+app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), async (req, res) => {
   const { pairingCode, acknowledgedBy, responseMessage, responseId, alertId } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code) {
     return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
   }
 
-  const session = getCaregiverSession(code);
-  const familyState = getOrCreateFamilyState(code);
+  const session = await getCaregiverSessionAsync(code);
+  const familyState = await getOrCreateFamilyStateAsync(code);
   if (!familyState) {
     return res.status(400).json({ error: 'BadRequest', message: 'Invalid family code.' });
   }
@@ -3945,7 +4228,7 @@ app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), (req, res) => 
     session.activeAlert.acknowledgedAt = new Date().toISOString();
     session.activeAlert.responseMessage = responseMessage;
     session.activeAlert.responseId = responseId;
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   }
 
   if (familyState.activeAlert) {
@@ -3985,7 +4268,7 @@ app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), (req, res) => 
     };
     if (session) {
       session.messages.push(newMessage);
-      setCaregiverSession(code, session);
+      await setCaregiverSessionAsync(code, session);
     }
     familyState.messages = [...(familyState.messages || []).slice(-29), newMessage];
 
@@ -4000,7 +4283,7 @@ app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), (req, res) => 
   }
 
   familyState.lastUpdated = Date.now();
-  saveFamilyState(code, familyState, true);
+  await saveFamilyStateAsync(code, familyState, true);
 
   broadcastEvent(code, {
     eventId: `ev-ack-${Date.now()}`,
@@ -4015,21 +4298,21 @@ app.post('/api/caregiver/alert/acknowledge', requireFamilyAuth(), (req, res) => 
 });
 
 // Caregiver resolves and clears the active alert
-app.post('/api/caregiver/alert/resolve', requireFamilyAuth(), (req, res) => {
+app.post('/api/caregiver/alert/resolve', requireFamilyAuth(), async (req, res) => {
   const { pairingCode, alertId } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code) {
     return res.status(400).json({ error: 'BadRequest', message: 'A valid pairingCode is required.' });
   }
 
-  const session = getCaregiverSession(code);
+  const session = await getCaregiverSessionAsync(code);
   if (session) {
     session.activeAlert = null;
     session.quickAlert = null;
-    setCaregiverSession(code, session);
+    await setCaregiverSessionAsync(code, session);
   }
 
-  const familyState = getOrCreateFamilyState(code);
+  const familyState = await getOrCreateFamilyStateAsync(code);
   if (familyState) {
     familyState.activeAlert = null;
     if (Array.isArray(familyState.alertHistory)) {
@@ -4041,7 +4324,7 @@ app.post('/api/caregiver/alert/resolve', requireFamilyAuth(), (req, res) => {
       });
     }
     familyState.lastUpdated = Date.now();
-    saveFamilyState(code, familyState, true);
+    await saveFamilyStateAsync(code, familyState, true);
   }
 
   broadcastEvent(code, {
