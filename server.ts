@@ -39,6 +39,7 @@ import {
   revokeUserTokens,
   revokeFamilyTokens,
   isTokenRevoked,
+  isFamilyRevokedMemory,
   initTokenRevocationStore,
   clearAllRevocationsForTesting,
   getRevocationStats,
@@ -587,7 +588,9 @@ export function findFamilyAccount(criteria: { uid?: string; email?: string; fami
 
 /**
  * Authoritatively retrieves a family account by UID, Email, or familyCode across instances.
- * Evaluates fast in-memory cache first, then reads from Cloud Firestore if absent.
+ * Cloud Firestore is the authoritative datastore.
+ * When an account is authoritatively absent/deleted in Firestore, local caches are purged
+ * to prevent resurrection from already-running servers or legacy replicas.
  */
 export async function findFamilyAccountAsync(
   criteria: { uid?: string; email?: string; familyCode?: string },
@@ -596,26 +599,61 @@ export async function findFamilyAccountAsync(
   const cleanEmail = criteria.email ? criteria.email.trim().toLowerCase() : undefined;
   const cleanCode = criteria.familyCode ? sanitizeFamilyCode(criteria.familyCode) : undefined;
 
-  // 1. In-memory check (fast-path)
-  const cached = findFamilyAccount(criteria);
-  if (cached) return cached;
-
   if (cleanEmail === 'demo@beeyou.app' || cleanCode === 'BEE-DEMO') {
     return familyAccounts.get('demo@beeyou.app') || null;
+  }
+
+  // 1. Check if the family is revoked in memory
+  const codeToCheck = cleanCode || (cleanEmail ? familyAccounts.get(cleanEmail)?.familyCode : undefined);
+  if (codeToCheck && (revokedFamilyCodes.has(codeToCheck) || isFamilyRevokedMemory(codeToCheck))) {
+    if (cleanEmail) familyAccounts.delete(cleanEmail);
+    if (codeToCheck) activeFamilyStates.delete(codeToCheck);
+    return null;
   }
 
   // 2. Authoritative Cloud Firestore lookup
   try {
     const cloudAccount = await fetchFamilyAccountFromFirestore(criteria, options);
     if (cloudAccount) {
+      if (cloudAccount.familyCode && (revokedFamilyCodes.has(cloudAccount.familyCode) || isFamilyRevokedMemory(cloudAccount.familyCode))) {
+        familyAccounts.delete(cloudAccount.email.toLowerCase().trim());
+        activeFamilyStates.delete(cloudAccount.familyCode);
+        return null;
+      }
       familyAccounts.set(cloudAccount.email.toLowerCase().trim(), cloudAccount);
       return cloudAccount;
+    } else {
+      // Cloud Firestore authoritatively reports the account does not exist.
+      // Purge any stale local cached record so it cannot resurrect.
+      if (cleanEmail && familyAccounts.has(cleanEmail)) {
+        familyAccounts.delete(cleanEmail);
+      }
+      if (cleanCode) {
+        activeFamilyStates.delete(cleanCode);
+        for (const [em, acc] of familyAccounts.entries()) {
+          if (acc.familyCode === cleanCode) {
+            familyAccounts.delete(em);
+          }
+        }
+      }
+      return null;
     }
   } catch (err: any) {
     if (err instanceof PersistenceError && !err.isTransient) {
       throw err;
     }
     console.warn('[Session Store] Firestore account lookup notice:', err?.message);
+  }
+
+  // 3. Fallback to in-memory cache ONLY IF Firestore lookup was not available (e.g. offline dev)
+  const cached = findFamilyAccount(criteria);
+  if (cached) {
+    if (cached.familyCode && (revokedFamilyCodes.has(cached.familyCode) || isFamilyRevokedMemory(cached.familyCode))) {
+      familyAccounts.delete(cached.email.toLowerCase().trim());
+      activeFamilyStates.delete(cached.familyCode);
+      return null;
+    }
+    return cached;
   }
 
   return null;
@@ -669,6 +707,7 @@ interface CloudSyncEvent {
 export interface SharedFamilyState {
   familyCode: string;
   email: string;
+  ownerUid?: string;
   backupEmail?: string;
   caregiverName: string;
   caregiverRole: string;
@@ -1301,7 +1340,7 @@ async function flushDirtyFamilies(): Promise<void> {
   }
 }
 
-// Mark a family state as updated and trigger asynchronous persistence
+// Mark a family state as updated and trigger asynchronous disk persistence
 function saveFamilyState(code: string, state?: SharedFamilyState, immediate = false): void {
   const cleanCode = sanitizeFamilyCode(code);
   if (!cleanCode) return;
@@ -1319,8 +1358,6 @@ function saveFamilyState(code: string, state?: SharedFamilyState, immediate = fa
     activeFamilyStates.set(cleanCode, state);
   }
   dirtyFamilyCodes.add(cleanCode);
-
-  syncFamilyToFirebase(cleanCode).catch(() => {});
 
   if (immediate) {
     flushDirtyFamilies().catch(() => {});
@@ -1340,18 +1377,17 @@ export async function saveFamilyStateAsync(
     return;
   }
 
-  if (state) {
-    activeFamilyStates.set(cleanCode, state);
-  }
-
+  const optObj = typeof options === 'boolean' ? { immediate: options } : (options || {});
   const stateToSync = state || activeFamilyStates.get(cleanCode);
   if (stateToSync) {
-    await syncFamilyStateToRtdb(cleanCode, stateToSync, options);
+    const syncRes = await syncFamilyStateToRtdb(cleanCode, stateToSync, optObj);
+    if (syncRes && syncRes.lastUpdated) {
+      stateToSync.lastUpdated = syncRes.lastUpdated;
+    }
+    activeFamilyStates.set(cleanCode, stateToSync);
   }
 
-  try {
-    saveFamilyState(cleanCode, state, false);
-  } catch {}
+  saveFamilyState(cleanCode, stateToSync, optObj.immediate ?? false);
 }
 
 // Periodic non-blocking flush interval (flushes batches every 1000ms)
@@ -1459,11 +1495,6 @@ export async function getOrCreateFamilyStateAsync(
     return demoSandboxedState;
   }
 
-  let state = activeFamilyStates.get(cleanCode);
-  if (state) {
-    return state;
-  }
-
   try {
     const cloudState = await fetchFamilyStateFromRtdb(cleanCode, options);
     if (cloudState) {
@@ -1472,6 +1503,19 @@ export async function getOrCreateFamilyStateAsync(
     }
   } catch (err: any) {
     console.warn(`[State Store] RTDB lookup notice for ${cleanCode}:`, err?.message);
+  }
+
+  let state = activeFamilyStates.get(cleanCode);
+  if (state) {
+    if (!state.ownerUid) {
+      const account =
+        (await findFamilyAccountAsync({ familyCode: cleanCode }, options)) ||
+        (email ? await findFamilyAccountAsync({ email }, options) : null);
+      if (account?.ownerUid) {
+        state.ownerUid = account.ownerUid;
+      }
+    }
+    return state;
   }
 
   const account =
@@ -1487,6 +1531,7 @@ export async function getOrCreateFamilyStateAsync(
   state = {
     familyCode: cleanCode,
     email: account?.email || pairing?.caregiverEmail || email || `${cleanCode.toLowerCase()}@family.beeyou.app`,
+    ownerUid: account?.ownerUid,
     caregiverName: account?.caregiverName || pairing?.caregiverName || 'Caregiver',
     caregiverRole: account?.caregiverRole || 'Parent',
     childProfile: {
@@ -2901,9 +2946,32 @@ app.post('/api/family/state/:code', requireFamilyAuth(), async (req, res) => {
   if (caregiverName) current.caregiverName = caregiverName;
   current.lastUpdated = Date.now();
 
+  const fieldsToUpdate: (keyof SharedFamilyState)[] = [];
+  if (routines !== undefined) fieldsToUpdate.push('routines');
+  if (aacItems !== undefined) fieldsToUpdate.push('aacItems');
+  if (plansChanged !== undefined) fieldsToUpdate.push('plansChanged');
+  if (childState !== undefined) fieldsToUpdate.push('childState');
+  if (childProfile !== undefined) fieldsToUpdate.push('childProfile');
+  if (caregiverName !== undefined) fieldsToUpdate.push('caregiverName');
+  if (backupEmail !== undefined) fieldsToUpdate.push('backupEmail');
+
+  const ifMatchLastUpdated = req.body?.ifMatchLastUpdated !== undefined ? Number(req.body.ifMatchLastUpdated) : undefined;
+  const ifMatchEtag = req.body?.ifMatchEtag || (req.headers['if-match'] as string | undefined);
+
   try {
-    await saveFamilyStateAsync(code, current);
+    await saveFamilyStateAsync(code, current, {
+      fieldsToUpdate: fieldsToUpdate.length > 0 ? fieldsToUpdate : undefined,
+      ifMatchLastUpdated,
+      ifMatchEtag,
+    });
   } catch (syncErr: any) {
+    if (syncErr?.statusCode === 409 || syncErr?.code === 'rtdb_patch_conflict') {
+      return res.status(409).json({
+        error: 'Conflict',
+        message: 'Concurrency conflict: Family state has been modified by another client or server.',
+        detail: syncErr?.message,
+      });
+    }
     if (isProductionEnvironment()) {
       return res.status(502).json({
         error: 'PersistenceError',
@@ -3264,6 +3332,9 @@ app.post('/api/caregiver/family/register', async (req, res) => {
   // Initialize shared RTDB family state
   const initialState = await getOrCreateFamilyStateAsync(familyCode, cleanEmail);
   if (initialState) {
+    if (!initialState.ownerUid && account.ownerUid) {
+      initialState.ownerUid = account.ownerUid;
+    }
     await syncFamilyStateToRtdb(familyCode, initialState).catch(() => {});
   }
 
@@ -3410,6 +3481,9 @@ app.post('/api/caregiver/family/login', async (req, res) => {
     // Initialize shared RTDB family state
     const initialState = await getOrCreateFamilyStateAsync(account.familyCode, cleanEmail);
     if (initialState) {
+      if (!initialState.ownerUid && account.ownerUid) {
+        initialState.ownerUid = account.ownerUid;
+      }
       await syncFamilyStateToRtdb(account.familyCode, initialState).catch(() => {});
     }
   }
@@ -3748,8 +3822,14 @@ app.post('/api/caregiver/family/delete', requireFamilyAuth(), async (req, res) =
     caregiverSessionDeleted: false,
     pairingSessionsDeleted: false,
     diskFilesPurged: false,
+    firestoreAccountDeleted: false,
+    firestoreIndexDeleted: false,
+    rtdbFamilyStateDeleted: false,
+    rtdbCaregiverSessionDeleted: false,
+    rtdbPairingSessionDeleted: false,
     sharedDatastorePurged: false,
     sseClientsTerminated: false,
+    familyRevoked: false,
   };
 
   try {
@@ -3794,6 +3874,7 @@ app.post('/api/caregiver/family/delete', requireFamilyAuth(), async (req, res) =
         }
       }
     }
+    activeFamilyStates.delete(targetCode);
     await saveFamilyAccounts();
 
     // 4. Remove caregiver session
@@ -3827,18 +3908,38 @@ app.post('/api/caregiver/family/delete', requireFamilyAuth(), async (req, res) =
 
     // 7. Purge from authoritative shared datastores (Firestore & RTDB)
     try {
-      await deleteFamilyAccountFromFirestore(cleanEmail, targetCode);
+      const fsDel = await deleteFamilyAccountFromFirestore(cleanEmail, targetCode);
+      if (fsDel) {
+        results.firestoreAccountDeleted = fsDel.accountDeleted;
+        results.firestoreIndexDeleted = fsDel.indexDeleted;
+      }
+
       await deleteFamilyStateFromRtdb(targetCode);
+      results.rtdbFamilyStateDeleted = true;
+
       await deleteCaregiverSessionFromRtdb(targetCode);
+      results.rtdbCaregiverSessionDeleted = true;
+
       await deletePairingSessionFromRtdb(targetCode);
+      results.rtdbPairingSessionDeleted = true;
+
       results.sharedDatastorePurged = true;
-    } catch (storeErr) {
-      console.warn('[Delete] Shared datastore deletion warning:', storeErr);
+    } catch (storeErr: any) {
+      console.error('[Delete] Shared datastore deletion error:', storeErr);
+      revokedFamilyCodes.add(targetCode);
+      await revokeFamilyTokens(targetCode, 'family_deleted_partial_failure').catch(() => {});
+      return res.status(502).json({
+        error: 'DatastoreError',
+        message: 'Failed to completely purge family account from shared datastores.',
+        partialResults: results,
+        detail: storeErr?.message || String(storeErr),
+      });
     }
 
     // 8. Revoke family code and tokens
     revokedFamilyCodes.add(targetCode);
     await revokeFamilyTokens(targetCode, 'family_deleted');
+    results.familyRevoked = true;
 
     return res.json({
       success: true,

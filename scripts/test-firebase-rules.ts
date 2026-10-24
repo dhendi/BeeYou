@@ -1183,6 +1183,153 @@ async function runRulesVerification() {
       assert(false, 'Rejects non-audio write to tts_cache', e?.message);
     }
 
+    // -------------------------------------------------------------------------
+    // Suite 10: Shared Family Account & Code Index Privacy Isolation
+    // -------------------------------------------------------------------------
+    console.log('\n--- Suite 10: Family Account & Index Cross-Family Privacy ---');
+
+    const famAEmail = 'owner_a@test.com';
+    const famBEmail = 'owner_b@test.com';
+    const famACode = 'BEE-FAMA';
+    const famBCode = 'BEE-FAMB';
+    const uidA = 'uid-owner-a';
+    const uidB = 'uid-owner-b';
+
+    // Seed authoritative records with security rules disabled
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const fs = context.firestore();
+      await fs.doc(`beeyou_family_accounts/${famAEmail}`).set({
+        id: 'fam-a-doc',
+        email: famAEmail,
+        familyCode: famACode,
+        ownerUid: uidA,
+        childProfileJson: JSON.stringify({ name: 'Alice', ageGroup: 'kid' }),
+        caregiverName: 'Parent A',
+      });
+      await fs.doc(`beeyou_family_code_index/${famACode}`).set({
+        familyCode: famACode,
+        email: famAEmail,
+        updatedAt: Date.now(),
+      });
+
+      await fs.doc(`beeyou_family_accounts/${famBEmail}`).set({
+        id: 'fam-b-doc',
+        email: famBEmail,
+        familyCode: famBCode,
+        ownerUid: uidB,
+        childProfileJson: JSON.stringify({ name: 'Bob', ageGroup: 'teen' }),
+        caregiverName: 'Parent B',
+      });
+      await fs.doc(`beeyou_family_code_index/${famBCode}`).set({
+        familyCode: famBCode,
+        email: famBEmail,
+        updatedAt: Date.now(),
+      });
+    });
+
+    const userAContext = testEnv.authenticatedContext(uidA, { familyCode: famACode, email: famAEmail });
+    const userBContext = testEnv.authenticatedContext(uidB, { familyCode: famBCode, email: famBEmail });
+    const unauthedContext = testEnv.unauthenticatedContext();
+    const backendAdmin = testEnv.authenticatedContext('backend-service-worker', { backend: true });
+
+    // 10.1 Unauthenticated read to beeyou_family_accounts is denied
+    try {
+      await assertFails(unauthedContext.firestore().doc(`beeyou_family_accounts/${famAEmail}`).get());
+      assert(true, 'Unauthenticated read to beeyou_family_accounts is denied');
+    } catch (e: any) {
+      assert(false, 'Unauthenticated read to beeyou_family_accounts is denied', e?.message);
+    }
+
+    // 10.2 Unauthenticated read to beeyou_family_code_index is denied
+    try {
+      await assertFails(unauthedContext.firestore().doc(`beeyou_family_code_index/${famACode}`).get());
+      assert(true, 'Unauthenticated read to beeyou_family_code_index is denied');
+    } catch (e: any) {
+      assert(false, 'Unauthenticated read to beeyou_family_code_index is denied', e?.message);
+    }
+
+    // 10.3 Family A owner can read their own family account
+    try {
+      await assertSucceeds(userAContext.firestore().doc(`beeyou_family_accounts/${famAEmail}`).get());
+      assert(true, 'Family A owner can read their own family account');
+    } catch (e: any) {
+      assert(false, 'Family A owner can read their own family account', e?.message);
+    }
+
+    // 10.4 Family A owner can read their own family code index
+    try {
+      await assertSucceeds(userAContext.firestore().doc(`beeyou_family_code_index/${famACode}`).get());
+      assert(true, 'Family A owner can read their own family code index');
+    } catch (e: any) {
+      assert(false, 'Family A owner can read their own family code index', e?.message);
+    }
+
+    // 10.5 Cross-Family Isolation: Family B owner CANNOT read Family A account
+    try {
+      await assertFails(userBContext.firestore().doc(`beeyou_family_accounts/${famAEmail}`).get());
+      assert(true, 'Family B user cannot read Family A account (cross-family isolation enforced)');
+    } catch (e: any) {
+      assert(false, 'Family B user cannot read Family A account', e?.message);
+    }
+
+    // 10.6 Cross-Family Isolation: Family B owner CANNOT read Family A code index
+    try {
+      await assertFails(userBContext.firestore().doc(`beeyou_family_code_index/${famACode}`).get());
+      assert(true, 'Family B user cannot read Family A code index (cross-family isolation enforced)');
+    } catch (e: any) {
+      assert(false, 'Family B user cannot read Family A code index', e?.message);
+    }
+
+    // 10.7 Family B owner can read their own family account
+    try {
+      await assertSucceeds(userBContext.firestore().doc(`beeyou_family_accounts/${famBEmail}`).get());
+      assert(true, 'Family B owner can read their own family account');
+    } catch (e: any) {
+      assert(false, 'Family B owner can read their own family account', e?.message);
+    }
+
+    // 10.8 Ordinary client writes to beeyou_family_accounts are denied
+    try {
+      await assertFails(
+        userAContext.firestore().doc(`beeyou_family_accounts/${famAEmail}`).set({
+          ownerUid: uidA,
+          email: famAEmail,
+        })
+      );
+      assert(true, 'Ordinary client write to beeyou_family_accounts is denied');
+    } catch (e: any) {
+      assert(false, 'Ordinary client write to beeyou_family_accounts is denied', e?.message);
+    }
+
+    // 10.9 Ordinary client writes to beeyou_family_code_index are denied
+    try {
+      await assertFails(
+        userAContext.firestore().doc(`beeyou_family_code_index/${famACode}`).set({
+          familyCode: famACode,
+          email: famAEmail,
+        })
+      );
+      assert(true, 'Ordinary client write to beeyou_family_code_index is denied');
+    } catch (e: any) {
+      assert(false, 'Ordinary client write to beeyou_family_code_index is denied', e?.message);
+    }
+
+    // 10.10 Backend service can read and write both collections
+    try {
+      await assertSucceeds(backendAdmin.firestore().doc(`beeyou_family_accounts/${famAEmail}`).get());
+      await assertSucceeds(backendAdmin.firestore().doc(`beeyou_family_code_index/${famACode}`).get());
+      await assertSucceeds(
+        backendAdmin.firestore().doc(`beeyou_family_accounts/backend_test@test.com`).set({
+          ownerUid: 'uid-backend-test',
+          email: 'backend_test@test.com',
+          familyCode: 'BEE-BTEST',
+        })
+      );
+      assert(true, 'Backend service can authoritatively read and write family account registries');
+    } catch (e: any) {
+      assert(false, 'Backend service can authoritatively read and write family account registries', e?.message);
+    }
+
     // Cleanup environment
     await testEnv.cleanup();
 

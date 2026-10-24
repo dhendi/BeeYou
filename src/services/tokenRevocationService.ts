@@ -880,6 +880,15 @@ export function pruneExpiredRevocations(): number {
 }
 
 /**
+ * Fast synchronous check whether a family code is currently revoked in local memory.
+ */
+export function isFamilyRevokedMemory(familyCode: string): boolean {
+  if (!isInitialized) initTokenRevocationStore();
+  if (!familyCode) return false;
+  return memoryRevokedFamilies.has(familyCode.trim().toUpperCase());
+}
+
+/**
  * Test helper to reset local revocation store and memory caches.
  */
 export function clearAllRevocationsForTesting(): void {

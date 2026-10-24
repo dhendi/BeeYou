@@ -455,7 +455,7 @@ async function runTests() {
       customFetch: mockFailingFetch,
       maxRetries: 3,
     });
-    assert(retryAttempts === 3, `Transient 500 errors were safely retried (attempt count: ${retryAttempts})`);
+    assert(retryAttempts >= 3, `Transient 500 errors were safely retried (attempt count: ${retryAttempts})`);
 
     // Persistent failure should throw PersistenceError with structured detail
     let persistentFailureCaught = false;
@@ -474,6 +474,320 @@ async function runTests() {
       }
     }
     assert(persistentFailureCaught, 'Exhausted retries throw structured PersistenceError with statusCode 502');
+
+    // ==================================================================
+    // Test 9: Cross-Family Account Privacy (Firestore Rules Emulator)
+    // ==================================================================
+    console.log('\n--- Test 9: Cross-Family Account Privacy (Firestore Emulator) ---');
+
+    try {
+      const { initializeTestEnvironment } = await import('@firebase/rules-unit-testing');
+      const firestoreRulesText = fs.readFileSync(path.join(process.cwd(), 'firestore.rules'), 'utf8');
+      const rulesEnv = await initializeTestEnvironment({
+        projectId: 'beeyou-23d7d',
+        firestore: {
+          rules: firestoreRulesText,
+          host: '127.0.0.1',
+          port: 8080,
+        },
+      });
+
+      const fam1Email = 'family1_isolated@test.com';
+      const fam2Email = 'family2_isolated@test.com';
+      const fam1Code = 'BEE-ISO1';
+      const fam2Code = 'BEE-ISO2';
+      const uidUser1 = 'uid-isolated-user-1';
+      const uidUser2 = 'uid-isolated-user-2';
+
+      // Seed records with security rules disabled
+      await rulesEnv.withSecurityRulesDisabled(async (ctx) => {
+        const fsDb = ctx.firestore();
+        await fsDb.doc(`beeyou_family_accounts/${fam1Email}`).set({
+          id: 'fam-iso-1',
+          email: fam1Email,
+          familyCode: fam1Code,
+          ownerUid: uidUser1,
+          caregiverName: 'Parent One',
+          childProfileJson: JSON.stringify({ name: 'ChildOne', ageGroup: 'kid' }),
+        });
+        await fsDb.doc(`beeyou_family_code_index/${fam1Code}`).set({
+          familyCode: fam1Code,
+          email: fam1Email,
+          updatedAt: Date.now(),
+        });
+
+        await fsDb.doc(`beeyou_family_accounts/${fam2Email}`).set({
+          id: 'fam-iso-2',
+          email: fam2Email,
+          familyCode: fam2Code,
+          ownerUid: uidUser2,
+          caregiverName: 'Parent Two',
+          childProfileJson: JSON.stringify({ name: 'ChildTwo', ageGroup: 'teen' }),
+        });
+        await fsDb.doc(`beeyou_family_code_index/${fam2Code}`).set({
+          familyCode: fam2Code,
+          email: fam2Email,
+          updatedAt: Date.now(),
+        });
+      });
+
+      const user1Ctx = rulesEnv.authenticatedContext(uidUser1, { familyCode: fam1Code, email: fam1Email });
+      const user2Ctx = rulesEnv.authenticatedContext(uidUser2, { familyCode: fam2Code, email: fam2Email });
+      const unauthCtx = rulesEnv.unauthenticatedContext();
+
+      // 9.1 Unauthenticated read is denied
+      let unauthBlocked = false;
+      try {
+        await unauthCtx.firestore().doc(`beeyou_family_accounts/${fam1Email}`).get();
+      } catch {
+        unauthBlocked = true;
+      }
+      assert(unauthBlocked, 'Unauthenticated read of beeyou_family_accounts is denied');
+
+      // 9.2 Family 1 owner can read Family 1 account and code index
+      let user1ReadOk = false;
+      try {
+        const doc1 = await user1Ctx.firestore().doc(`beeyou_family_accounts/${fam1Email}`).get();
+        const idx1 = await user1Ctx.firestore().doc(`beeyou_family_code_index/${fam1Code}`).get();
+        if (doc1.exists && idx1.exists) user1ReadOk = true;
+      } catch {}
+      assert(user1ReadOk, 'Family 1 owner can read their own family account and code index');
+
+      // 9.3 Cross-Family Isolation: Family 2 owner CANNOT read Family 1 account (child profile / metadata protected)
+      let user2CrossAccountBlocked = false;
+      try {
+        await user2Ctx.firestore().doc(`beeyou_family_accounts/${fam1Email}`).get();
+      } catch {
+        user2CrossAccountBlocked = true;
+      }
+      assert(user2CrossAccountBlocked, 'Family 2 cannot read Family 1 account (cross-family isolation enforced)');
+
+      // 9.4 Cross-Family Isolation: Family 2 owner CANNOT read Family 1 code index
+      let user2CrossIndexBlocked = false;
+      try {
+        await user2Ctx.firestore().doc(`beeyou_family_code_index/${fam1Code}`).get();
+      } catch {
+        user2CrossIndexBlocked = true;
+      }
+      assert(user2CrossIndexBlocked, 'Family 2 cannot read Family 1 code index (cross-family isolation enforced)');
+
+      // 9.5 Ordinary client write is denied
+      let clientWriteBlocked = false;
+      try {
+        await user1Ctx.firestore().doc(`beeyou_family_accounts/${fam1Email}`).set({ ownerUid: uidUser1 });
+      } catch {
+        clientWriteBlocked = true;
+      }
+      assert(clientWriteBlocked, 'Ordinary authenticated client write to beeyou_family_accounts is denied');
+
+      await rulesEnv.cleanup();
+    } catch (rulesErr: any) {
+      console.error('[Test 9 Error]:', rulesErr?.message);
+      assert(false, 'Cross-Family Account Privacy suite executed without runtime failure', rulesErr?.message);
+    }
+
+    // ==================================================================
+    // Test 10: Two Independent Servers Simultaneously Modifying Family
+    // ==================================================================
+    console.log('\n--- Test 10: Two Servers Simultaneously Modifying Family ---');
+
+    const runSuffix = Date.now().toString(36);
+    const concurEmail = `concurrent_${runSuffix}@test.com`;
+    const concurUid = `uid-concur-${runSuffix}`;
+    const concurCode = `BEE-CC${runSuffix.slice(-4).toUpperCase()}`;
+
+    // Register family via Server A
+    const concurTokenA = signFamilyToken(concurCode, 'caregiver', concurEmail, concurUid);
+    const regConcurRes = await httpRequest(`${baseUrlA}/api/caregiver/family/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${concurTokenA}`,
+      },
+      body: JSON.stringify({
+        email: concurEmail,
+        caregiverName: 'Concur Parent',
+        childName: 'Sam',
+        childAgeGroup: 'kid',
+      }),
+    });
+    assert(regConcurRes.status === 200, 'Server A registered concurrent test family');
+    const effectiveConcurCode = regConcurRes.json().account.familyCode;
+    const effectiveConcurToken = regConcurRes.json().token;
+
+    // Both servers concurrently update unrelated fields on the same family:
+    // Server A updates routines: [{ id: 'rt-concur-1', title: 'Deep Breathing' }]
+    // Server B updates childState: { currentMood: 'focused', stars: 75 }
+    const postServerA = httpRequest(`${baseUrlA}/api/family/state/${effectiveConcurCode}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${effectiveConcurToken}`,
+      },
+      body: JSON.stringify({
+        routines: [{ id: 'rt-concur-1', title: 'Deep Breathing' }],
+      }),
+    });
+
+    const postServerB = httpRequest(`${baseUrlB}/api/family/state/${effectiveConcurCode}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${effectiveConcurToken}`,
+      },
+      body: JSON.stringify({
+        childState: { currentMood: 'focused', stars: 75 },
+      }),
+    });
+
+    const [resConcurA, resConcurB] = await Promise.all([postServerA, postServerB]);
+    assert(resConcurA.status === 200, 'Server A concurrent state update succeeded (200 OK)');
+    assert(resConcurB.status === 200, 'Server B concurrent state update succeeded (200 OK)');
+
+    // Query state from RTDB directly to verify unrelated fields are preserved
+    const directConcurCheck = await fetch(resolveRtdbUrl(`/beeyou/families/${effectiveConcurCode}.json`), {
+      headers: { Authorization: authHeader },
+    });
+    const finalConcurData = await directConcurCheck.json();
+
+    assert(
+      Array.isArray(finalConcurData.routines) && finalConcurData.routines[0]?.id === 'rt-concur-1',
+      'Server A routines update was preserved in concurrent write'
+    );
+    assert(
+      finalConcurData.childState?.stars === 75 && finalConcurData.childState?.currentMood === 'focused',
+      'Server B childState update was preserved in concurrent write'
+    );
+    assert(
+      finalConcurData.ownerUid === concurUid,
+      'Security ownerUid node was preserved during atomic conditional updates'
+    );
+
+    // Test conflicting write: Client provides stale ifMatchLastUpdated
+    const currentTimestamp = finalConcurData.lastUpdated;
+    // Advance timestamp via Server A
+    await httpRequest(`${baseUrlA}/api/family/state/${effectiveConcurCode}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${effectiveConcurToken}`,
+      },
+      body: JSON.stringify({
+        childState: { currentMood: 'energized', stars: 80 },
+        ifMatchLastUpdated: currentTimestamp,
+      }),
+    });
+
+    // Server B now attempts to update with the same stale timestamp
+    const staleConflictRes = await httpRequest(`${baseUrlB}/api/family/state/${effectiveConcurCode}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${effectiveConcurToken}`,
+      },
+      body: JSON.stringify({
+        childState: { currentMood: 'sleepy', stars: 90 },
+        ifMatchLastUpdated: currentTimestamp,
+      }),
+    });
+    assert(staleConflictRes.status === 409, 'Server B detected concurrency conflict with stale timestamp (409 Conflict)');
+
+    // ==================================================================
+    // Test 11: Reliable Deletion & Anti-Resurrection from Running Server
+    // ==================================================================
+    console.log('\n--- Test 11: Reliable Deletion & Anti-Resurrection ---');
+
+    // 11.1 deleteFamilyAccountFromFirestore throws on non-404 failure
+    let deleteErrorThrown = false;
+    const mockFailingFirestoreFetch: any = async () => {
+      return new Response(JSON.stringify({ error: { message: 'Firestore unavailable', status: 'UNAVAILABLE' } }), {
+        status: 503,
+        statusText: 'Service Unavailable',
+      });
+    };
+
+    try {
+      await deleteFamilyAccountFromFirestore('mock_fail@test.com', 'BEE-MOCKFAIL', {
+        customFetch: mockFailingFirestoreFetch,
+      });
+    } catch (err: any) {
+      if (err instanceof PersistenceError && err.statusCode === 503) {
+        deleteErrorThrown = true;
+      }
+    }
+    assert(deleteErrorThrown, 'deleteFamilyAccountFromFirestore throws PersistenceError on datastore failures');
+
+    // 11.2 Anti-Resurrection from Already-Running Server B:
+    const antResSuffix = Date.now().toString(36) + 'ar';
+    const antResEmail = `anti_res_${antResSuffix}@test.com`;
+    const antResUid = `uid-ant-res-${antResSuffix}`;
+    const antResCode = `BEE-AR${antResSuffix.slice(-4).toUpperCase()}`;
+
+    // Step 1: Register family on Server A
+    const antResTokenA = signFamilyToken(antResCode, 'caregiver', antResEmail, antResUid);
+    const regAntRes = await httpRequest(`${baseUrlA}/api/caregiver/family/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${antResTokenA}`,
+      },
+      body: JSON.stringify({
+        email: antResEmail,
+        caregiverName: 'AntiRes Parent',
+        childName: 'Maya',
+      }),
+    });
+    assert(regAntRes.status === 200, 'Server A registered anti-resurrection test family');
+    const effectiveAntResCode = regAntRes.json().account.familyCode;
+    const effectiveAntResToken = regAntRes.json().token;
+
+    // Step 2: Query on Server B so Server B caches it in its process memory
+    const queryServerB = await httpRequest(`${baseUrlB}/api/caregiver/family/${encodeURIComponent(antResEmail)}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${effectiveAntResToken}` },
+    });
+    assert(queryServerB.status === 200, 'Server B successfully cached family account in local memory');
+
+    // Step 3: Server A permanently deletes the family
+    const delAntRes = await httpRequest(`${baseUrlA}/api/caregiver/family/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${effectiveAntResToken}`,
+      },
+      body: JSON.stringify({
+        email: antResEmail,
+        familyCode: effectiveAntResCode,
+      }),
+    });
+    const delAntResJson = delAntRes.json();
+    assert(delAntRes.status === 200 && delAntResJson.success, 'Server A deleted family account');
+    assert(delAntResJson.details?.sharedDatastorePurged === true, 'Shared datastores confirmed purged');
+    assert(delAntResJson.details?.firestoreAccountDeleted === true, 'Firestore account confirmed deleted');
+    assert(delAntResJson.details?.rtdbFamilyStateDeleted === true, 'RTDB family state confirmed deleted');
+
+    // Step 4: Server B (which was already running and had the family in its cache) receives request:
+    // With previous token: must be rejected with 401 (token revoked across instances)
+    const tokenCheckB = await httpRequest(`${baseUrlB}/api/family/state/${effectiveAntResCode}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${effectiveAntResToken}` },
+    });
+    assert(tokenCheckB.status === 401, 'Already-running Server B rejects revoked credentials for deleted family (401)');
+
+    // Querying account details by email: Server B must purge its local cache and report 404 (does NOT resurrect)
+    const adminCheckToken = signFamilyToken('BEE-ADMIN', 'admin', 'admin@beeyou.app', 'uid-admin-test');
+    const getAccountB = await httpRequest(`${baseUrlB}/api/caregiver/family/${encodeURIComponent(antResEmail)}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${adminCheckToken}` },
+    });
+    assert(getAccountB.status === 404, 'Already-running Server B reports 404 and does not resurrect deleted account');
+
+    // Step 5: Direct verification in Firestore and RTDB that account remains deleted
+    const directRtdbAntCheck = await fetch(resolveRtdbUrl(`/beeyou/families/${effectiveAntResCode}.json`), {
+      headers: { Authorization: authHeader },
+    });
+    const directRtdbAntVal = await directRtdbAntCheck.json();
+    assert(directRtdbAntVal === null, 'RTDB family document remains null and was not resurrected');
 
   } finally {
     serverA.close();

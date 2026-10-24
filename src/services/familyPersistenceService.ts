@@ -56,6 +56,8 @@ export interface PersistenceSyncOptions {
   maxRetries?: number;
   timeoutMs?: number;
   ifMatchLastUpdated?: number;
+  ifMatchEtag?: string;
+  fieldsToUpdate?: (keyof SharedFamilyState)[];
 }
 
 export interface ServerFamilyAccount {
@@ -84,6 +86,7 @@ export interface ServerFamilyAccount {
 export interface SharedFamilyState {
   familyCode: string;
   email: string;
+  ownerUid?: string;
   backupEmail?: string;
   caregiverName: string;
   caregiverRole: string;
@@ -218,12 +221,19 @@ export function resolveRtdbUrl(subPath: string, options?: PersistenceSyncOptions
  * Executes a resilient HTTP request against Firebase Realtime Database.
  * Verifies responses, retries transient failures, and returns parsed JSON.
  */
-async function executeRtdbRequest<T = any>(
+interface RtdbResponse<T> {
+  data: T | null;
+  etag: string | null;
+  status: number;
+}
+
+async function executeRtdbRequestWithHeaders<T = any>(
   url: string,
-  method: 'GET' | 'PUT' | 'PATCH' | 'DELETE',
+  method: 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE',
   body?: any,
-  options?: PersistenceSyncOptions
-): Promise<T> {
+  options?: PersistenceSyncOptions,
+  extraHeaders?: Record<string, string>
+): Promise<RtdbResponse<T>> {
   const fetchFn = options?.customFetch || fetch;
   const maxRetries = options?.maxRetries ?? 2;
   const timeoutMs = options?.timeoutMs ?? 6000;
@@ -231,6 +241,7 @@ async function executeRtdbRequest<T = any>(
   const authHeader = options?.customAuthHeader || (await getFirestoreAuthHeader(options).catch(() => undefined));
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    ...(extraHeaders || {}),
   };
   if (authHeader) {
     headers['Authorization'] = authHeader;
@@ -250,6 +261,8 @@ async function executeRtdbRequest<T = any>(
         signal: controller.signal,
       });
 
+      const etag = res.headers.get('etag');
+
       if (!res.ok) {
         let errDetail = '';
         try {
@@ -268,26 +281,26 @@ async function executeRtdbRequest<T = any>(
           errDetail
         );
 
-        if (!isTransient) {
+        if (res.status === 412 || !isTransient) {
           throw err;
         }
         lastError = err;
       } else {
         if (res.status === 204) {
-          return null as unknown as T;
+          return { data: null, etag, status: res.status };
         }
         const text = await res.text();
         if (!text || text.trim() === 'null') {
-          return null as unknown as T;
+          return { data: null, etag, status: res.status };
         }
         try {
-          return JSON.parse(text) as T;
+          return { data: JSON.parse(text) as T, etag, status: res.status };
         } catch {
-          return text as unknown as T;
+          return { data: text as unknown as T, etag, status: res.status };
         }
       }
     } catch (err: any) {
-      if (err instanceof PersistenceError && !err.isTransient) {
+      if (err instanceof PersistenceError && (!err.isTransient || err.statusCode === 412)) {
         throw err;
       }
       if (err?.name === 'AbortError') {
@@ -310,99 +323,38 @@ async function executeRtdbRequest<T = any>(
   throw lastError || new PersistenceError(`RTDB ${method} failed after ${maxRetries} retries`, 500, false);
 }
 
-/**
- * Synchronizes shared family state to Firebase Realtime Database.
- *
- * CRITICAL SAFEGUARDS:
- * 1. Uses PATCH instead of PUT so security-related nodes (ownerUid, members,
- *    memberRoles, revokedMembers, pendingRequests) are NEVER overwritten.
- * 2. Verifies HTTP responses and throws PersistenceError on non-2xx status.
- * 3. Supports conflict detection via ifMatchLastUpdated timestamp comparison.
- * 4. Completely isolated from the BEE-DEMO reviewer sandbox.
- */
-export async function syncFamilyStateToRtdb(
-  familyCode: string,
-  state: SharedFamilyState,
-  options?: PersistenceSyncOptions
-): Promise<{ success: boolean; lastUpdated: number }> {
-  const cleanCode = sanitizeFamilyCode(familyCode);
-  if (!cleanCode || cleanCode === 'BEE-DEMO') {
-    return { success: true, lastUpdated: state.lastUpdated || Date.now() };
-  }
-
-  const url = resolveRtdbUrl(`/beeyou/families/${encodeURIComponent(cleanCode)}.json`, options);
-
-  // Concurrency conflict detection if caller provided expected lastUpdated
-  if (options?.ifMatchLastUpdated !== undefined) {
-    const existing = await fetchFamilyStateFromRtdb(cleanCode, options);
-    if (existing && existing.lastUpdated && existing.lastUpdated > options.ifMatchLastUpdated) {
-      throw new PersistenceError(
-        `Concurrency conflict: Remote state has newer timestamp (${existing.lastUpdated} > ${options.ifMatchLastUpdated})`,
-        409,
-        false,
-        'rtdb_patch_conflict'
-      );
-    }
-  }
-
-  const patchPayload: Record<string, any> = {
-    familyCode: cleanCode,
-    email: state.email || '',
-    caregiverName: state.caregiverName || '',
-    caregiverRole: state.caregiverRole || '',
-    childProfile: state.childProfile || { name: 'Child', ageGroup: 'kid', interests: [], pronouns: 'they/them' },
-    childState: state.childState || {
-      lastActiveTime: new Date().toISOString(),
-      currentActivity: 'Using BeeYou',
-      currentMood: 'calm',
-      habitsCompletedToday: 0,
-      totalHabits: 4,
-      stars: 0,
-      isOnline: true,
-    },
-    routines: state.routines || [],
-    aacItems: state.aacItems || [],
-    plansChanged: state.plansChanged || { active: false },
-    activeAlert: state.activeAlert !== undefined ? state.activeAlert : null,
-    alertHistory: state.alertHistory || [],
-    messages: state.messages || [],
-    lastUpdated: state.lastUpdated || Date.now(),
-  };
-
-  if (state.backupEmail) {
-    patchPayload.backupEmail = state.backupEmail;
-  }
-
-  try {
-    await executeRtdbRequest(url, 'PATCH', patchPayload, options);
-    return { success: true, lastUpdated: patchPayload.lastUpdated };
-  } catch (err: any) {
-    if (isProductionEnvironment() || options?.customFetch || options?.ifMatchLastUpdated !== undefined) {
-      throw err;
-    }
-    console.warn(`[Family State] Non-fatal RTDB sync notice for ${cleanCode}:`, err?.message);
-    return { success: false, lastUpdated: patchPayload.lastUpdated };
-  }
+async function executeRtdbRequest<T = any>(
+  url: string,
+  method: 'GET' | 'PUT' | 'PATCH' | 'DELETE',
+  body?: any,
+  options?: PersistenceSyncOptions,
+  extraHeaders?: Record<string, string>
+): Promise<T> {
+  const resp = await executeRtdbRequestWithHeaders<T>(url, method, body, options, extraHeaders);
+  return resp.data as T;
 }
 
 /**
- * Fetches shared family state from Firebase Realtime Database.
+ * Fetches shared family state along with its raw node and ETag for atomic concurrency control.
  */
-export async function fetchFamilyStateFromRtdb(
+export async function fetchFamilyStateWithEtag(
   familyCode: string,
   options?: PersistenceSyncOptions
-): Promise<SharedFamilyState | null> {
+): Promise<{ state: SharedFamilyState | null; rawNode: any | null; etag: string | null }> {
   const cleanCode = sanitizeFamilyCode(familyCode);
   if (!cleanCode || cleanCode === 'BEE-DEMO') {
-    return null;
+    return { state: null, rawNode: null, etag: null };
   }
 
   const url = resolveRtdbUrl(`/beeyou/families/${encodeURIComponent(cleanCode)}.json`, options);
 
   try {
-    const raw = await executeRtdbRequest<any>(url, 'GET', undefined, options);
+    const res = await executeRtdbRequestWithHeaders<any>(url, 'GET', undefined, options, {
+      'X-Firebase-ETag': 'true',
+    });
+    const raw = res.data;
     if (!raw || typeof raw !== 'object' || !raw.familyCode) {
-      return null;
+      return { state: null, rawNode: raw, etag: res.etag };
     }
 
     const state: SharedFamilyState = {
@@ -430,17 +382,170 @@ export async function fetchFamilyStateFromRtdb(
       lastUpdated: Number(raw.lastUpdated) || Date.now(),
     };
 
-    return state;
+    return { state, rawNode: raw, etag: res.etag };
   } catch (err: any) {
     if (err instanceof PersistenceError && (err.statusCode === 404 || err.statusCode === 401)) {
-      return null;
+      return { state: null, rawNode: null, etag: null };
     }
     if (isProductionEnvironment() || options?.customFetch) {
       throw err;
     }
     console.warn(`[Family State] Non-fatal RTDB read notice for ${cleanCode}:`, err?.message);
-    return null;
+    return { state: null, rawNode: null, etag: null };
   }
+}
+
+/**
+ * Synchronizes shared family state to Firebase Realtime Database.
+ *
+ * CRITICAL SAFEGUARDS:
+ * 1. Uses atomic conditional PUT with Realtime Database ETags (X-Firebase-ETag / if-match)
+ *    so simultaneous updates from different servers/devices never cause silent lost updates.
+ * 2. Security-related nodes (ownerUid, members, memberRoles, revokedMembers, pendingRequests)
+ *    are ALWAYS preserved from the remote node and never overwritten.
+ * 3. Supports atomic conflict detection via ifMatchLastUpdated and ifMatchEtag.
+ * 4. Verifies HTTP responses and throws PersistenceError on non-2xx status.
+ * 5. Completely isolated from the BEE-DEMO reviewer sandbox.
+ */
+export async function syncFamilyStateToRtdb(
+  familyCode: string,
+  state: SharedFamilyState,
+  options?: PersistenceSyncOptions
+): Promise<{ success: boolean; lastUpdated: number; etag?: string | null }> {
+  const cleanCode = sanitizeFamilyCode(familyCode);
+  if (!cleanCode || cleanCode === 'BEE-DEMO') {
+    return { success: true, lastUpdated: state.lastUpdated || Date.now() };
+  }
+
+  const url = resolveRtdbUrl(`/beeyou/families/${encodeURIComponent(cleanCode)}.json`, options);
+  const maxConcurrencyRetries = options?.ifMatchLastUpdated !== undefined || options?.ifMatchEtag !== undefined ? 0 : 3;
+
+  for (let attempt = 0; attempt <= maxConcurrencyRetries; attempt++) {
+    // 1. Fetch current remote node and ETag
+    const { rawNode, etag } = await fetchFamilyStateWithEtag(cleanCode, options);
+
+    // 2. Concurrency conflict checks
+    if (options?.ifMatchLastUpdated !== undefined) {
+      if (rawNode && rawNode.lastUpdated && Number(rawNode.lastUpdated) > options.ifMatchLastUpdated) {
+        throw new PersistenceError(
+          `Concurrency conflict: Remote state has newer timestamp (${rawNode.lastUpdated} > ${options.ifMatchLastUpdated})`,
+          409,
+          false,
+          'rtdb_patch_conflict'
+        );
+      }
+    }
+
+    if (options?.ifMatchEtag !== undefined) {
+      if (etag && etag !== options.ifMatchEtag) {
+        throw new PersistenceError(
+          `Concurrency conflict: Remote ETag mismatch (${etag} !== ${options.ifMatchEtag})`,
+          409,
+          false,
+          'rtdb_patch_conflict'
+        );
+      }
+    }
+
+    // 3. Build merged payload starting from rawNode to preserve security and untouched nodes
+    const merged: Record<string, any> = rawNode && typeof rawNode === 'object' ? { ...rawNode } : {};
+
+    merged.familyCode = cleanCode;
+    merged.email = state.email || merged.email || '';
+    if (state.backupEmail) merged.backupEmail = state.backupEmail;
+    merged.caregiverName = state.caregiverName || merged.caregiverName || 'Caregiver';
+    merged.caregiverRole = state.caregiverRole || merged.caregiverRole || 'Parent';
+
+    // Merge childProfile
+    merged.childProfile = state.childProfile || merged.childProfile || { name: 'Child', ageGroup: 'kid', interests: [], pronouns: 'they/them' };
+
+    // Selective or full field merge
+    if (options?.fieldsToUpdate && Array.isArray(options.fieldsToUpdate)) {
+      for (const f of options.fieldsToUpdate) {
+        if ((state as any)[f] !== undefined) {
+          merged[f] = (state as any)[f];
+        }
+      }
+    } else {
+      if (state.childState !== undefined) merged.childState = state.childState;
+      if (state.routines !== undefined) merged.routines = state.routines;
+      if (state.aacItems !== undefined) merged.aacItems = state.aacItems;
+      if (state.plansChanged !== undefined) merged.plansChanged = state.plansChanged;
+      if (state.activeAlert !== undefined) merged.activeAlert = state.activeAlert;
+      if (state.alertHistory !== undefined) merged.alertHistory = state.alertHistory;
+      if (state.messages !== undefined) merged.messages = state.messages;
+    }
+
+    // MANDATORY SECURITY NODE PRESERVATION:
+    // ownerUid, members, memberRoles, revokedMembers, pendingRequests must never be removed or clobbered
+    if (rawNode?.ownerUid || state.ownerUid) merged.ownerUid = rawNode?.ownerUid || state.ownerUid;
+    if (rawNode?.members) merged.members = rawNode.members;
+    if (rawNode?.memberRoles) merged.memberRoles = rawNode.memberRoles;
+    if (rawNode?.revokedMembers) merged.revokedMembers = rawNode.revokedMembers;
+    if (rawNode?.pendingRequests) merged.pendingRequests = rawNode.pendingRequests;
+
+    merged.lastUpdated = state.lastUpdated || Date.now();
+
+    // 4. Conditional PUT with ETag
+    const putHeaders: Record<string, string> = {
+      'X-Firebase-ETag': 'true',
+    };
+    if (etag) {
+      putHeaders['if-match'] = etag;
+    }
+
+    try {
+      const putRes = await executeRtdbRequestWithHeaders<any>(url, 'PUT', merged, options, putHeaders);
+      return {
+        success: true,
+        lastUpdated: merged.lastUpdated,
+        etag: putRes.etag || etag,
+      };
+    } catch (err: any) {
+      if (err instanceof PersistenceError && err.statusCode === 412) {
+        // Stale ETag / Precondition Failed
+        if (options?.ifMatchLastUpdated !== undefined || options?.ifMatchEtag !== undefined) {
+          throw new PersistenceError(
+            `Concurrency conflict: Remote state changed during write (${err.message})`,
+            409,
+            false,
+            'rtdb_patch_conflict'
+          );
+        }
+        if (attempt < maxConcurrencyRetries) {
+          // Retry with fresh ETag and merged data
+          const backoff = 50 * Math.pow(2, attempt);
+          await new Promise((resolve) => setTimeout(resolve, backoff));
+          continue;
+        }
+        throw new PersistenceError(
+          'RTDB conditional write failed due to persistent concurrent updates',
+          409,
+          false,
+          'rtdb_patch_conflict'
+        );
+      }
+
+      if (isProductionEnvironment() || options?.customFetch || options?.ifMatchLastUpdated !== undefined) {
+        throw err;
+      }
+      console.warn(`[Family State] Non-fatal RTDB sync notice for ${cleanCode}:`, err?.message);
+      return { success: false, lastUpdated: merged.lastUpdated };
+    }
+  }
+
+  throw new PersistenceError('RTDB conditional write exceeded max retries', 409, false, 'rtdb_patch_conflict');
+}
+
+/**
+ * Fetches shared family state from Firebase Realtime Database.
+ */
+export async function fetchFamilyStateFromRtdb(
+  familyCode: string,
+  options?: PersistenceSyncOptions
+): Promise<SharedFamilyState | null> {
+  const { state } = await fetchFamilyStateWithEtag(familyCode, options);
+  return state;
 }
 
 /**
@@ -692,8 +797,8 @@ export async function saveFamilyAccountToFirestore(
     return;
   }
 
-  const safeEmailDocId = encodeURIComponent(cleanEmail);
-  const safeCodeDocId = encodeURIComponent(cleanCode);
+  const safeEmailDocId = cleanEmail;
+  const safeCodeDocId = cleanCode;
 
   const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
   const baseHost = options?.customHost || (emulatorHost ? `http://${emulatorHost}` : 'https://firestore.googleapis.com');
@@ -788,7 +893,7 @@ export async function fetchFamilyAccountFromFirestore(
 
   // 1. Direct email lookup
   if (cleanEmail) {
-    const safeEmailDocId = encodeURIComponent(cleanEmail);
+    const safeEmailDocId = cleanEmail;
     const docUrl = `${baseHost}/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_family_accounts/${safeEmailDocId}`;
 
     const res = await fetchFn(docUrl, {
@@ -836,37 +941,54 @@ export async function fetchFamilyAccountFromFirestore(
 }
 
 /**
- * Permanently deletes family account documents and code index from Cloud Firestore.
+ * Authoritatively deletes a family account and its familyCode index from Cloud Firestore.
+ * Throws PersistenceError on datastore errors so failures fail closed and are not falsely reported as success.
  */
 export async function deleteFamilyAccountFromFirestore(
-  email: string,
-  familyCode: string,
+  email?: string,
+  familyCode?: string,
   options?: PersistenceSyncOptions
-): Promise<void> {
-  const cleanEmail = email.trim().toLowerCase();
-  const cleanCode = sanitizeFamilyCode(familyCode);
-  if (cleanEmail === 'demo@beeyou.app' || cleanCode === 'BEE-DEMO') return;
+): Promise<{ accountDeleted: boolean; indexDeleted: boolean }> {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanCode = sanitizeFamilyCode(familyCode || '');
+  if (!cleanEmail && !cleanCode) {
+    return { accountDeleted: false, indexDeleted: false };
+  }
+  if (cleanEmail === 'demo@beeyou.app' || cleanCode === 'BEE-DEMO') {
+    return { accountDeleted: true, indexDeleted: true };
+  }
 
   const config = verifyFirestoreConfig();
   if (!config.configured && !options?.customAuthHeader && !options?.customHost) {
-    return;
+    if (isProductionEnvironment()) {
+      throw new PersistenceError(
+        'Cloud Firestore configuration missing in production; family account deletion cannot be committed',
+        500,
+        false,
+        'firestore_delete_account'
+      );
+    }
+    return { accountDeleted: true, indexDeleted: true };
   }
 
-  const safeEmailDocId = encodeURIComponent(cleanEmail);
-  const safeCodeDocId = encodeURIComponent(cleanCode);
+  const safeEmailDocId = cleanEmail || undefined;
+  const safeCodeDocId = cleanCode || undefined;
 
   const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
   const baseHost = options?.customHost || (emulatorHost ? `http://${emulatorHost}` : 'https://firestore.googleapis.com');
   const commitUrl = `${baseHost}/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:commit`;
 
-  const writes = [
-    {
+  const writes: any[] = [];
+  if (safeEmailDocId) {
+    writes.push({
       delete: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_family_accounts/${safeEmailDocId}`,
-    },
-    {
+    });
+  }
+  if (safeCodeDocId) {
+    writes.push({
       delete: `projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/beeyou_family_code_index/${safeCodeDocId}`,
-    },
-  ];
+    });
+  }
 
   const authHeader = await getFirestoreAuthHeader(options);
   const fetchFn = options?.customFetch || fetch;
@@ -881,9 +1003,23 @@ export async function deleteFamilyAccountFromFirestore(
   });
 
   if (!res.ok && res.status !== 404) {
-    const errText = await res.text().catch(() => res.statusText);
-    console.warn(`[Persistence] Notice on deleting Firestore account: ${errText}`);
+    let errText = '';
+    try {
+      const json = await res.json();
+      errText = json?.error?.message || JSON.stringify(json);
+    } catch {
+      errText = await res.text().catch(() => res.statusText);
+    }
+    throw new PersistenceError(
+      `Firestore deleteFamilyAccount failed (${res.status}): ${errText}`,
+      res.status,
+      res.status >= 500,
+      'firestore_delete_account',
+      errText
+    );
   }
+
+  return { accountDeleted: true, indexDeleted: true };
 }
 
 // ============================================================================
