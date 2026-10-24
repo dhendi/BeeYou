@@ -260,8 +260,8 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
   const finalizeOnboarding = (withTrial = false) => {
     if (withTrial) {
       startFreeTrial(selectedCycle);
-      const suggestedVoice = selectedPersona === 'child' ? 'amy' : selectedPersona === 'teen' ? 'ryan' : 'lessac';
-      updateSettings({ voicePersona: suggestedVoice });
+      // Start with on-device native speech out of the box
+      updateSettings({ voicePersona: 'system' });
     } else {
       setSubscriptionTier('basic');
       updateSettings({ voicePersona: 'system' });

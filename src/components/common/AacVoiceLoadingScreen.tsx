@@ -7,63 +7,95 @@ import { t, subscribeToLanguage, getLanguage } from '../../services/translator';
 
 const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
   es: {
-    'Loading Your Voice': 'Cargando tu voz',
-    'Voice Pack Ready!': '¡Paquete de voz listo!',
-    'Pre-caching every speech tile for instantaneous communication.': 'Preparando cada casilla para comunicación instantánea.',
+    'Preparing Your Voice': 'Preparando tu voz',
+    'Loading Your Voice': 'Preparando tu voz',
+    'Voice Ready!': '¡Voz lista!',
+    'Voice Pack Ready!': '¡Voz lista!',
+    'Pre-caching core speech tiles for instant playback.': 'Preparando casillas de voz para comunicación instantánea.',
+    'Pre-caching every speech tile for instantaneous communication.': 'Preparando casillas de voz para comunicación instantánea.',
     'All AAC tiles are cached for instant 0ms speech.': 'Todas las casillas están listas para hablar al instante.',
-    'Speech Tiles Cached': 'Casillas de voz listas',
+    'Speech Tiles Ready': 'Casillas listas',
+    'Speech Tiles Cached': 'Casillas listas',
+    'Voice Model': 'Modelo de voz',
     'Ready for communication!': '¡Listo para comunicarse!',
     'Connecting to neural speech engine...': 'Conectando con el motor de voz...',
     'Preparing speech cache...': 'Preparando la voz...',
     'Continue to app': 'Continuar a la aplicación',
+    'Downloading voice model...': 'Descargando modelo de voz...',
     'Downloading neural voice model...': 'Descargando modelo de voz...',
     'Preparing neural speech engine...': 'Preparando motor de voz...',
+    'Speech engine ready': 'Motor de voz listo',
     'Voice model ready': 'Modelo de voz listo',
+    'Optimizing speech tiles...': 'Optimizando casillas...',
     'Voice': 'Voz',
   },
   fr: {
-    'Loading Your Voice': 'Chargement de votre voix',
-    'Voice Pack Ready!': 'Pack vocal prêt !',
-    'Pre-caching every speech tile for instantaneous communication.': 'Mise en cache de chaque case pour une parole instantanée.',
-    'All AAC tiles are cached for instant 0ms speech.': 'Toutes les cases CAA sont prêtes pour une élocution instantanée.',
-    'Speech Tiles Cached': 'Cases vocales prêtes',
+    'Preparing Your Voice': 'Préparation de votre voix',
+    'Loading Your Voice': 'Préparation de votre voix',
+    'Voice Ready!': 'Voix prête !',
+    'Voice Pack Ready!': 'Voix prête !',
+    'Pre-caching core speech tiles for instant playback.': 'Mise en mémoire des cases pour une parole instantanée.',
+    'Pre-caching every speech tile for instantaneous communication.': 'Mise en mémoire des cases pour une parole instantanée.',
+    'All AAC tiles are cached for instant 0ms speech.': 'Toutes les cases CAA sont prêtes pour parler sans délai.',
+    'Speech Tiles Ready': 'Cases prêtes',
+    'Speech Tiles Cached': 'Cases prêtes',
+    'Voice Model': 'Modèle vocal',
     'Ready for communication!': 'Prêt pour la communication !',
     'Connecting to neural speech engine...': 'Connexion au moteur vocal...',
     'Preparing speech cache...': 'Préparation de la synthèse vocale...',
     'Continue to app': 'Continuer vers l\'application',
+    'Downloading voice model...': 'Téléchargement du modèle vocal...',
     'Downloading neural voice model...': 'Téléchargement du modèle vocal...',
     'Preparing neural speech engine...': 'Préparation du moteur vocal...',
+    'Speech engine ready': 'Moteur vocal prêt',
     'Voice model ready': 'Modèle vocal prêt',
+    'Optimizing speech tiles...': 'Optimisation des cases vocales...',
     'Voice': 'Voix',
   },
   fr_ca: {
-    'Loading Your Voice': 'Chargement de votre voix québécoise',
-    'Voice Pack Ready!': 'Pack vocal prêt !',
-    'Pre-caching every speech tile for instantaneous communication.': 'Mise en mémoire de chaque case pour une parole immédiate.',
+    'Preparing Your Voice': 'Préparation de votre voix québécoise',
+    'Loading Your Voice': 'Préparation de votre voix québécoise',
+    'Voice Ready!': 'Voix québécoise prête !',
+    'Voice Pack Ready!': 'Voix québécoise prête !',
+    'Pre-caching core speech tiles for instant playback.': 'Mise en mémoire des cases pour une parole immédiate.',
+    'Pre-caching every speech tile for instantaneous communication.': 'Mise en mémoire des cases pour une parole immédiate.',
     'All AAC tiles are cached for instant 0ms speech.': 'Toutes les cases CAA sont prêtes pour parler sans délai.',
-    'Speech Tiles Cached': 'Cases vocales prêtes',
+    'Speech Tiles Ready': 'Cases prêtes',
+    'Speech Tiles Cached': 'Cases prêtes',
+    'Voice Model': 'Modèle vocal',
     'Ready for communication!': 'Prêt pour la communication !',
     'Connecting to neural speech engine...': 'Connexion au moteur vocal québécois...',
     'Preparing speech cache...': 'Préparation de la voix québécoise...',
     'Continue to app': 'Aller à l\'application',
+    'Downloading voice model...': 'Téléchargement du modèle québécois...',
     'Downloading neural voice model...': 'Téléchargement du modèle québécois...',
     'Preparing neural speech engine...': 'Préparation du moteur de voix québécois...',
+    'Speech engine ready': 'Moteur vocal prêt',
     'Voice model ready': 'Modèle vocal prêt',
+    'Optimizing speech tiles...': 'Optimisation des cases...',
     'Voice': 'Voix',
   },
   de: {
-    'Loading Your Voice': 'Lade deine Stimme',
-    'Voice Pack Ready!': 'Sprachpaket bereit!',
+    'Preparing Your Voice': 'Bereite deine Stimme vor',
+    'Loading Your Voice': 'Bereite deine Stimme vor',
+    'Voice Ready!': 'Stimme bereit!',
+    'Voice Pack Ready!': 'Stimme bereit!',
+    'Pre-caching core speech tiles for instant playback.': 'Lade Sprachfelder für sofortige Sprachausgabe vor.',
     'Pre-caching every speech tile for instantaneous communication.': 'Jedes Sprachfeld wird für sofortige Kommunikation vorgeladen.',
     'All AAC tiles are cached for instant 0ms speech.': 'Alle UK-Karten sind für sofortige Sprache bereit.',
+    'Speech Tiles Ready': 'Sprachfelder bereit',
     'Speech Tiles Cached': 'Sprachfelder bereit',
+    'Voice Model': 'Sprachmodell',
     'Ready for communication!': 'Bereit zur Kommunikation!',
     'Connecting to neural speech engine...': 'Verbindung zum Sprachmodul...',
     'Preparing speech cache...': 'Sprachspeicher wird vorbereitet...',
     'Continue to app': 'Weiter zur App',
-    'Downloading neural voice model...': 'Lade neuronales Sprachmodell herunter...',
+    'Downloading voice model...': 'Lade Sprachmodell herunter...',
+    'Downloading neural voice model...': 'Lade Sprachmodell herunter...',
     'Preparing neural speech engine...': 'Bereite neuronales Sprachmodul vor...',
+    'Speech engine ready': 'Sprachmodul einsatzbereit',
     'Voice model ready': 'Sprachmodell einsatzbereit',
+    'Optimizing speech tiles...': 'Optimiere Sprachfelder...',
     'Voice': 'Stimme',
   },
   it: {
@@ -207,12 +239,17 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
 
   const formatProgressPhrase = (phrase: string): string => {
     if (!phrase) return '';
-    if (phrase.startsWith('Downloading neural voice model')) return translateLoadingText('Downloading neural voice model...', currentUiLang);
-    if (phrase.startsWith('Downloading voice model')) return translateLoadingText('Downloading neural voice model...', currentUiLang);
+    if (phrase.startsWith('Downloading neural voice model')) return translateLoadingText('Downloading voice model...', currentUiLang);
+    if (phrase.startsWith('Downloading voice model')) return translateLoadingText('Downloading voice model...', currentUiLang);
     if (phrase.startsWith('Preparing neural speech engine')) return translateLoadingText('Preparing neural speech engine...', currentUiLang);
+    if (phrase.startsWith('Speech engine ready')) return translateLoadingText('Speech engine ready', currentUiLang);
     if (phrase.startsWith('Voice model ready')) return translateLoadingText('Voice model ready', currentUiLang);
     if (phrase.startsWith('Connecting to neural speech engine')) return translateLoadingText('Connecting to neural speech engine...', currentUiLang);
     if (phrase.startsWith('Preparing speech cache')) return translateLoadingText('Preparing speech cache...', currentUiLang);
+    if (phrase.startsWith('Optimizing tile:')) {
+      const tileName = phrase.replace('Optimizing tile:', '').trim();
+      return `${translateLoadingText('Optimizing speech tiles...', currentUiLang)} (${tileName})`;
+    }
     return translateLoadingText(phrase, currentUiLang);
   };
 
@@ -272,7 +309,7 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
       }, 300);
     }, 30000);
 
-    // Trigger genuine background pre-caching of every single AAC tile
+    // Trigger genuine background pre-caching of neural voice model and core AAC tiles
     preloadVoicePack(
       persona,
       language,
@@ -281,10 +318,13 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
         highestLoadedRef.current = Math.max(highestLoadedRef.current, p.loaded);
         highestPercentRef.current = Math.max(highestPercentRef.current, p.percent);
         setProgress({
-          loaded: highestLoadedRef.current,
-          total: p.total || 82,
+          loaded: p.loaded,
+          total: p.total,
           percent: highestPercentRef.current,
           currentPhrase: p.currentPhrase,
+          loadedBytes: p.loadedBytes,
+          totalBytes: p.totalBytes,
+          stage: p.stage,
         });
       }
     )
@@ -341,12 +381,12 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
 
         {/* Headline */}
         <h3 id="aac-loading-title" className="text-xl sm:text-2xl font-black text-[#2D241E] tracking-tight">
-          {isFinished ? translateLoadingText('Voice Pack Ready!', currentUiLang) : translateLoadingText('Loading Your Voice', currentUiLang)}
+          {isFinished ? translateLoadingText('Voice Ready!', currentUiLang) : translateLoadingText('Preparing Your Voice', currentUiLang)}
         </h3>
         <p className="text-xs sm:text-sm text-[#7A6C60] font-semibold mt-1 max-w-xs">
           {isFinished
             ? translateLoadingText('All AAC tiles are cached for instant 0ms speech.', currentUiLang)
-            : translateLoadingText('Pre-caching every speech tile for instantaneous communication.', currentUiLang)}
+            : translateLoadingText('Pre-caching core speech tiles for instant playback.', currentUiLang)}
         </p>
 
         {/* Live Progress Bar */}
@@ -375,9 +415,17 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
           </div>
 
           <div className="flex items-center justify-between text-[11px] text-[#8C7A6B] font-bold px-0.5">
-            <span>{translateLoadingText('Speech Tiles Cached', currentUiLang)}</span>
+            <span>
+              {progress.stage === 'tiles'
+                ? translateLoadingText('Speech Tiles Ready', currentUiLang)
+                : translateLoadingText('Voice Model', currentUiLang)}
+            </span>
             <span className="tabular-nums font-extrabold">
-              {progress.loaded} / {progress.total}
+              {progress.stage === 'tiles'
+                ? `${progress.loaded} / ${progress.total}`
+                : progress.totalBytes && progress.totalBytes > 0
+                ? `${(progress.loadedBytes ? progress.loadedBytes / (1024 * 1024) : 0).toFixed(1)} MB of ${(progress.totalBytes / (1024 * 1024)).toFixed(1)} MB done`
+                : `${progress.percent}% done`}
             </span>
           </div>
         </div>

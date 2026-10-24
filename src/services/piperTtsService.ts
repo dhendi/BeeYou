@@ -18,6 +18,7 @@ export interface PiperProgressInfo {
   currentPhrase: string;
   loadedBytes: number;
   totalBytes: number;
+  stage?: 'download' | 'engine' | 'tiles' | 'ready';
 }
 
 // Maps internal persona and language to official Piper Voice IDs
@@ -418,36 +419,47 @@ export async function preloadPiperVoice(
     try {
       // 1. Check if already stored in OPFS
       const alreadyStored = await isPiperVoiceReady(personaId, lang);
+      let reportedLoaded = 0;
+      let reportedTotal = 0;
+
       if (!alreadyStored) {
         onProgress?.({
-          percent: 10,
-          currentPhrase: `Downloading neural voice model (${voiceId})...`,
-          loadedBytes: 10,
-          totalBytes: 100,
+          percent: 5,
+          currentPhrase: 'Downloading voice model...',
+          loadedBytes: 0,
+          totalBytes: 0,
+          stage: 'download',
         });
 
         await piper.download(voiceId as any, (p) => {
-          const percent = p.total > 0 ? Math.min(90, Math.round((p.loaded / p.total) * 100)) : 50;
+          reportedLoaded = p.loaded;
+          reportedTotal = p.total;
+          const percent = p.total > 0 ? Math.min(75, Math.round((p.loaded / p.total) * 75)) : 50;
           onProgress?.({
             percent,
-            currentPhrase: `Downloading voice model: ${Math.round(percent)}%`,
+            currentPhrase: 'Downloading voice model...',
             loadedBytes: p.loaded,
             totalBytes: p.total,
+            stage: 'download',
           });
         });
 
         // Ensure OPFS write stream is completely closed and flushed before session initialization
         await waitForOpfsFileReady(`${voiceId}.onnx`, 1000000);
         await waitForOpfsFileReady(`${voiceId}.onnx.json`, 100);
+      } else {
+        reportedLoaded = 1;
+        reportedTotal = 1;
       }
 
       // 2. Warm up / prime the WebAssembly session in memory for this target voice
       if (activeLoadedVoiceId !== voiceId) {
         onProgress?.({
-          percent: 95,
-          currentPhrase: `Preparing neural speech engine...`,
-          loadedBytes: 95,
-          totalBytes: 100,
+          percent: 80,
+          currentPhrase: 'Preparing neural speech engine...',
+          loadedBytes: reportedLoaded || reportedTotal,
+          totalBytes: reportedTotal,
+          stage: 'engine',
         });
 
         await Promise.race([
@@ -474,10 +486,11 @@ export async function preloadPiperVoice(
       } catch {}
 
       onProgress?.({
-        percent: 100,
-        currentPhrase: `Voice model ready (${voiceId})`,
-        loadedBytes: 100,
-        totalBytes: 100,
+        percent: 85,
+        currentPhrase: 'Speech engine ready',
+        loadedBytes: reportedLoaded || reportedTotal,
+        totalBytes: reportedTotal,
+        stage: 'tiles',
       });
 
       return true;

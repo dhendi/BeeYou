@@ -62,8 +62,10 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
   }, [settings.language]);
 
   useEffect(() => {
-    const persona = settings.voicePersona || 'amy';
-    prewarmCoreAudioVocabulary(persona, settings.language || 'en');
+    const persona = settings.voicePersona || 'system';
+    if (persona !== 'system') {
+      prewarmCoreAudioVocabulary(persona, settings.language || 'en');
+    }
   }, [settings.voicePersona, settings.language]);
 
   const speak = async (
@@ -77,8 +79,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
       gestureTime?: number;
     }
   ) => {
-    if (settings.soundEffects && options?.previewAudio) playChime('speak');
-    const personaToUse = options?.voicePersona || settings.voicePersona || 'amy';
+    const personaToUse = options?.voicePersona || settings.voicePersona || 'system';
     const personaObj = getVoicePersonaById(personaToUse);
     const personaLang = (personaObj.language && personaObj.language !== 'all') ? personaObj.language : undefined;
     const currentActiveLang = (options?.previewAudio && personaLang)

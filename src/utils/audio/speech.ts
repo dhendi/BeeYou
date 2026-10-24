@@ -987,7 +987,7 @@ export async function speakText(
     unlockAudioHardwareNode(ctx);
   }
 
-  const rawPersona = options?.voicePersona || 'amy';
+  const rawPersona = options?.voicePersona || 'system';
   const personaObj = getVoicePersonaById(rawPersona);
   let selectedPersonaId = personaObj.id;
 
@@ -1057,10 +1057,33 @@ export async function speakText(
 
   // 1. Audition / Voice Studio Preview Vocalization
   if (options?.previewAudio) {
+    // 1a. Priority for System Persona: Instant Synchronous Native SpeechSynthesis
+    if (selectedPersonaId === 'system') {
+      let sysReported = false;
+      const reportSys = () => {
+        if (sysReported) return;
+        sysReported = true;
+        recordReport('system_speech', false, 0, 0, 0, 0, 0);
+      };
+      const systemSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
+        ...options,
+        voicePersona: 'system',
+        pitch: calibratedPitch,
+        rate: calibratedRate,
+        force: true,
+        onAudibleStart: reportSys,
+      });
+      if (systemSuccess || speechId !== latestSpeechRequestId) {
+        reportSys();
+        return;
+      }
+    }
+
+    // 1b. Fast instant preview for neural personas using pre-rendered local audio
     if (selectedPersonaId !== 'system') {
       const previewCandidateUrls = [
-        `/assets/audio/previews/${selectedPersonaId}.wav`,
         `/assets/audio/previews/${selectedPersonaId}.mp3`,
+        `/assets/audio/previews/${selectedPersonaId}.wav`,
       ];
       for (const previewUrl of previewCandidateUrls) {
         try {
@@ -1133,20 +1156,8 @@ export async function speakText(
   // Priority 2: System text-to-speech fallback (whole sentence as one continuous utterance)
   // Priority 3: Offline prerecorded-word stitching emergency fallback (synthesizeOfflineSentence via Web Audio)
   if (isMultiWord) {
-    // 2a. Fast Local Cache Lookup (L1 RAM + L2 CacheStorage)
-    const localCached = await getLocalCacheOnly(streamUrl, cacheKey);
-    if (speechId !== latestSpeechRequestId) return;
-    if (localCached && isAudioPayload(localCached.buffer)) {
-      console.log(`[AAC Speech] Playing multi-word sentence via local cache (${selectedPersonaId})`);
-      const played = await playAudioUrl(localCached.buffer, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
-        recordReport('local_cache', true, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
-      });
-      if (played || speechId !== latestSpeechRequestId) return;
-    }
-
-    // Priority 1 for System Persona: Direct Native Browser SpeechSynthesis
+    // 2a. Priority for System Persona: Direct Synchronous Native Browser SpeechSynthesis
     if (selectedPersonaId === 'system') {
-      console.log(`[AAC Speech] Vocalizing sentence via primary system speech synthesis`);
       let sysReported = false;
       const reportSys = () => {
         if (sysReported) return;
@@ -1155,7 +1166,7 @@ export async function speakText(
       };
       const systemSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
         ...options,
-        voicePersona: selectedPersonaId,
+        voicePersona: 'system',
         pitch: calibratedPitch,
         rate: calibratedRate,
         force: options?.force,
@@ -1165,6 +1176,17 @@ export async function speakText(
         reportSys();
         return;
       }
+    }
+
+    // 2b. Fast Local Cache Lookup (L1 RAM + L2 CacheStorage) for neural personas
+    const localCached = await getLocalCacheOnly(streamUrl, cacheKey);
+    if (speechId !== latestSpeechRequestId) return;
+    if (localCached && isAudioPayload(localCached.buffer)) {
+      console.log(`[AAC Speech] Playing multi-word sentence via local cache (${selectedPersonaId})`);
+      const played = await playAudioUrl(localCached.buffer, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
+        recordReport('local_cache', true, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
+      });
+      if (played || speechId !== latestSpeechRequestId) return;
     }
 
     // Priority 1: Piper On-Device Neural Synthesis (Preferred whole-sentence neural engine)
@@ -1260,20 +1282,8 @@ export async function speakText(
   // When an individual tile is tapped on the board, vocalizes using the consistent selected Piper voice.
   // Priority: 1. Fast Local Cache (0ms instant playback) -> 2. Piper on-device neural synthesis -> 3. System speech fallback
 
-  // 3a. Local Audio Cache (L1 RAM + L2 CacheStorage)
-  const localCachedSingle = await getLocalCacheOnly(streamUrl, cacheKey);
-  if (speechId !== latestSpeechRequestId) return;
-  if (localCachedSingle && isAudioPayload(localCachedSingle.buffer)) {
-    console.log(`[AAC Speech] Playing single word via local cache (${selectedPersonaId})`);
-    const played = await playAudioUrl(localCachedSingle.buffer, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
-      recordReport('local_cache', true, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
-    });
-    if (played || speechId !== latestSpeechRequestId) return;
-  }
-
-  // 3b. Priority for System Persona: Direct Native Browser SpeechSynthesis
+  // 3a. Priority for System Persona: Direct Synchronous Native Browser SpeechSynthesis
   if (selectedPersonaId === 'system') {
-    console.log(`[AAC Speech] Vocalizing single word via primary system speech synthesis`);
     let sysReported = false;
     const reportSys = () => {
       if (sysReported) return;
@@ -1292,6 +1302,17 @@ export async function speakText(
       reportSys();
       return;
     }
+  }
+
+  // 3b. Local Audio Cache (L1 RAM + L2 CacheStorage) for neural voices
+  const localCachedSingle = await getLocalCacheOnly(streamUrl, cacheKey);
+  if (speechId !== latestSpeechRequestId) return;
+  if (localCachedSingle && isAudioPayload(localCachedSingle.buffer)) {
+    console.log(`[AAC Speech] Playing single word via local cache (${selectedPersonaId})`);
+    const played = await playAudioUrl(localCachedSingle.buffer, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
+      recordReport('local_cache', true, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
+    });
+    if (played || speechId !== latestSpeechRequestId) return;
   }
 
   // 3c. Piper On-Device Neural Synthesis for Single Word
@@ -1359,6 +1380,33 @@ export async function speakText(
     reportSingleAudible();
   } else if (speechId === latestSpeechRequestId) {
     playChime('speak');
+  }
+}
+
+/**
+ * Caches synthesized Piper audio into memory (L1) and persistent browser CacheStorage (L2)
+ * so subsequent tile taps vocalize instantaneously with zero delay.
+ */
+export function cachePiperAudio(
+  personaId: string,
+  lang: string,
+  formattedText: string,
+  piperBuf: ArrayBuffer
+): void {
+  const cacheKey = getTtsCacheKey(personaId, lang, formattedText);
+  const streamUrl = getTtsStreamUrl(personaId, lang, formattedText);
+  const blob = new Blob([piperBuf], { type: 'audio/wav' });
+  const blobUrl = URL.createObjectURL(blob);
+  audioMemoryCache.set(cacheKey, { blobUrl, buffer: piperBuf });
+  if (typeof window !== 'undefined' && 'caches' in window) {
+    const fullUrl = new URL(streamUrl, window.location.origin).href;
+    const resToCache = new Response(piperBuf.slice(0), {
+      headers: {
+        'content-type': 'audio/wav',
+        'cache-control': 'public, max-age=31536000, immutable',
+      },
+    });
+    caches.open(TTS_CACHE_NAME).then((c) => c.put(fullUrl, resToCache)).catch(() => {});
   }
 }
 

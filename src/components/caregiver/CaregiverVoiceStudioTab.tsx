@@ -35,13 +35,20 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   const [showAllCatalog, setShowAllCatalog] = useState(false);
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
 
+  const FEATURED_VOICE_IDS = ['system', 'amy', 'ryan', 'lessac', 'danny'];
+
   useEffect(() => {
+    // Eagerly pre-warm audio previews for featured personas for instantaneous audition
+    FEATURED_VOICE_IDS.forEach((id) => {
+      if (id !== 'system') {
+        const audio = new Audio(`/assets/audio/previews/${id}.mp3`);
+        audio.preload = 'auto';
+      }
+    });
     return () => {
       stopSpeaking();
     };
   }, []);
-
-  const FEATURED_VOICE_IDS = ['system', 'amy', 'ryan', 'lessac', 'danny'];
 
   const activeLanguage = settings.language || 'en';
   const languagePersonas = getVoicePersonasForLanguage(activeLanguage);

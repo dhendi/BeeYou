@@ -263,7 +263,7 @@ export const AACView: React.FC = () => {
 
   // Pre-warm high-frequency core communication vocabulary for 0ms offline audio playback
   useEffect(() => {
-    const p = settings?.voicePersona || 'amy';
+    const p = settings?.voicePersona || 'system';
     const l = settings?.language || 'en';
     if (!isVoicePackLoaded(p, l)) {
       triggerVoicePreload(p, l);

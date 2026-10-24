@@ -772,7 +772,7 @@ export const VOICE_PERSONAS: VoicePersona[] = [
   },
 ];
 
-export const DEFAULT_VOICE_PERSONA_ID = 'amy';
+export const DEFAULT_VOICE_PERSONA_ID = 'system';
 
 /**
  * Dedicated default voice personas mapped by language code.
@@ -802,7 +802,7 @@ export function getDefaultVoicePersonaForLanguage(lang: string = 'en'): string {
     return DEFAULT_LANGUAGE_VOICES[clean];
   }
   const norm = clean.split('_')[0];
-  return DEFAULT_LANGUAGE_VOICES[norm] || 'amy';
+  return DEFAULT_LANGUAGE_VOICES[norm] || 'system';
 }
 
 /**

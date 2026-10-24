@@ -1,12 +1,9 @@
 import { getPrimarySpokenPhrasesForLanguage, getSpokenPhrasesForLanguage } from '../data/aacVocabularyCatalog';
 import { getVoicePersonaById, TTS_GENERATION_VERSION } from '../data/voicePersonasData';
-import { preloadPiperVoice, isPiperVoiceReady, isPiperVoiceReadySync } from './piperTtsService';
+import { preloadPiperVoice, isPiperVoiceReady, isPiperVoiceReadySync, synthesizeWithPiper } from './piperTtsService';
 import {
-  getTtsStreamUrl,
-  getTtsCacheKey,
-  getLocalCacheOnly,
-  getOrFetchAudioItem,
   formatForNaturalSpeech,
+  cachePiperAudio,
 } from '../utils/audio/speech';
 import { t } from './translator';
 
@@ -15,6 +12,9 @@ export interface PreloadProgress {
   total: number;
   percent: number;
   currentPhrase: string;
+  loadedBytes?: number;
+  totalBytes?: number;
+  stage?: 'download' | 'engine' | 'tiles' | 'ready';
 }
 
 export type PreloadProgressCallback = (progress: PreloadProgress) => void;
@@ -126,93 +126,74 @@ export async function preloadVoicePack(
 
     // Preload Piper on-device neural voice model first
     let piperReady = false;
+    let modelTotalBytes = 0;
+    let modelLoadedBytes = 0;
+
     try {
       piperReady = await preloadPiperVoice(voiceToUse, normalizedLang, (pInfo) => {
+        modelTotalBytes = pInfo.totalBytes || modelTotalBytes;
+        modelLoadedBytes = pInfo.loadedBytes || modelLoadedBytes;
         dispatchProgress({
-          loaded: Math.round((pInfo.percent / 100) * total),
-          total,
+          loaded: pInfo.percent,
+          total: 100,
           percent: pInfo.percent,
           currentPhrase: pInfo.currentPhrase,
+          loadedBytes: pInfo.loadedBytes,
+          totalBytes: pInfo.totalBytes,
+          stage: pInfo.stage || 'download',
         });
       });
     } catch (piperErr) {
       console.warn('[AAC Preload] Piper voice model download notice:', piperErr);
     }
 
-    // If Piper on-device neural voice is verified ready, or device is offline, mark ready with on-device speech
-    if (piperReady || isPiperVoiceReadySync(voiceToUse, normalizedLang) || (typeof navigator !== 'undefined' && !navigator.onLine)) {
-      markVoicePackLoaded(personaId, normalizedLang);
-      dispatchProgress({ loaded: total, total, percent: 100, currentPhrase: 'Ready' });
-      return;
-    }
+    if (effectiveSignal.aborted) return;
 
-    // Concurrency worker pool (up to 6 parallel fetches for fast downloads)
-    const CONCURRENCY = 6;
-    let index = 0;
+    // Pre-warm core speech tiles on-device with Piper so first tap has zero delay
+    const coreTilesToWarm = primaryItems.slice(0, 12);
+    const numCoreTiles = coreTilesToWarm.length;
 
-    const runItem = async (phraseText: string) => {
-      const formatted = formatForNaturalSpeech(phraseText);
-      if (!formatted) return;
+    for (let i = 0; i < numCoreTiles; i++) {
+      if (effectiveSignal.aborted) break;
+      const item = coreTilesToWarm[i];
+      if (!item) continue;
 
-      const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
-      const streamUrl = `${getTtsStreamUrl(voiceToUse, normalizedLang, formatted)}&cachedOnly=1`;
-
-      try {
-        const local = await getLocalCacheOnly(streamUrl, cacheKey);
-        if (!local && !effectiveSignal.aborted) {
-          // Strict 1.5s timeout per tile to ensure preloading NEVER blocks or hangs
-          await Promise.race([
-            getOrFetchAudioItem(streamUrl, cacheKey),
-            new Promise((resolve) => setTimeout(resolve, 1500)),
-          ]);
-        }
-      } catch {
-        // Ignore single item fetch error
-      }
-    };
-
-    const primaryWorker = async () => {
-      while (index < primaryItems.length) {
-        if (effectiveSignal.aborted) return;
-        const currentIndex = index++;
-        const item = primaryItems[currentIndex];
-        if (!item) break;
-
-        await runItem(item.phrase);
-
-        loaded++;
-        if (!effectiveSignal.aborted) {
-          const percent = Math.min(100, Math.round((loaded / total) * 100));
-          dispatchProgress({
-            loaded,
-            total,
-            percent,
-            currentPhrase: item.phrase,
+      const formatted = formatForNaturalSpeech(item.phrase);
+      if (formatted) {
+        try {
+          const piperBuf = await synthesizeWithPiper(formatted, voiceToUse, normalizedLang, {
+            timeoutMs: 3000,
+            signal: effectiveSignal,
           });
-        }
+          if (piperBuf) {
+            cachePiperAudio(voiceToUse, normalizedLang, formatted, piperBuf);
+          }
+        } catch {}
       }
-    };
 
-    const primaryWorkers = Array.from({ length: Math.min(CONCURRENCY, primaryItems.length) }, () => primaryWorker());
-    await Promise.all(primaryWorkers);
+      const tilePercent = Math.min(100, 85 + Math.round(((i + 1) / numCoreTiles) * 15));
+      dispatchProgress({
+        loaded: i + 1,
+        total: numCoreTiles,
+        percent: tilePercent,
+        currentPhrase: `Optimizing tile: ${item.phrase}`,
+        loadedBytes: modelTotalBytes,
+        totalBytes: modelTotalBytes,
+        stage: 'tiles',
+      });
+    }
 
     if (!effectiveSignal.aborted) {
       markVoicePackLoaded(personaId, normalizedLang);
-      dispatchProgress({ loaded: total, total, percent: 100, currentPhrase: 'Ready' });
-
-      // Silently warm secondary scene tiles in background on idle priority
-      const allItems = getSpokenPhrasesForLanguage(normalizedLang, (key) => t(key));
-      const secondaryItems = allItems.slice(primaryItems.length);
-      if (secondaryItems.length > 0) {
-        const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 500));
-        idleFn(async () => {
-          for (const item of secondaryItems) {
-            if (effectiveSignal.aborted) break;
-            await runItem(item.phrase);
-            await new Promise((r) => setTimeout(r, 40));
-          }
-        });
-      }
+      dispatchProgress({
+        loaded: numCoreTiles,
+        total: numCoreTiles,
+        percent: 100,
+        currentPhrase: 'Ready',
+        loadedBytes: modelTotalBytes,
+        totalBytes: modelTotalBytes,
+        stage: 'ready',
+      });
     }
   })()
     .finally(() => {

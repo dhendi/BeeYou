@@ -855,7 +855,7 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      const activePersona = settings.voicePersona || 'amy';
+                      const activePersona = settings.voicePersona || 'system';
                       speak(t('Hello! This is your BeeYou communication voice.'), { voicePersona: activePersona, previewAudio: true, force: true });
                     }}
                     className="px-3.5 py-2 bg-[#5B8E7D] hover:bg-[#4E7D6D] text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
