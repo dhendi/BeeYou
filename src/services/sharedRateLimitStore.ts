@@ -49,6 +49,7 @@ export function isProductionEnvironment(): boolean {
   }
   return (
     process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'production' ||
     process.env.REQUIRE_RTDB_SYNC === 'true' ||
     process.env.REQUIRE_FIRESTORE_SYNC === 'true'
   );

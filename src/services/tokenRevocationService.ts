@@ -132,7 +132,11 @@ export function isProductionEnvironment(): boolean {
   if (process.env.OFFLINE_DEV === 'true' || process.env.ALLOW_OFFLINE_REVOCATION === 'true') {
     return false;
   }
-  return process.env.NODE_ENV === 'production' || process.env.REQUIRE_FIRESTORE_SYNC === 'true';
+  return (
+    process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'production' ||
+    process.env.REQUIRE_FIRESTORE_SYNC === 'true'
+  );
 }
 
 /**

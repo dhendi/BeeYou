@@ -338,6 +338,10 @@ export class UsageBudgetTracker {
             date: today,
           };
         }
+
+        throw new Error(
+          `RTDB budget metric reservation exceeded maximum retries (${maxRetries + 1}) due to continuous 412 conflicts`
+        );
       } catch (err: any) {
         console.warn('[UsageBudgetTracker] RTDB reservation error:', err?.message || err);
         if (isProductionEnvironment()) {
@@ -363,6 +367,18 @@ export class UsageBudgetTracker {
           retryAfterSec,
         };
       }
+    }
+
+    // Production fail-closed guard: Never fall through to local in-memory counters in production
+    if (isProductionEnvironment()) {
+      const retryAfterSec = getSecondsUntilMidnight();
+      return {
+        allowed: false,
+        remaining: 0,
+        date: today,
+        error: 'Failed to secure shared budget reservation in production. Cached audio remains available.',
+        retryAfterSec,
+      };
     }
 
     // Local fallback atomic check (only permitted in offline development / test / non-production)
@@ -586,6 +602,10 @@ export class UsageBudgetTracker {
             date: today,
           };
         }
+
+        throw new Error(
+          `RTDB budget metric reservation exceeded maximum retries (${maxRetries + 1}) due to continuous 412 conflicts`
+        );
       } catch (err: any) {
         console.warn('[UsageBudgetTracker] RTDB reservation error:', err?.message || err);
         if (isProductionEnvironment()) {
@@ -611,6 +631,18 @@ export class UsageBudgetTracker {
           retryAfterSec,
         };
       }
+    }
+
+    // Production fail-closed guard: Never fall through to local in-memory counters in production
+    if (isProductionEnvironment()) {
+      const retryAfterSec = getSecondsUntilMidnight();
+      return {
+        allowed: false,
+        remaining: 0,
+        date: today,
+        error: 'Failed to secure shared budget reservation in production. Cached translations remain available.',
+        retryAfterSec,
+      };
     }
 
     // Local fallback atomic check (only permitted in offline development / test / non-production)

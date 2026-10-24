@@ -95,6 +95,70 @@ function spawnWorkerServer(): Promise<{ child: ChildProcess; port: number }> {
   });
 }
 
+function spawnBudgetWorker(targetDate: string, cap: number): Promise<{
+  child: ChildProcess;
+  trigger: () => Promise<{ allowed: boolean; remaining: number; date: string; error?: string }>;
+}> {
+  return new Promise((resolve, reject) => {
+    const tsxCli = path.resolve('node_modules/tsx/dist/cli.mjs');
+    const child = spawn(
+      process.execPath,
+      [tsxCli, 'scripts/helpers/budget-slot-worker.ts', targetDate, String(cap)],
+      {
+        env: { ...process.env, VERCEL: '1', NODE_ENV: 'test' },
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }
+    );
+
+    let stdoutData = '';
+    let isReady = false;
+
+    child.stdout.on('data', (chunk) => {
+      stdoutData += chunk.toString();
+      if (!isReady && stdoutData.includes('WORKER_READY')) {
+        isReady = true;
+        resolve({
+          child,
+          trigger: () =>
+            new Promise((res, rej) => {
+              let resultBuffer = '';
+              child.stdout.on('data', (c) => {
+                resultBuffer += c.toString();
+                const match = resultBuffer.match(/WORKER_RESULT:(.+)/);
+                if (match) {
+                  try {
+                    res(JSON.parse(match[1]));
+                  } catch (e) {
+                    rej(e);
+                  }
+                }
+              });
+              child.on('error', rej);
+              child.stdin.write('GO\n');
+            }),
+        });
+      }
+    });
+
+    child.on('error', (err) => {
+      if (!isReady) reject(err);
+    });
+
+    child.on('exit', (code) => {
+      if (!isReady) {
+        reject(new Error(`Budget worker exited early with code ${code}`));
+      }
+    });
+
+    setTimeout(() => {
+      if (!isReady) {
+        child.kill('SIGTERM');
+        reject(new Error('Budget worker spawn timed out'));
+      }
+    }, 15000);
+  });
+}
+
 async function runAcceptanceTests() {
   console.log('\n========================================================================');
   console.log('BeeYou: Rate Limits, Quotas & Concurrency Reliability Acceptance Suite');
@@ -494,6 +558,83 @@ async function runAcceptanceTests() {
     capTracker.destroy();
 
     // ------------------------------------------------------------------------
+    // Scenario 7B: Exhausted ETag 412 Retries, Production Fail-Closed & Recovery
+    // ------------------------------------------------------------------------
+    console.log('\n--- Scenario 7B: Exhausted ETag 412 Retries, Production Fail-Closed & Recovery ---');
+    let return412 = true;
+    let putAttempts = 0;
+    const retry412Tracker = new UsageBudgetTracker({
+      customPath: path.join(testTempDir, 'retry_412_budget.json'),
+      customDbUrl: 'http://mock-412-db',
+      customFetch: async (_input, init) => {
+        const method = init?.method || 'GET';
+        if (method === 'GET') {
+          return new Response(JSON.stringify({ date: '2099-10-10', ttsUpstreamCalls: 0, translateUpstreamCalls: 0 }), {
+            status: 200,
+            headers: { etag: 'etag-initial-412' },
+          });
+        }
+        if (method === 'PUT') {
+          putAttempts++;
+          if (return412) {
+            return new Response('{"error":"Precondition Failed"}', { status: 412 });
+          }
+          return new Response(init?.body as string, { status: 200, headers: { etag: 'etag-success-412' } });
+        }
+        return new Response('', { status: 404 });
+      },
+    });
+
+    const savedNodeEnv = process.env.NODE_ENV;
+    const savedVercelEnv = process.env.VERCEL_ENV;
+
+    // 1. Production NODE_ENV=production: exhausted 412 retries must reject TTS and Translation
+    process.env.NODE_ENV = 'production';
+    delete process.env.VERCEL_ENV;
+
+    putAttempts = 0;
+    const prodTts412 = await retry412Tracker.reserveTtsBudget('2099-10-10');
+    assert(!prodTts412.allowed, 'Production TTS reservation REJECTED when all 412 retries are exhausted');
+    assert(putAttempts > 1, `Repeated 412 retries attempted before exhausting (${putAttempts} attempts)`);
+
+    putAttempts = 0;
+    const prodTrans412 = await retry412Tracker.reserveTranslateBudget('2099-10-10');
+    assert(!prodTrans412.allowed, 'Production translation reservation REJECTED when all 412 retries are exhausted');
+    assert(putAttempts > 1, `Repeated 412 retries attempted before exhausting translation (${putAttempts} attempts)`);
+
+    // 2. Confirm no local spending counter is used as replacement in production
+    const metricsAfter412Exhaust = retry412Tracker.getMetrics();
+    assert(metricsAfter412Exhaust.ttsUpstreamCalls === 0, 'No local TTS counter replacement used on exhausted retries');
+    assert(metricsAfter412Exhaust.translateUpstreamCalls === 0, 'No local translation counter replacement used on exhausted retries');
+
+    // 3. Confirm VERCEL_ENV=production also enforces fail-closed rejection
+    process.env.NODE_ENV = 'test';
+    process.env.VERCEL_ENV = 'production';
+    const vercelTts412 = await retry412Tracker.reserveTtsBudget('2099-10-10');
+    assert(!vercelTts412.allowed, 'VERCEL_ENV=production strictly enforces fail-closed rejection on exhausted 412 retries');
+    assert(retry412Tracker.getMetrics().ttsUpstreamCalls === 0, 'VERCEL_ENV=production does not increment local counter');
+
+    // 4. Confirm subsequent successful shared-store request recovers normally
+    return412 = false;
+    process.env.NODE_ENV = 'production';
+    delete process.env.VERCEL_ENV;
+    const recoveredTts = await retry412Tracker.reserveTtsBudget('2099-10-10');
+    assert(recoveredTts.allowed, 'Subsequent successful shared-store request recovers normally');
+
+    // 5. Confirm explicit offline development permits local fallback
+    process.env.OFFLINE_DEV = 'true';
+    return412 = true; // Still returning 412 on cloud mock
+    const offlineRes = await retry412Tracker.reserveTtsBudget('2099-10-10');
+    assert(offlineRes.allowed, 'Explicit offline development permits local fallback when cloud writes fail');
+
+    // Restore environment
+    delete process.env.OFFLINE_DEV;
+    process.env.NODE_ENV = savedNodeEnv;
+    if (savedVercelEnv) process.env.VERCEL_ENV = savedVercelEnv;
+    else delete process.env.VERCEL_ENV;
+    retry412Tracker.destroy();
+
+    // ------------------------------------------------------------------------
     // Scenario 8: TTS cache hits and single-flight deduplication
     // ------------------------------------------------------------------------
     console.log('\n--- Scenario 8: TTS Cache Hits & Single-Flight Deduplication ---');
@@ -734,6 +875,43 @@ async function runAcceptanceTests() {
         assert(usageResWorker.status === 200, 'Process 2 reports global spending metrics over RTDB');
 
         assert(true, 'Two separate Node.js processes share rate limits and spending caps across process boundaries');
+
+        // Concurrently reserve the final global TTS budget slot from two independent Node.js processes
+        console.log('  Testing two independent Node.js processes racing for final budget slot...');
+        const multiProcessBudgetDate = `2099-11-${Date.now() % 1000}`;
+        const mainBudgetTracker = new UsageBudgetTracker({
+          dailyTtsCap: 5,
+        });
+        mainBudgetTracker.setCapsForTesting({ dailyTtsCap: 5 });
+
+        // Pre-reserve 4 slots so exactly 1 slot remains out of 5
+        for (let i = 0; i < 4; i++) {
+          const preRes = await mainBudgetTracker.reserveTtsBudget(multiProcessBudgetDate);
+          assert(preRes.allowed, `Pre-reserved slot ${i + 1} of 5 in main process`);
+        }
+
+        // Spawn independent child Node.js process
+        const budgetWorker = await spawnBudgetWorker(multiProcessBudgetDate, 5);
+
+        try {
+          // Concurrently race for the final slot from both independent Node.js processes
+          const [mainResult, workerResult] = await Promise.all([
+            mainBudgetTracker.reserveTtsBudget(multiProcessBudgetDate),
+            budgetWorker.trigger(),
+          ]);
+
+          const totalAllowed = (mainResult.allowed ? 1 : 0) + (workerResult.allowed ? 1 : 0);
+          assert(
+            totalAllowed === 1,
+            `Concurrently racing two independent Node.js processes yields exactly 1 success (main: ${mainResult.allowed}, worker: ${workerResult.allowed})`
+          );
+
+          const postRaceMetrics = await mainBudgetTracker.getMetricsAsync(multiProcessBudgetDate);
+          assert(postRaceMetrics.ttsUpstreamCalls === 5, 'Daily spending cap strictly held at 5 across independent processes');
+        } finally {
+          budgetWorker.child.kill('SIGTERM');
+          mainBudgetTracker.destroy();
+        }
       } finally {
         worker.child.kill('SIGTERM');
       }
