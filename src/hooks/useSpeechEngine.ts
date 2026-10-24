@@ -5,6 +5,7 @@ import {
   playChime,
   stopSpeaking as haltSpeaking,
   subscribeToSpeechState,
+  subscribeToSpeechPreparing,
   subscribeToVoiceUpdates,
   getOfflineCapableVoices,
   prewarmCoreAudioVocabulary,
@@ -20,6 +21,7 @@ interface UseSpeechEngineProps {
 
 export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseSpeechEngineProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPreparingSpeech, setIsPreparingSpeech] = useState(false);
   const [speakingText, setSpeakingText] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(
     typeof navigator !== 'undefined' ? !navigator.onLine : false
@@ -30,6 +32,10 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
     const unsubSpeech = subscribeToSpeechState((speaking, text) => {
       setIsSpeaking(speaking);
       setSpeakingText(text);
+    });
+
+    const unsubPreparing = subscribeToSpeechPreparing((preparing) => {
+      setIsPreparingSpeech(preparing);
     });
 
     const unsubVoices = subscribeToVoiceUpdates(() => {
@@ -48,6 +54,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
 
     return () => {
       unsubSpeech();
+      unsubPreparing();
       unsubVoices();
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -112,6 +119,7 @@ export function useSpeechEngine({ settings, isPremium, onLanguageChanged }: UseS
 
   return {
     isSpeaking,
+    isPreparingSpeech,
     speakingText,
     isOffline,
     offlineVoices,

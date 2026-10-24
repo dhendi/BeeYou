@@ -145,12 +145,105 @@ export const LANGUAGE_SUBJECT_PRONOUNS: Record<string, Record<string, string>> =
 };
 
 /**
+ * Canonical dictionary of built-in AAC dual-label vocabulary.
+ * Maps slash compounds to their primary word for consistent visual display and speech.
+ */
+export const DUAL_LABEL_VOCABULARY: Record<string, string> = {
+  'i / me': 'I',
+  'i/me': 'I',
+  'yes / good': 'Yes',
+  'yes/good': 'Yes',
+  'no / stop': 'No',
+  'no/stop': 'No',
+  'my / mine': 'My',
+  'my/mine': 'My',
+  'hurt / pain': 'Hurt',
+  'hurt/pain': 'Hurt',
+  'toilet / potty': 'Toilet',
+  'toilet/potty': 'Toilet',
+  'mom / dad': 'Mom',
+  'mom/dad': 'Mom',
+  'shot / vaccine': 'Shot',
+  'shot/vaccine': 'Shot',
+  'hot / fever': 'Hot',
+  'hot/fever': 'Hot',
+  'cold / chills': 'Cold',
+  'cold/chills': 'Cold',
+  'draw / color': 'Draw',
+  'draw/color': 'Draw',
+  'ipad / tablet': 'Tablet',
+  'ipad/tablet': 'Tablet',
+  'lunch / snack': 'Lunch',
+  'lunch/snack': 'Lunch',
+  'bill / check': 'Check',
+  'bill/check': 'Check',
+  'sleep / nap': 'Sleep',
+  'sleep/nap': 'Sleep',
+  'tablet / video': 'Tablet',
+  'tablet/video': 'Tablet',
+  'hurt / fell': 'Hurt',
+  'hurt/fell': 'Hurt',
+};
+
+const LEGITIMATE_SLASH_ABBREVIATIONS = new Set([
+  'and/or',
+  'w/o',
+  'w/',
+  'c/o',
+  'n/a',
+  'a/c',
+  'either/or',
+]);
+
+/**
+ * Normalizes dual-label AAC vocabulary (such as "I / Me" or "Yes / Good")
+ * to its primary word while safely preserving user-authored phrases with legitimate slashes
+ * (e.g., "tea and/or coffee", "w/o ice", "1/2 cup").
+ */
+export function normalizeDualLabel(text: string): string {
+  if (!text || typeof text !== 'string') return '';
+  const trimmed = text.trim();
+  const lower = trimmed.toLowerCase();
+
+  // 1. Direct dictionary match for known dual-label AAC tiles
+  if (DUAL_LABEL_VOCABULARY[lower]) {
+    return DUAL_LABEL_VOCABULARY[lower];
+  }
+
+  // 2. Ignore known abbreviations, fractions, and dates
+  if (
+    LEGITIMATE_SLASH_ABBREVIATIONS.has(lower) ||
+    /^\d+\/\d+/.test(trimmed) || // fractions (1/2) or dates (5/10/2026)
+    /^[a-zA-Z]\/[a-zA-Z]$/.test(trimmed) // single-letter slashes like w/o, c/o
+  ) {
+    return trimmed;
+  }
+
+  // 3. Match standalone dual-label vocabulary tile patterns:
+  // Must be exactly two words separated by " / " or "/" where each is a single alphabetic word
+  // e.g., "Word1 / Word2" or "Word1/Word2", but NOT multi-word phrases like "tea and/or coffee"
+  const dualMatch = trimmed.match(/^([a-zA-Z\u00C0-\u024F]+)\s*\/\s*([a-zA-Z\u00C0-\u024F]+)$/);
+  if (dualMatch) {
+    const first = dualMatch[1];
+    const second = dualMatch[2].toLowerCase();
+    // Verify it's not a known compound like "and/or"
+    if (second === 'or' && first.toLowerCase() === 'and') {
+      return trimmed;
+    }
+    return first;
+  }
+
+  return trimmed;
+}
+
+/**
  * Normalizes an AAC token to clean lowercase text
  */
 function cleanToken(token: string | AACItem): string {
   if (!token) return '';
-  if (typeof token === 'string') return token.trim().toLowerCase();
-  return (token.speechText || token.label || '').trim().toLowerCase();
+  const raw = typeof token === 'string' ? token : (token.speechText || token.label || '');
+  const normalized = normalizeDualLabel(raw.trim());
+  return normalized.toLowerCase();
 }
 
 /**

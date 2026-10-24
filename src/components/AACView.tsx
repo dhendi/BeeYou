@@ -58,6 +58,7 @@ import {
   Layers, 
   SlidersHorizontal,
   Search,
+  Loader2,
   AlertTriangle,
   Palette,
   Keyboard,
@@ -176,6 +177,7 @@ export const AACView: React.FC = () => {
     adventures,
     speak,
     isSpeaking,
+    isPreparingSpeech,
     stopSpeaking,
     activeTheme,
     aacActiveScene,
@@ -292,6 +294,7 @@ export const AACView: React.FC = () => {
   });
 
   const longPressTimerRef = useRef<any>(null);
+  const isTileLongPressRef = useRef<boolean>(false);
   const [inspectingSentence, setInspectingSentence] = useState<FavoriteSentence | null>(null);
   const longPressSentenceTimerRef = useRef<any>(null);
   const isSentenceLongPressRef = useRef<boolean>(false);
@@ -973,6 +976,12 @@ export const AACView: React.FC = () => {
   })();
 
   const handleTileClick = (item: AACItem) => {
+    // If a long press was triggered, suppress the subsequent click event to prevent inserting the base uninflected word
+    if (isTileLongPressRef.current) {
+      isTileLongPressRef.current = false;
+      return;
+    }
+
     const gestureTime = performance.now();
     if (isMaskingMode) {
       toggleMaskItem(item.id);
@@ -992,16 +1001,18 @@ export const AACView: React.FC = () => {
       } else {
         speak(speech, { gestureTime });
       }
+      if (settings.soundEffects) playChime('tap');
     } else {
       addToSentence({ ...item, originalLabel: item.originalLabel || item.label, label: t(item.label), speechText: speech }, { gestureTime });
     }
-    playChime('tap');
   };
 
   const handleLongPressStart = (item: AACItem) => {
+    isTileLongPressRef.current = false;
     const inflections = getWordInflections(item.label, item.colorType);
     if (inflections.length > 1) {
       longPressTimerRef.current = setTimeout(() => {
+        isTileLongPressRef.current = true;
         setInflectionTarget({ item, inflections });
         playChime('star');
       }, 450);
@@ -1013,6 +1024,10 @@ export const AACView: React.FC = () => {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
     }
+    // Safety fallback: reset long press guard after touch release window
+    setTimeout(() => {
+      isTileLongPressRef.current = false;
+    }, 150);
   };
 
   useEffect(() => {
@@ -1245,6 +1260,15 @@ export const AACView: React.FC = () => {
                       <span className="w-1.5 h-2.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                     <span>{t('STOP')}</span>
+                  </button>
+                ) : isPreparingSpeech ? (
+                  <button
+                    onClick={stopSpeaking}
+                    className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.7)] transition-all active:scale-95 bg-amber-200 hover:bg-amber-300 text-amber-950 border-2 border-amber-400 animate-pulse cursor-pointer"
+                    title="Cancel speech preparation"
+                  >
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-amber-900" />
+                    <span>{t('PREPARING...')}</span>
                   </button>
                 ) : (
                   <button

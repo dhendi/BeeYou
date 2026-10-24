@@ -3,6 +3,7 @@ import { getAudioContext, enableSilentModePlayback, unlockAudioHardwareNode } fr
 import { getVoicePersonaById, getDefaultVoicePersonaForLanguage, TTS_GENERATION_VERSION } from '../../data/voicePersonasData';
 import { t, getLanguage } from '../../services/translator';
 import { isPremiumSubscription } from '../../services/subscriptionService';
+import { normalizeDualLabel } from '../aacGrammar';
 import { synthesizeWithPiper, resolvePiperVoiceId, isPiperVoiceReady, isPiperVoiceReadySync, preloadPiperVoice, getLastPiperTimings } from '../../services/piperTtsService';
 
 // -------------------------------------------------------------
@@ -15,6 +16,7 @@ let activeSourceNode: AudioBufferSourceNode | null = null;
 let cachedVoices: SpeechSynthesisVoice[] = [];
 let voicesLoaded = false;
 const speechListeners: Set<(isSpeaking: boolean, text: string | null) => void> = new Set();
+const preparingListeners: Set<(isPreparing: boolean, text: string | null) => void> = new Set();
 const voiceUpdateListeners: Set<(voices: SpeechSynthesisVoice[]) => void> = new Set();
 export interface CachedAudioItem {
   blobUrl: string;
@@ -286,6 +288,23 @@ export function subscribeToSpeechState(listener: (isSpeaking: boolean, text: str
   return () => {
     speechListeners.delete(listener);
   };
+}
+
+export function subscribeToSpeechPreparing(listener: (isPreparing: boolean, text: string | null) => void) {
+  preparingListeners.add(listener);
+  return () => {
+    preparingListeners.delete(listener);
+  };
+}
+
+function notifySpeechPreparing(isPreparing: boolean, text: string | null) {
+  preparingListeners.forEach((listener) => {
+    try {
+      listener(isPreparing, text);
+    } catch (e) {
+      console.error(e);
+    }
+  });
 }
 
 export function subscribeToVoiceUpdates(listener: (voices: SpeechSynthesisVoice[]) => void) {
@@ -682,21 +701,30 @@ export function stripEmojis(text: string): string {
 
 /**
  * Format phrases for natural human speech cadence and conversational prosody without emojis.
- * Removes internal periods, commas, or unnatural stops that create robotic word-by-word cadences.
+ * Removes artificial internal word-by-word periods while preserving commas, decimals,
+ * abbreviations, and terminal question/exclamation marks.
  */
 export function formatForNaturalSpeech(text: string): string {
   let cleaned = stripEmojis(text.trim()).replace(/\s+/g, ' ');
   if (!cleaned) return '';
 
-  // Clean dual slash labels like "My/Mine", "My / Mine", "I / Me", "Yes / Good", "No / Stop"
-  // Speak ONLY the first word so it never repeats or pronounces "slash"
-  if (cleaned.includes('/')) {
-    cleaned = cleaned.split('/')[0].trim();
-  }
+  // Clean dual slash labels like "My / Mine", "I / Me", "Yes / Good", "No / Stop"
+  // Normalizes to the primary word while safely preserving user phrases like "tea and/or coffee"
+  cleaned = normalizeDualLabel(cleaned);
 
-  // Clean mid-phrase periods, semicolons, and unnatural internal stops that fragment speech into robotic word chunks.
-  // e.g., "I. want. a. drink." -> "I want a drink."
-  cleaned = cleaned.replace(/([a-zA-Z0-9\u00C0-\u024F])\s*[\.,;:]\s*(?=[a-zA-Z0-9\u00C0-\u024F])/g, (m, p1) => p1 + ' ');
+  // Temporarily protect standard abbreviations from having their periods stripped
+  cleaned = cleaned.replace(/\b(dr|mr|mrs|ms|prof|st|etc|vs)\./gi, '$1\uE000');
+  cleaned = cleaned.replace(/\b([a-zA-Z])\.([a-zA-Z])\./g, '$1\uE000$2\uE000'); // e.g. a.m., p.m., e.g., i.e.
+
+  // Remove artificial word-by-word internal periods (e.g., "I. want. a. drink." -> "I want a drink.")
+  // Note: Commas (lists, clauses), decimals (3.5), and multilingual punctuation are strictly preserved.
+  cleaned = cleaned.replace(/([a-zA-Z\u00C0-\u024F])\.(?=\s+[a-zA-Z0-9\u00C0-\u024F])/g, '$1');
+
+  // Convert robotic mid-phrase semicolons or colons between words into a natural comma pause
+  cleaned = cleaned.replace(/([a-zA-Z0-9\u00C0-\u024F])\s*[;:]\s*(?=[a-zA-Z0-9\u00C0-\u024F])/g, '$1, ');
+
+  // Restore protected abbreviation periods
+  cleaned = cleaned.replace(/\uE000/g, '.');
   cleaned = cleaned.replace(/\s+/g, ' ').trim();
 
   if (!cleaned) return '';
@@ -787,6 +815,7 @@ function stopAudioHardware() {
  */
 export function stopSpeaking() {
   latestSpeechRequestId++;
+  notifySpeechPreparing(false, null);
   stopAudioHardware();
 }
 
@@ -1143,11 +1172,13 @@ export async function speakText(
       const piperVoiceId = resolvePiperVoiceId(selectedPersonaId, normalizedLang);
       const piperReady = piperVoiceId ? isPiperVoiceReadySync(selectedPersonaId, normalizedLang) : false;
       if (piperReady) {
+        notifySpeechPreparing(true, formattedText);
         try {
           const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, {
             timeoutMs: 4500,
             isCancelled: () => speechId !== latestSpeechRequestId,
           });
+          notifySpeechPreparing(false, null);
           if (speechId !== latestSpeechRequestId) return;
           if (piperBuf && isAudioPayload(piperBuf)) {
             console.log(`[AAC Speech] Playing multi-word sentence via Piper on-device neural engine (${selectedPersonaId})`);
@@ -1173,6 +1204,7 @@ export async function speakText(
             if (played || speechId !== latestSpeechRequestId) return;
           }
         } catch (piperErr) {
+          notifySpeechPreparing(false, null);
           console.warn('[AAC Speech] Piper sentence synthesis error:', piperErr);
         }
       } else if (piperVoiceId) {
@@ -1267,11 +1299,13 @@ export async function speakText(
     const piperVoiceId = resolvePiperVoiceId(selectedPersonaId, normalizedLang);
     const piperReady = piperVoiceId ? isPiperVoiceReadySync(selectedPersonaId, normalizedLang) : false;
     if (piperReady) {
+      notifySpeechPreparing(true, formattedText);
       try {
         const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, {
           timeoutMs: 3500,
           isCancelled: () => speechId !== latestSpeechRequestId,
         });
+        notifySpeechPreparing(false, null);
         if (speechId !== latestSpeechRequestId) return;
         if (piperBuf && isAudioPayload(piperBuf)) {
           console.log(`[AAC Speech] Playing single word via Piper neural synthesis (${selectedPersonaId})`);
@@ -1295,6 +1329,7 @@ export async function speakText(
           if (played || speechId !== latestSpeechRequestId) return;
         }
       } catch (piperErr) {
+        notifySpeechPreparing(false, null);
         console.warn('[AAC Speech] Piper word synthesis error:', piperErr);
       }
     } else if (piperVoiceId) {

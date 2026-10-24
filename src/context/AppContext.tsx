@@ -153,6 +153,7 @@ export interface AppContextType {
 
   // TTS & Offline Engine
   isSpeaking: boolean;
+  isPreparingSpeech: boolean;
   speakingText: string | null;
   isOffline: boolean;
   stopSpeaking: () => void;
@@ -1208,6 +1209,7 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
 
     // TTS & Offline Engine
     isSpeaking: speechEngine.isSpeaking,
+    isPreparingSpeech: speechEngine.isPreparingSpeech,
     speakingText: speechEngine.speakingText,
     isOffline: speechEngine.isOffline,
     stopSpeaking: speechEngine.stopSpeaking,
