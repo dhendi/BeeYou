@@ -416,7 +416,7 @@ export async function preloadPiperVoice(
               console.warn(`[Piper TTS] Model warm-up notice for ${voiceId}:`, warmErr);
             }
           }),
-          new Promise((r) => setTimeout(r, 2000)),
+          new Promise((r) => setTimeout(r, 12000)),
         ]);
       }
 
@@ -493,7 +493,7 @@ export async function synthesizeWithPiper(
       return null;
     }
 
-    const effectiveTimeout = Math.min(timeoutMs || 2200, 2500);
+    const effectiveTimeout = timeoutMs || 4500;
 
     const timeoutPromise = new Promise<null>((resolve) =>
       setTimeout(() => resolve(null), effectiveTimeout)
@@ -563,4 +563,21 @@ export async function synthesizeWithPiper(
 
   inFlightPiperPredictions.set(cacheKey, predictionPromise);
   return predictionPromise;
+}
+
+// Client startup: pre-sync stored OPFS voices to localStorage for instant synchronous ready checks
+if (typeof window !== 'undefined') {
+  getPiperModule().then((piper) => {
+    if (piper && typeof piper.stored === 'function') {
+      return piper.stored().then((storedVoices: any) => {
+        if (Array.isArray(storedVoices)) {
+          for (const v of storedVoices) {
+            try {
+              localStorage.setItem(`beeyou_piper_ready_${v}`, '1');
+            } catch {}
+          }
+        }
+      });
+    }
+  }).catch(() => {});
 }

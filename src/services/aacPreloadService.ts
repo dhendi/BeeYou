@@ -139,8 +139,8 @@ export async function preloadVoicePack(
       console.warn('[AAC Preload] Piper voice model download notice:', piperErr);
     }
 
-    // If Piper on-device neural voice is verified ready, the engine is fully prepared
-    if (piperReady || isPiperVoiceReadySync(voiceToUse, normalizedLang)) {
+    // If Piper on-device neural voice is verified ready, or device is offline, mark ready with on-device speech
+    if (piperReady || isPiperVoiceReadySync(voiceToUse, normalizedLang) || (typeof navigator !== 'undefined' && !navigator.onLine)) {
       markVoicePackLoaded(personaId, normalizedLang);
       dispatchProgress({ loaded: total, total, percent: 100, currentPhrase: 'Ready' });
       return;

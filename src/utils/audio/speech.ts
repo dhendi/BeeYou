@@ -1050,7 +1050,7 @@ export async function speakText(
     // 1b. On-device Piper neural preview
     if (selectedPersonaId !== 'system') {
       try {
-        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 2200);
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 3500);
         if (speechId !== latestSpeechRequestId) return;
         if (piperBuf && isAudioPayload(piperBuf)) {
           const previewKey = `preview_piper_${selectedPersonaId}_${normalizedLang}`;
@@ -1065,23 +1065,7 @@ export async function speakText(
       }
     }
 
-    // 1c. Universal Edge TTS Stream Preview (/api/tts)
-    try {
-      const previewCacheKey = getTtsCacheKey(voiceToStream, normalizedLang, formattedText);
-      const previewStreamUrl = getTtsStreamUrl(voiceToStream, normalizedLang, formattedText);
-      const serverItem = await getOrFetchAudioItem(previewStreamUrl, previewCacheKey);
-      if (speechId !== latestSpeechRequestId) return;
-      if (serverItem && isAudioPayload(serverItem.buffer)) {
-        const played = await playAudioUrl(serverItem.buffer, formattedText, calibratedRate, speechId, undefined, previewCacheKey, (t) => {
-          recordReport('server_stream', false, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
-        });
-        if (played || speechId !== latestSpeechRequestId) return;
-      }
-    } catch (streamErr) {
-      console.warn('[AAC Speech] Preview server stream notice:', streamErr);
-    }
-
-    // 1d. Native Browser Speech Synthesis Fallback
+    // 1c. Native Browser Speech Synthesis Fallback
     if (speechId !== latestSpeechRequestId) return;
     const browserSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
       ...options,
@@ -1092,7 +1076,7 @@ export async function speakText(
     });
     if (browserSuccess || speechId !== latestSpeechRequestId) return;
 
-    // 1e. Sensory chime fallback if audio generation failed completely
+    // 1d. Sensory chime fallback if audio generation failed completely
     if (speechId === latestSpeechRequestId) {
       playChime('speak');
     }
@@ -1124,83 +1108,88 @@ export async function speakText(
     // Priority 1 for System Persona: Direct Native Browser SpeechSynthesis
     if (selectedPersonaId === 'system') {
       console.log(`[AAC Speech] Vocalizing sentence via primary system speech synthesis`);
+      let sysReported = false;
+      const reportSys = () => {
+        if (sysReported) return;
+        sysReported = true;
+        recordReport('system_speech', false, 0, 0, 0, 0, 0);
+      };
       const systemSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
         ...options,
         voicePersona: selectedPersonaId,
         pitch: calibratedPitch,
         rate: calibratedRate,
         force: options?.force,
+        onAudibleStart: reportSys,
       });
       if (systemSuccess || speechId !== latestSpeechRequestId) {
-        recordReport('system_speech', false, 0, 0, 0, 0, 0);
+        reportSys();
         return;
       }
     }
 
     // Priority 1: Piper On-Device Neural Synthesis (Preferred whole-sentence neural engine)
     if (selectedPersonaId !== 'system') {
-      try {
-        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 2200);
-        if (speechId !== latestSpeechRequestId) return;
-        if (piperBuf && isAudioPayload(piperBuf)) {
-          console.log(`[AAC Speech] Playing multi-word sentence via Piper on-device neural engine (${selectedPersonaId})`);
-          // Cache in L1 memory and L2 CacheStorage for subsequent 0ms replay
-          const blob = new Blob([piperBuf], { type: 'audio/wav' });
-          const blobUrl = URL.createObjectURL(blob);
-          audioMemoryCache.set(cacheKey, { blobUrl, buffer: piperBuf });
-          if (typeof window !== 'undefined' && 'caches' in window) {
-            const fullUrl = new URL(streamUrl, window.location.origin).href;
-            const resToCache = new Response(piperBuf.slice(0), {
-              headers: {
-                'content-type': 'audio/wav',
-                'cache-control': 'public, max-age=31536000, immutable',
-              },
+      const piperReady = isPiperVoiceReadySync(selectedPersonaId, normalizedLang);
+      if (piperReady) {
+        try {
+          const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 4500);
+          if (speechId !== latestSpeechRequestId) return;
+          if (piperBuf && isAudioPayload(piperBuf)) {
+            console.log(`[AAC Speech] Playing multi-word sentence via Piper on-device neural engine (${selectedPersonaId})`);
+            // Cache in L1 memory and L2 CacheStorage for subsequent 0ms replay
+            const blob = new Blob([piperBuf], { type: 'audio/wav' });
+            const blobUrl = URL.createObjectURL(blob);
+            audioMemoryCache.set(cacheKey, { blobUrl, buffer: piperBuf });
+            if (typeof window !== 'undefined' && 'caches' in window) {
+              const fullUrl = new URL(streamUrl, window.location.origin).href;
+              const resToCache = new Response(piperBuf.slice(0), {
+                headers: {
+                  'content-type': 'audio/wav',
+                  'cache-control': 'public, max-age=31536000, immutable',
+                },
+              });
+              caches.open(TTS_CACHE_NAME).then((c) => c.put(fullUrl, resToCache)).catch(() => {});
+            }
+
+            const { onnxInferenceMs, phonemizeMs } = getLastPiperTimings();
+            const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
+              recordReport('piper', false, 0, phonemizeMs, onnxInferenceMs, t.audioDecodeMs, t.playbackSchedulingMs);
             });
-            caches.open(TTS_CACHE_NAME).then((c) => c.put(fullUrl, resToCache)).catch(() => {});
+            if (played || speechId !== latestSpeechRequestId) return;
           }
-
-          const { onnxInferenceMs, phonemizeMs } = getLastPiperTimings();
-          const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
-            recordReport('piper', false, 0, phonemizeMs, onnxInferenceMs, t.audioDecodeMs, t.playbackSchedulingMs);
-          });
-          if (played || speechId !== latestSpeechRequestId) return;
+        } catch (piperErr) {
+          console.warn('[AAC Speech] Piper sentence synthesis error:', piperErr);
         }
-      } catch (piperErr) {
-        console.warn('[AAC Speech] Piper sentence synthesis error:', piperErr);
+      } else {
+        // Cold model not yet in OPFS: kick off background preload so future sentences use Piper
+        preloadPiperVoice(selectedPersonaId, normalizedLang).catch(() => {});
       }
     }
 
-    // Priority 2: Universal Edge TTS Stream (/api/tts)
-    try {
-      const serverItem = await getOrFetchAudioItem(streamUrl, cacheKey);
-      if (speechId !== latestSpeechRequestId) return;
-      if (serverItem && isAudioPayload(serverItem.buffer)) {
-        console.log(`[AAC Speech] Playing multi-word sentence via edge TTS stream (${voiceToStream})`);
-        const played = await playAudioUrl(serverItem.buffer, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
-          recordReport('server_stream', false, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
-        });
-        if (played || speechId !== latestSpeechRequestId) return;
-      }
-    } catch (streamErr) {
-      console.warn('[AAC Speech] Edge TTS multi-word stream notice:', streamErr);
-    }
-
-    // Priority 3: System text-to-speech fallback (single continuous utterance)
+    // Priority 2: Instant Device Speech Synthesis Fallback (Synchronous within active user gesture window)
     if (speechId !== latestSpeechRequestId) return;
     console.log(`[AAC Speech] Multi-word sentence falling back to system speech synthesis (${selectedPersonaId})`);
+    let systemReported = false;
+    const reportSystemAudible = () => {
+      if (systemReported) return;
+      systemReported = true;
+      recordReport('system_speech', false, 0, 0, 0, 0, 0);
+    };
     const systemSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
       ...options,
       voicePersona: selectedPersonaId,
       pitch: calibratedPitch,
       rate: calibratedRate,
       force: options?.force,
+      onAudibleStart: reportSystemAudible,
     });
     if (systemSuccess || speechId !== latestSpeechRequestId) {
-      recordReport('system_speech', false, 0, 0, 0, 0, 0);
+      reportSystemAudible();
       return;
     }
 
-    // Priority 4: Offline pre-recorded word stitching emergency fallback
+    // Priority 3: Offline pre-recorded word stitching emergency fallback
     console.log(`[AAC Speech] System speech synthesis unavailable or dropped, attempting offline word stitching (${voiceToStream})`);
     try {
       const stitchedWav = await synthesizeOfflineSentence(formattedText, voiceToStream, options?.sentenceWords);
@@ -1223,7 +1212,7 @@ export async function speakText(
 
   // 3. Single Word Vocalization
   // When an individual tile is tapped on the board, vocalizes using the consistent selected Piper voice.
-  // Priority: 1. Fast Local Cache (0ms instant playback) -> 2. Piper on-device neural synthesis -> 3. Edge TTS stream -> 4. System speech fallback
+  // Priority: 1. Fast Local Cache (0ms instant playback) -> 2. Piper on-device neural synthesis -> 3. System speech fallback
 
   // 3a. Local Audio Cache (L1 RAM + L2 CacheStorage)
   const localCachedSingle = await getLocalCacheOnly(streamUrl, cacheKey);
@@ -1239,67 +1228,82 @@ export async function speakText(
   // 3b. Priority for System Persona: Direct Native Browser SpeechSynthesis
   if (selectedPersonaId === 'system') {
     console.log(`[AAC Speech] Vocalizing single word via primary system speech synthesis`);
+    let sysReported = false;
+    const reportSys = () => {
+      if (sysReported) return;
+      sysReported = true;
+      recordReport('system_speech', false, 0, 0, 0, 0, 0);
+    };
     const singleSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
       ...options,
       voicePersona: selectedPersonaId,
       pitch: calibratedPitch,
       rate: calibratedRate,
       force: options?.force,
+      onAudibleStart: reportSys,
     });
     if (singleSuccess || speechId !== latestSpeechRequestId) {
-      recordReport('system_speech', false, 0, 0, 0, 0, 0);
+      reportSys();
       return;
     }
   }
 
   // 3c. Piper On-Device Neural Synthesis for Single Word
   if (selectedPersonaId !== 'system') {
-    try {
-      const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 1200);
-      if (speechId !== latestSpeechRequestId) return;
-      if (piperBuf && isAudioPayload(piperBuf)) {
-        console.log(`[AAC Speech] Playing single word via Piper neural synthesis (${selectedPersonaId})`);
-        const { onnxInferenceMs, phonemizeMs } = getLastPiperTimings();
-        const blob = new Blob([piperBuf], { type: 'audio/wav' });
-        const blobUrl = URL.createObjectURL(blob);
-        audioMemoryCache.set(cacheKey, { blobUrl, buffer: piperBuf });
-        const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
-          recordReport('piper', false, 0, phonemizeMs, onnxInferenceMs, t.audioDecodeMs, t.playbackSchedulingMs);
-        });
-        if (played || speechId !== latestSpeechRequestId) return;
+    const piperReady = isPiperVoiceReadySync(selectedPersonaId, normalizedLang);
+    if (piperReady) {
+      try {
+        const piperBuf = await synthesizeWithPiper(formattedText, selectedPersonaId, normalizedLang, 3500);
+        if (speechId !== latestSpeechRequestId) return;
+        if (piperBuf && isAudioPayload(piperBuf)) {
+          console.log(`[AAC Speech] Playing single word via Piper neural synthesis (${selectedPersonaId})`);
+          const { onnxInferenceMs, phonemizeMs } = getLastPiperTimings();
+          const blob = new Blob([piperBuf], { type: 'audio/wav' });
+          const blobUrl = URL.createObjectURL(blob);
+          audioMemoryCache.set(cacheKey, { blobUrl, buffer: piperBuf });
+          if (typeof window !== 'undefined' && 'caches' in window) {
+            const fullUrl = new URL(streamUrl, window.location.origin).href;
+            const resToCache = new Response(piperBuf.slice(0), {
+              headers: {
+                'content-type': 'audio/wav',
+                'cache-control': 'public, max-age=31536000, immutable',
+              },
+            });
+            caches.open(TTS_CACHE_NAME).then((c) => c.put(fullUrl, resToCache)).catch(() => {});
+          }
+          const played = await playAudioUrl(piperBuf, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
+            recordReport('piper', false, 0, phonemizeMs, onnxInferenceMs, t.audioDecodeMs, t.playbackSchedulingMs);
+          });
+          if (played || speechId !== latestSpeechRequestId) return;
+        }
+      } catch (piperErr) {
+        console.warn('[AAC Speech] Piper word synthesis error:', piperErr);
       }
-    } catch (piperErr) {
-      console.warn('[AAC Speech] Piper word synthesis error:', piperErr);
+    } else {
+      // Cold model not yet in OPFS: kick off background preload so future words use Piper
+      preloadPiperVoice(selectedPersonaId, normalizedLang).catch(() => {});
     }
   }
 
-  // 3c. Universal Edge TTS Stream for Single Word (/api/tts)
-  try {
-    const serverItem = await getOrFetchAudioItem(streamUrl, cacheKey);
-    if (speechId !== latestSpeechRequestId) return;
-    if (serverItem && isAudioPayload(serverItem.buffer)) {
-      console.log(`[AAC Speech] Playing single word via edge TTS stream (${voiceToStream})`);
-      const played = await playAudioUrl(serverItem.buffer, formattedText, calibratedRate, speechId, undefined, cacheKey, (t) => {
-        recordReport('server_stream', false, 0, 0, 0, t.audioDecodeMs, t.playbackSchedulingMs);
-      });
-      if (played || speechId !== latestSpeechRequestId) return;
-    }
-  } catch (streamErr) {
-    console.warn('[AAC Speech] Edge TTS single-word stream notice:', streamErr);
-  }
-
-  // 3d. Native Browser SpeechSynthesis Fallback:
+  // 3d. Native Browser SpeechSynthesis Fallback (Synchronous within active user gesture window):
   if (speechId !== latestSpeechRequestId) return;
   console.log(`[AAC Speech] Single word falling back to system speech synthesis (${selectedPersonaId})`);
+  let singleSystemReported = false;
+  const reportSingleAudible = () => {
+    if (singleSystemReported) return;
+    singleSystemReported = true;
+    recordReport('system_speech', false, 0, 0, 0, 0, 0);
+  };
   const singleSuccess = await speakWithBrowserSpeechSynthesis(formattedText, {
     ...options,
     voicePersona: selectedPersonaId,
     pitch: calibratedPitch,
     rate: calibratedRate,
     force: options?.force,
+    onAudibleStart: reportSingleAudible,
   });
   if (singleSuccess) {
-    recordReport('system_speech', false, 0, 0, 0, 0, 0);
+    reportSingleAudible();
   } else if (speechId === latestSpeechRequestId) {
     playChime('speak');
   }
@@ -1941,6 +1945,7 @@ function speakWithBrowserSpeechSynthesis(
     lang?: string;
     voicePersona?: string;
     force?: boolean;
+    onAudibleStart?: () => void;
   }
 ): Promise<boolean> {
   enableSilentModePlayback();
@@ -1989,6 +1994,8 @@ function speakWithBrowserSpeechSynthesis(
         fr: 'fr-FR',
         fr_ca: 'fr-CA',
         de: 'de-DE',
+        it: 'it-IT',
+        pt: 'pt-BR',
         el: 'el-GR',
         ru: 'ru-RU',
         vi: 'vi-VN',
@@ -2076,6 +2083,7 @@ function speakWithBrowserSpeechSynthesis(
           startWatchdogTimer = null;
         }
         notifySpeechState(true, formattedText);
+        options?.onAudibleStart?.();
       };
 
       utterance.onend = () => {
@@ -2109,6 +2117,7 @@ function speakWithBrowserSpeechSynthesis(
                 startWatchdogTimer = null;
               }
               notifySpeechState(true, formattedText);
+              options?.onAudibleStart?.();
             };
             fallbackUtterance.onend = () => {
               activeUtterancesSet.delete(fallbackUtterance);
@@ -2263,11 +2272,10 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
     (lang === 'zh' || lang.startsWith('zh')) ? 'zh' :
     lang.substring(0, 2);
 
-  // System native voice runs directly on-device hardware with 0ms latency for English;
-  // For non-English languages, cloud multilingual TTS is used, so we pre-warm it!
-  if (selectedPersonaId === 'system' && normalizedLang === 'en') return;
+  // System native voice runs directly on-device hardware with 0ms latency
+  if (selectedPersonaId === 'system') return;
 
-  const voiceToUse = selectedPersonaId === 'system' ? 'amy' : selectedPersonaId;
+  const voiceToUse = selectedPersonaId;
   const throttleKey = `${voiceToUse}_${normalizedLang}`;
   const now = Date.now();
   if (prewarmThrottleMap.has(throttleKey) && now - prewarmThrottleMap.get(throttleKey)! < 60000) {
@@ -2278,9 +2286,10 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
   const idleFn = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 100));
   idleFn(async () => {
     // Populate RAM and local cache using the consistent selected Piper neural voice during idle time
-    if (selectedPersonaId !== 'system' && isPiperVoiceReadySync(voiceToUse, normalizedLang)) {
+    if (isPiperVoiceReadySync(voiceToUse, normalizedLang)) {
       for (const phrase of CORE_AAC_VOCABULARY) {
-        const formatted = formatForNaturalSpeech(phrase);
+        const translated = normalizedLang !== 'en' ? t(phrase) : phrase;
+        const formatted = formatForNaturalSpeech(translated);
         if (!formatted) continue;
         const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
         const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
@@ -2306,22 +2315,6 @@ export async function prewarmCoreAudioVocabulary(persona: string = 'system', lan
           }
         } catch {}
         await new Promise((r) => setTimeout(r, 60));
-      }
-      return;
-    }
-
-    // For non-English: fetch each core vocabulary item and cache to L1 RAM & L2 CacheStorage
-    for (const phrase of CORE_AAC_VOCABULARY) {
-      const translated = t(phrase);
-      const formatted = formatForNaturalSpeech(translated);
-      if (!formatted) continue;
-      const cacheKey = getTtsCacheKey(voiceToUse, normalizedLang, formatted);
-      const streamUrl = getTtsStreamUrl(voiceToUse, normalizedLang, formatted);
-      const local = await getLocalCacheOnly(streamUrl, cacheKey);
-      if (!local) {
-        try {
-          await getOrFetchAudioItem(streamUrl, cacheKey);
-        } catch {}
       }
     }
   });

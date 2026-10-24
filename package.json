@@ -14,6 +14,7 @@
     "test:ratelimits": "npx firebase-tools emulators:exec --only database,firestore \"tsx scripts/test-rate-limits-and-quotas.ts\"",
     "test:rules": "npx firebase-tools emulators:exec --only database,firestore,storage \"tsx scripts/test-firebase-rules.ts\"",
     "test:android": "tsx scripts/test-android-network-security.ts",
+    "test:speech": "tsx scripts/test-aac-speech-verification.ts",
     "cap:sync": "npm run build && cap sync",
     "cap:ios": "cap open ios",
     "cap:android": "cap open android",
