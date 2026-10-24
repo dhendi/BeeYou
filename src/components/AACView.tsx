@@ -1,23 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { AACCategory, AACItem, FavoriteSentence } from '../types';
-import { getThemedAacEmoji } from '../data/themesData';
-import { getFavoriteSentenceSticker } from '../data/defaultData';
-import { resolveAacImageUrl, MULBERRY_ATTRIBUTION } from '../services/symbolService';
+import { AAC_SCENES } from '../data/aacScenesData';
+import {
+  QuickChatModal,
+  MulberryAttributionModal,
+  SentenceInspectorModal,
+  GrammarInflectionsModal,
+  AACSentenceStrip,
+  AACFavoritesView,
+  AACTileGrid,
+  AACToolbar,
+} from './aac';
 const AACSymbolPickerModal = React.lazy(() => import('./AACSymbolPickerModal').then((m) => ({ default: m.AACSymbolPickerModal })));
 const AACWordEditorModal = React.lazy(() => import('./AACWordEditorModal').then((m) => ({ default: m.AACWordEditorModal })));
 const AACGuideModal = React.lazy(() => import('./AACGuideModal').then((m) => ({ default: m.AACGuideModal })));
 import { CoachMarksOverlay, CoachMarkStep } from './CoachMarksOverlay';
 import { getWordInflections, WordInflection } from '../utils/aacInflections';
-import { autocorrectAacGrammar } from '../utils/aacGrammar';
 import { t } from '../services/translator';
-import { AccessibleTile } from './common/AccessibleTile';
 import { ParentalGateModal } from './common/ParentalGateModal';
 import { GridStage, DwellMode, AACButtonSize, STORAGE_KEYS } from '../types/aac';
 
 import { getGrammaticalCategoryLabel } from '../utils/aacHelpers';
 import { registerScrollCancel } from '../utils/touchScrollGuard';
-import { prewarmCoreAudioVocabulary, prewarmPhrases } from '../utils/audio/speech';
+import { prewarmPhrases } from '../utils/audio/speech';
 import { isVoicePackLoaded } from '../services/aacPreloadService';
 import { preloadPiperVoice } from '../services/piperTtsService';
 export { getGrammaticalCategoryLabel };
@@ -49,112 +55,9 @@ const AAC_COACH_STEPS: CoachMarkStep[] = [
     mascotHint: 'Add new words anytime!',
   },
 ];
-import { 
-  Volume2, 
-  Trash2, 
-  Delete, 
-  BookmarkPlus, 
-  Lightbulb, 
-  Layers, 
-  SlidersHorizontal,
-  Search,
-  Loader2,
-  AlertTriangle,
-  Palette,
-  Keyboard,
-  MapPin,
-  Globe,
-  X,
-  Heart,
-  Plus,
-  Edit3,
-  Zap,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Folder,
-  ArrowLeft,
-  Home as HomeIcon,
-  Eye,
-  EyeOff,
-  MessageSquare,
-  MessageCircle,
-  HelpCircle,
-  ShieldAlert,
-  Info,
-  ExternalLink,
-  Mic,
-  Maximize2
-} from 'lucide-react';
+import { AlertTriangle, X } from 'lucide-react';
 import { playChime, playAudioUrl } from '../utils/audio';
 
-// Standard Category Folder Tiles (Proloquo2Go Style)
-const FOLDER_TILES: Array<{
-  id: string;
-  category: AACCategory;
-  label: string;
-  stickerSrc: string;
-  symbolId: string;
-  arasaacId?: number;
-  colorType: 'noun' | 'subject' | 'social';
-  description: string;
-}> = [
-  { id: 'folder-food', category: 'food', label: 'Food', stickerSrc: '/assets/stickers/aac_food.webp', symbolId: 'food', colorType: 'noun', description: 'Meals, snacks & treats' },
-  { id: 'folder-drinks', category: 'drinks', label: 'Drinks', stickerSrc: '/assets/stickers/aac_drinks.webp', symbolId: 'drink', colorType: 'noun', description: 'Water, juice & milk' },
-  { id: 'folder-activities', category: 'activities', label: 'Play & Fun', stickerSrc: '/assets/stickers/aac_activities.webp', symbolId: 'play_,_to', colorType: 'noun', description: 'Games, toys & hobbies' },
-  { id: 'folder-places', category: 'places', label: 'Places', stickerSrc: '/assets/stickers/aac_places.webp', symbolId: 'house', colorType: 'noun', description: 'Home, school & park' },
-  { id: 'folder-people', category: 'people', label: 'People', stickerSrc: '/assets/stickers/aac_people.webp', symbolId: 'good_person', colorType: 'subject', description: 'Family, friends & helpers' },
-  { id: 'folder-feelings', category: 'feelings', label: 'Feelings', stickerSrc: '/assets/stickers/aac_feelings.webp', symbolId: 'happy_man', colorType: 'noun', description: 'Emotions & how I feel' },
-  { id: 'folder-sensory', category: 'sensory', label: 'Sensory', stickerSrc: '/assets/stickers/aac_sensory.webp', symbolId: 'sensory_room', colorType: 'noun', description: 'Sensory needs & regulation' },
-];
-
-const QUICK_CHAT_GROUPS = [
-  {
-    title: 'Greetings & Social',
-    phrases: [
-      { text: 'Hello!', emoji: '👋' },
-      { text: 'Good morning!', emoji: '☀️' },
-      { text: 'Goodbye!', emoji: '👋' },
-      { text: 'See you later!', emoji: '⭐' },
-      { text: 'How are you?', emoji: '😊' },
-      { text: 'Have a great day!', emoji: '🌟' },
-    ],
-  },
-  {
-    title: 'Polite & Courteous',
-    phrases: [
-      { text: 'Please.', emoji: '🙏' },
-      { text: 'Thank you very much!', emoji: '❤️' },
-      { text: "You're welcome!", emoji: '😊' },
-      { text: 'Excuse me please.', emoji: '✋' },
-      { text: 'I love you!', emoji: '💖' },
-      { text: 'Yes, please.', emoji: '✅' },
-      { text: 'No, thank you.', emoji: '⛔' },
-    ],
-  },
-  {
-    title: 'Self-Advocacy & AAC',
-    phrases: [
-      { text: 'I communicate using this AAC tablet. Please give me time to reply.', emoji: '🗣️' },
-      { text: 'I do not understand. Can you explain differently?', emoji: '❓' },
-      { text: 'Can you please repeat that?', emoji: '🔄' },
-      { text: 'It is too loud and overwhelming here.', emoji: '🔊' },
-      { text: 'I need a sensory quiet break.', emoji: '🛋️' },
-      { text: 'Please do not rush me.', emoji: '⏳' },
-    ],
-  },
-  {
-    title: 'Urgent Needs',
-    phrases: [
-      { text: 'Please help me right now!', emoji: '🆘' },
-      { text: 'Stop that please, I do not like it.', emoji: '🛑' },
-      { text: 'I need to use the restroom.', emoji: '🚽' },
-      { text: 'Something hurts.', emoji: '🤕' },
-      { text: 'I feel sick to my tummy.', emoji: '🤢' },
-      { text: 'I want my caregiver or mom.', emoji: '👩' },
-    ],
-  },
-];
 
 export const AACView: React.FC = () => {
   const {
@@ -272,10 +175,6 @@ export const AACView: React.FC = () => {
     }
   }, [settings?.voicePersona, settings?.language, isPremium]);
 
-  // Favorite Sentences Form state
-  const [newFavSentenceText, setNewFavSentenceText] = useState('');
-  const [newFavSentenceEmoji, setNewFavSentenceEmoji] = useState('💬');
-  const [showAddSentenceForm, setShowAddSentenceForm] = useState(false);
 
   // Proloquo2Go Features State
   const [showQuickChatDrawer, setShowQuickChatDrawer] = useState(false);
@@ -342,197 +241,7 @@ export const AACView: React.FC = () => {
   const isFairytaleTheme = activeTheme?.category === 'fantasy' || activeTheme?.id === 'theme-fantasy';
   const isRacingTheme = activeTheme?.category === 'racing' || activeTheme?.id === 'theme-racing';
 
-  const TRAIN_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/train_star_gold.webp',
-    favorite_sentences: '/assets/stickers/train_speech_bubble.webp',
-    favorites: '/assets/stickers/train_reward_trophy.webp',
-    food: '/assets/stickers/train_pizza_slice.webp',
-    drinks: '/assets/stickers/train_canteen_flask.webp',
-    activities: '/assets/stickers/train_game_controller.webp',
-    places: '/assets/stickers/train_home_station.webp',
-    people: '/assets/stickers/train_child_persona.webp',
-    feelings: '/assets/stickers/train_lantern_heart.webp',
-    sensory: '/assets/stickers/train_ear_defenders.webp',
-    all: '/assets/stickers/train_conductor_logbook.webp',
-  };
 
-  const TRAIN_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/train_pizza_slice.webp',
-    'folder-drinks': '/assets/stickers/train_canteen_flask.webp',
-    'folder-activities': '/assets/stickers/train_game_controller.webp',
-    'folder-places': '/assets/stickers/train_home_station.webp',
-    'folder-people': '/assets/stickers/train_child_persona.webp',
-    'folder-feelings': '/assets/stickers/train_lantern_heart.webp',
-    'folder-sensory': '/assets/stickers/train_ear_defenders.webp',
-  };
-
-  const SPACE_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/space_star_gold.webp',
-    favorite_sentences: '/assets/stickers/space_speech_bubble.webp',
-    favorites: '/assets/stickers/space_reward_trophy.webp',
-    food: '/assets/stickers/space_pizza_slice.webp',
-    drinks: '/assets/stickers/space_routine_water_drink.webp',
-    activities: '/assets/stickers/space_game_controller.webp',
-    places: '/assets/stickers/space_home_house.webp',
-    people: '/assets/stickers/space_child_persona.webp',
-    feelings: '/assets/stickers/space_fav_love_heart.webp',
-    sensory: '/assets/stickers/space_sensory_loud_noise.webp',
-    all: '/assets/stickers/space_homework_study.webp',
-  };
-
-  const SPACE_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/space_pizza_slice.webp',
-    'folder-drinks': '/assets/stickers/space_routine_water_drink.webp',
-    'folder-activities': '/assets/stickers/space_game_controller.webp',
-    'folder-places': '/assets/stickers/space_home_house.webp',
-    'folder-people': '/assets/stickers/space_child_persona.webp',
-    'folder-feelings': '/assets/stickers/space_fav_love_heart.webp',
-    'folder-sensory': '/assets/stickers/space_sensory_loud_noise.webp',
-  };
-
-  const TURTLE_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/turtle_lily_pads.webp',
-    favorite_sentences: '/assets/stickers/turtle_leaf_speech_bubbles.webp',
-    favorites: '/assets/stickers/turtle_lotus_trophy.webp',
-    food: '/assets/stickers/turtle_garden_sandwich.webp',
-    drinks: '/assets/stickers/turtle_bamboo_drink_cup.webp',
-    activities: '/assets/stickers/turtle_game_controller.webp',
-    places: '/assets/stickers/turtle_moss_cottage_home.webp',
-    people: '/assets/stickers/turtle_child_persona_hatchling.webp',
-    feelings: '/assets/stickers/turtle_shell_heart.webp',
-    sensory: '/assets/stickers/turtle_shell_headphones.webp',
-    all: '/assets/stickers/turtle_botanical_folder.webp',
-  };
-
-  const TURTLE_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/turtle_garden_sandwich.webp',
-    'folder-drinks': '/assets/stickers/turtle_bamboo_drink_cup.webp',
-    'folder-activities': '/assets/stickers/turtle_game_controller.webp',
-    'folder-places': '/assets/stickers/turtle_moss_cottage_home.webp',
-    'folder-people': '/assets/stickers/turtle_child_persona_hatchling.webp',
-    'folder-feelings': '/assets/stickers/turtle_shell_heart.webp',
-    'folder-sensory': '/assets/stickers/turtle_shell_headphones.webp',
-  };
-
-  const DINO_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/dino_amber_star_core.webp',
-    favorite_sentences: '/assets/stickers/dino_jungle_speech_bubbles.webp',
-    favorites: '/assets/stickers/dino_amber_fossil_trophy.webp',
-    food: '/assets/stickers/dino_flatbread_sandwich.webp',
-    drinks: '/assets/stickers/dino_stone_tumbler_water.webp',
-    activities: '/assets/stickers/dino_game_controller.webp',
-    places: '/assets/stickers/dino_cavern_retreat.webp',
-    people: '/assets/stickers/dino_child_persona_rex.webp',
-    feelings: '/assets/stickers/dino_triceratops_frill_heart.webp',
-    sensory: '/assets/stickers/dino_ammonite_headphones.webp',
-    all: '/assets/stickers/dino_palm_leaf_folio.webp',
-  };
-
-  const DINO_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/dino_flatbread_sandwich.webp',
-    'folder-drinks': '/assets/stickers/dino_stone_tumbler_water.webp',
-    'folder-activities': '/assets/stickers/dino_game_controller.webp',
-    'folder-places': '/assets/stickers/dino_cavern_retreat.webp',
-    'folder-people': '/assets/stickers/dino_child_persona_rex.webp',
-    'folder-feelings': '/assets/stickers/dino_triceratops_frill_heart.webp',
-    'folder-sensory': '/assets/stickers/dino_ammonite_headphones.webp',
-  };
-
-  const FROG_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/frog_lotus_star_core.webp',
-    favorite_sentences: '/assets/stickers/frog_lily_speech_bubbles.webp',
-    favorites: '/assets/stickers/frog_lotus_reward_trophy.webp',
-    food: '/assets/stickers/frog_garden_sandwich.webp',
-    drinks: '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
-    activities: '/assets/stickers/frog_game_controller.webp',
-    places: '/assets/stickers/frog_willow_hollow_retreat.webp',
-    people: '/assets/stickers/frog_child_persona.webp',
-    feelings: '/assets/stickers/frog_lily_pad_heart.webp',
-    sensory: '/assets/stickers/frog_pebble_headphones.webp',
-    all: '/assets/stickers/frog_reed_school_folder.webp',
-  };
-
-  const FROG_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/frog_garden_sandwich.webp',
-    'folder-drinks': '/assets/stickers/frog_dewdrop_bamboo_cup.webp',
-    'folder-activities': '/assets/stickers/frog_game_controller.webp',
-    'folder-places': '/assets/stickers/frog_willow_hollow_retreat.webp',
-    'folder-people': '/assets/stickers/frog_child_persona.webp',
-    'folder-feelings': '/assets/stickers/frog_lily_pad_heart.webp',
-    'folder-sensory': '/assets/stickers/frog_pebble_headphones.webp',
-  };
-
-  const OCEAN_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/ocean_golden_starfish_badge.webp',
-    favorite_sentences: '/assets/stickers/ocean_bubble_speech_bubble.webp',
-    favorites: '/assets/stickers/ocean_golden_seahorse_trophy.webp',
-    food: '/assets/stickers/ocean_pizza_slice.webp',
-    drinks: '/assets/stickers/ocean_seaglass_canteen.webp',
-    activities: '/assets/stickers/ocean_game_controller.webp',
-    places: '/assets/stickers/ocean_home_house.webp',
-    people: '/assets/stickers/ocean_child_persona.webp',
-    feelings: '/assets/stickers/ocean_seaglass_heart.webp',
-    sensory: '/assets/stickers/ocean_conch_headphones.webp',
-    all: '/assets/stickers/ocean_captains_logbook.webp',
-  };
-
-  const OCEAN_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/ocean_pizza_slice.webp',
-    'folder-drinks': '/assets/stickers/ocean_seaglass_canteen.webp',
-    'folder-activities': '/assets/stickers/ocean_game_controller.webp',
-    'folder-places': '/assets/stickers/ocean_home_house.webp',
-    'folder-people': '/assets/stickers/ocean_child_persona.webp',
-    'folder-feelings': '/assets/stickers/ocean_seaglass_heart.webp',
-    'folder-sensory': '/assets/stickers/ocean_conch_headphones.webp',
-  };
-
-  const FAIRYTALE_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/fairytale_star_gold.webp',
-    favorite_sentences: '/assets/stickers/fairytale_speech_bubble.webp',
-    favorites: '/assets/stickers/fairytale_reward_trophy.webp',
-    food: '/assets/stickers/fairytale_pizza_slice.webp',
-    drinks: '/assets/stickers/fairytale_routine_water_drink.webp',
-    activities: '/assets/stickers/fairytale_game_controller.webp',
-    places: '/assets/stickers/fairytale_home_house.webp',
-    people: '/assets/stickers/fairytale_child_persona.webp',
-    feelings: '/assets/stickers/fairytale_fav_love_heart.webp',
-    sensory: '/assets/stickers/fairytale_star_melody_headphones.webp',
-    all: '/assets/stickers/fairytale_spellbook_journal.webp',
-  };
-
-  const FAIRYTALE_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/fairytale_pizza_slice.webp',
-    'folder-drinks': '/assets/stickers/fairytale_routine_water_drink.webp',
-    'folder-activities': '/assets/stickers/fairytale_game_controller.webp',
-    'folder-places': '/assets/stickers/fairytale_home_house.webp',
-    'folder-people': '/assets/stickers/fairytale_child_persona.webp',
-    'folder-feelings': '/assets/stickers/fairytale_fav_love_heart.webp',
-    'folder-sensory': '/assets/stickers/fairytale_star_melody_headphones.webp',
-  };
-
-  const RACING_CATEGORY_ICONS: Record<string, string> = {
-    core: '/assets/stickers/racing_star_gold.webp',
-    favorite_sentences: '/assets/stickers/racing_speech_bubble.webp',
-    favorites: '/assets/stickers/racing_reward_trophy.webp',
-    food: '/assets/stickers/racing_pizza_slice.webp',
-    drinks: '/assets/stickers/racing_water_drink.webp',
-    activities: '/assets/stickers/racing_game_controller.webp',
-    places: '/assets/stickers/racing_home_house.webp',
-    people: '/assets/stickers/racing_persona.webp',
-    feelings: '/assets/stickers/racing_heart.webp',
-    sensory: '/assets/stickers/racing_teen_headphones.webp',
-    all: '/assets/stickers/racing_homework_study.webp',
-  };
-
-  const RACING_FOLDER_STICKERS: Record<string, string> = {
-    'folder-food': '/assets/stickers/racing_pizza_slice.webp',
-    'folder-drinks': '/assets/stickers/racing_water_drink.webp',
-    'folder-activities': '/assets/stickers/racing_game_controller.webp',
-    'folder-places': '/assets/stickers/racing_home_house.webp',
-    'folder-people': '/assets/stickers/racing_persona.webp',
-    'folder-feelings': '/assets/stickers/racing_heart.webp',
-    'folder-sensory': '/assets/stickers/racing_teen_headphones.webp',
-  };
 
   const categories: { id: AACCategory | 'all' | 'favorite_sentences'; label: string; iconSrc: string }[] = [
     { id: 'core', label: t('Core Board'), iconSrc: '/assets/stickers/aac_core.webp' },
@@ -625,277 +334,6 @@ export const AACView: React.FC = () => {
         return 'bg-slate-50 hover:bg-slate-100 text-slate-900 border-2 border-slate-300 ring-slate-300 font-semibold';
     }
   };
-
-  // Context Scene Switcher data with comprehensive situational vocabulary
-  const AAC_SCENES: Array<{ 
-    id: string; 
-    label: string; 
-    emoji: string; 
-    description: string;
-    phrases: string[]; 
-    items: AACItem[];
-  }> = [
-    {
-      id: 'doctor',
-      label: 'Doctor / Clinic',
-      emoji: '🏥',
-      description: 'Hospital, doctor visits, symptoms, body parts, and comfort',
-      phrases: [
-        'This hurts right here.',
-        'I am scared and need comfort.',
-        'Please be gentle with me.',
-        'Can my caregiver stay with me?',
-        'I need a sensory break.',
-        'I do not want a shot.',
-        'My tummy hurts.',
-        'I have a headache.',
-        'I need to use the restroom.',
-        'How much longer will this take?'
-      ],
-      items: [
-        { id: 'sc-doc-1', label: 'Doctor', speechText: 'Doctor', emoji: '👩‍⚕️', category: 'people', colorType: 'subject', motorIndex: 1 },
-        { id: 'sc-doc-2', label: 'Nurse', speechText: 'Nurse', emoji: '👨‍⚕️', category: 'people', colorType: 'subject', motorIndex: 2 },
-        { id: 'sc-doc-3', label: 'Mom / Dad', speechText: 'I want my caregiver with me', emoji: '👩', category: 'people', colorType: 'subject', motorIndex: 3 },
-        { id: 'sc-doc-4', label: 'Hurt / Pain', speechText: 'This hurts', emoji: '🤕', category: 'feelings', colorType: 'emergency', motorIndex: 4 },
-        { id: 'sc-doc-5', label: 'Tummy', speechText: 'My tummy hurts', emoji: '🤰', category: 'feelings', colorType: 'noun', motorIndex: 5 },
-        { id: 'sc-doc-6', label: 'Head', speechText: 'My head hurts', emoji: '💆', category: 'feelings', colorType: 'noun', motorIndex: 6 },
-        { id: 'sc-doc-7', label: 'Throat', speechText: 'My throat hurts', emoji: '😮', category: 'feelings', colorType: 'noun', motorIndex: 7 },
-        { id: 'sc-doc-8', label: 'Ear', speechText: 'My ear hurts', emoji: '👂', category: 'feelings', colorType: 'noun', motorIndex: 8 },
-        { id: 'sc-doc-9', label: 'Stethoscope', speechText: 'Listen to my heart with stethoscope', emoji: '🩺', category: 'personal', colorType: 'noun', motorIndex: 9 },
-        { id: 'sc-doc-10', label: 'Medicine', speechText: 'I need my medicine', emoji: '💊', category: 'personal', colorType: 'noun', motorIndex: 10 },
-        { id: 'sc-doc-11', label: 'Bandage', speechText: 'I need a bandaid bandage', emoji: '🩹', category: 'personal', colorType: 'noun', motorIndex: 11 },
-        { id: 'sc-doc-12', label: 'Shot / Vaccine', speechText: 'I am worried about getting a shot', emoji: '💉', category: 'personal', colorType: 'emergency', motorIndex: 12 },
-        { id: 'sc-doc-13', label: 'Hot / Fever', speechText: 'I feel hot and have a fever', emoji: '🌡️', category: 'feelings', colorType: 'adjective', motorIndex: 13 },
-        { id: 'sc-doc-14', label: 'Cold / Chills', speechText: 'I feel cold and shivering', emoji: '🥶', category: 'feelings', colorType: 'adjective', motorIndex: 14 },
-        { id: 'sc-doc-15', label: 'Scared', speechText: 'I feel scared', emoji: '😨', category: 'feelings', colorType: 'emergency', motorIndex: 15 },
-        { id: 'sc-doc-16', label: 'Gentle Please', speechText: 'Please be gentle', emoji: '🤲', category: 'core', colorType: 'social', motorIndex: 16 },
-        { id: 'sc-doc-17', label: 'Breathe', speechText: 'Take a deep breath', emoji: '🫁', category: 'actions', colorType: 'verb', motorIndex: 17 },
-        { id: 'sc-doc-18', label: 'Open Mouth', speechText: 'Open mouth wide', emoji: '👄', category: 'actions', colorType: 'verb', motorIndex: 18 },
-        { id: 'sc-doc-19', label: 'Need a Break', speechText: 'I need to pause and take a break', emoji: '🧘', category: 'sensory', colorType: 'emergency', motorIndex: 19 },
-        { id: 'sc-doc-20', label: 'Restroom', speechText: 'I need to use the bathroom', emoji: '🚽', category: 'places', colorType: 'noun', motorIndex: 20 },
-        { id: 'sc-doc-21', label: 'Help', speechText: 'Please help me', emoji: '🆘', category: 'core', colorType: 'emergency', motorIndex: 21 },
-        { id: 'sc-doc-22', label: 'All Done', speechText: 'Are we all done now?', emoji: '✅', category: 'core', colorType: 'adjective', motorIndex: 22 },
-        { id: 'sc-doc-23', label: 'Water', speechText: 'Can I have a sip of water', emoji: '💧', category: 'drinks', colorType: 'noun', motorIndex: 23 },
-        { id: 'sc-doc-24', label: 'Thank You', speechText: 'Thank you doctor', emoji: '🙏', category: 'core', colorType: 'social', motorIndex: 24 },
-      ]
-    },
-    {
-      id: 'school',
-      label: 'School',
-      emoji: '🏫',
-      description: 'Classroom tools, learning tasks, teachers, and recess',
-      phrases: [
-        'I need help with my work.',
-        'I do not understand.',
-        'May I go to the restroom?',
-        'I need a sensory quiet break.',
-        'Can you please repeat that?',
-        'It is my turn now.',
-        'Can I have a drink of water?',
-        'I am finished with my task.',
-        'The classroom is too loud.',
-        'I am ready for recess.'
-      ],
-      items: [
-        { id: 'sc-sch-1', label: 'Teacher', speechText: 'Teacher', emoji: '🧑‍🏫', category: 'people', colorType: 'subject', motorIndex: 1 },
-        { id: 'sc-sch-2', label: 'Friend', speechText: 'My friend and classmate', emoji: '🤝', category: 'people', colorType: 'subject', motorIndex: 2 },
-        { id: 'sc-sch-3', label: 'Help Me', speechText: 'I need help please', emoji: '🆘', category: 'core', colorType: 'emergency', motorIndex: 3 },
-        { id: 'sc-sch-4', label: 'Raise Hand', speechText: 'I am raising my hand with an answer', emoji: '🙋', category: 'actions', colorType: 'verb', motorIndex: 4 },
-        { id: 'sc-sch-5', label: 'Read', speechText: 'Read a book', emoji: '📖', category: 'activities', colorType: 'verb', motorIndex: 5 },
-        { id: 'sc-sch-6', label: 'Write', speechText: 'Write with pencil', emoji: '✏️', category: 'activities', colorType: 'verb', motorIndex: 6 },
-        { id: 'sc-sch-7', label: 'Draw / Color', speechText: 'Draw and color pictures', emoji: '🖍️', category: 'activities', colorType: 'verb', motorIndex: 7 },
-        { id: 'sc-sch-8', label: 'Scissors', speechText: 'Cut paper with scissors', emoji: '✂️', category: 'activities', colorType: 'noun', motorIndex: 8 },
-        { id: 'sc-sch-9', label: 'Book', speechText: 'School book', emoji: '📚', category: 'activities', colorType: 'noun', motorIndex: 9 },
-        { id: 'sc-sch-10', label: 'Desk', speechText: 'Sit at my desk', emoji: '🪑', category: 'places', colorType: 'noun', motorIndex: 10 },
-        { id: 'sc-sch-11', label: 'Backpack', speechText: 'My school backpack', emoji: '🎒', category: 'personal', colorType: 'noun', motorIndex: 11 },
-        { id: 'sc-sch-12', label: 'iPad / Tablet', speechText: 'Use my tablet device', emoji: '📱', category: 'activities', colorType: 'noun', motorIndex: 12 },
-        { id: 'sc-sch-13', label: 'Circle Time', speechText: 'Circle time on rug', emoji: '⭕', category: 'activities', colorType: 'noun', motorIndex: 13 },
-        { id: 'sc-sch-14', label: 'Recess', speechText: 'Recess play outside', emoji: '🛝', category: 'activities', colorType: 'verb', motorIndex: 14 },
-        { id: 'sc-sch-15', label: 'Lunch / Snack', speechText: 'Time for lunch and snack', emoji: '🥪', category: 'food', colorType: 'noun', motorIndex: 15 },
-        { id: 'sc-sch-16', label: 'Water', speechText: 'Water fountain drink', emoji: '💧', category: 'drinks', colorType: 'noun', motorIndex: 16 },
-        { id: 'sc-sch-17', label: 'Quiet Please', speechText: 'Please keep it quiet', emoji: '🤫', category: 'sensory', colorType: 'social', motorIndex: 17 },
-        { id: 'sc-sch-18', label: 'My Turn', speechText: 'It is my turn', emoji: '👉', category: 'core', colorType: 'social', motorIndex: 18 },
-        { id: 'sc-sch-19', label: 'Your Turn', speechText: 'It is your turn', emoji: '👈', category: 'core', colorType: 'social', motorIndex: 19 },
-        { id: 'sc-sch-20', label: 'Sensory Break', speechText: 'I need a sensory headphone break', emoji: '🎧', category: 'sensory', colorType: 'emergency', motorIndex: 20 },
-        { id: 'sc-sch-21', label: 'Restroom', speechText: 'May I go to the bathroom', emoji: '🚽', category: 'places', colorType: 'noun', motorIndex: 21 },
-        { id: 'sc-sch-22', label: 'Finished', speechText: 'I am all finished with my work', emoji: '✅', category: 'core', colorType: 'adjective', motorIndex: 22 },
-        { id: 'sc-sch-23', label: 'Good Job', speechText: 'Good job!', emoji: '⭐', category: 'core', colorType: 'social', motorIndex: 23 },
-        { id: 'sc-sch-24', label: 'Go Home', speechText: 'Time to go home on the bus', emoji: '🚌', category: 'places', colorType: 'noun', motorIndex: 24 },
-      ]
-    },
-    {
-      id: 'restaurant',
-      label: 'Restaurant',
-      emoji: '🍽️',
-      description: 'Ordering food, drinks, and dining out vocabulary',
-      phrases: [
-        'Can I have the menu please?',
-        'I would like pizza.',
-        'Can I have water with ice?',
-        'This food is delicious.',
-        'I need a break.',
-        'Can we sit somewhere quieter?',
-        'I need to use the restroom.',
-        'Can I have the check please?',
-        'Thank you for the food.',
-        'I am all done eating.'
-      ],
-      items: [
-        { id: 'sc-rest-1', label: 'I Want', speechText: 'I want', emoji: '🙋', category: 'actions', colorType: 'subject', motorIndex: 1 },
-        { id: 'sc-rest-2', label: 'Order', speechText: 'I would like to order', emoji: '🗣️', category: 'actions', colorType: 'verb', motorIndex: 2 },
-        { id: 'sc-rest-3', label: 'Eat', speechText: 'Eat food', emoji: '🍽️', category: 'actions', colorType: 'verb', motorIndex: 3 },
-        { id: 'sc-rest-4', label: 'Drink', speechText: 'Drink', emoji: '🥤', category: 'drinks', colorType: 'verb', motorIndex: 4 },
-        { id: 'sc-rest-5', label: 'Water', speechText: 'Can I have water please', emoji: '💧', category: 'drinks', colorType: 'noun', motorIndex: 5 },
-        { id: 'sc-rest-6', label: 'Juice', speechText: 'Can I have juice', emoji: '🧃', category: 'drinks', colorType: 'noun', motorIndex: 6 },
-        { id: 'sc-rest-7', label: 'Menu', speechText: 'Can I see the menu', emoji: '📜', category: 'food', colorType: 'noun', motorIndex: 7 },
-        { id: 'sc-rest-8', label: 'Pizza', speechText: 'I want pizza', emoji: '🍕', category: 'food', colorType: 'noun', motorIndex: 8 },
-        { id: 'sc-rest-9', label: 'Burger', speechText: 'I want a burger', emoji: '🍔', category: 'food', colorType: 'noun', motorIndex: 9 },
-        { id: 'sc-rest-10', label: 'Fries', speechText: 'I want french fries', emoji: '🍟', category: 'food', colorType: 'noun', motorIndex: 10 },
-        { id: 'sc-rest-11', label: 'Nuggets', speechText: 'I want chicken nuggets', emoji: '🍗', category: 'food', colorType: 'noun', motorIndex: 11 },
-        { id: 'sc-rest-12', label: 'Pasta', speechText: 'I want pasta noodles', emoji: '🍝', category: 'food', colorType: 'noun', motorIndex: 12 },
-        { id: 'sc-rest-13', label: 'Ice Cream', speechText: 'I want ice cream dessert', emoji: '🍨', category: 'food', colorType: 'noun', motorIndex: 13 },
-        { id: 'sc-rest-14', label: 'Fork & Spoon', speechText: 'I need a fork and spoon', emoji: '🍴', category: 'food', colorType: 'noun', motorIndex: 14 },
-        { id: 'sc-rest-15', label: 'Napkin', speechText: 'I need a napkin', emoji: '🧻', category: 'personal', colorType: 'noun', motorIndex: 15 },
-        { id: 'sc-rest-16', label: 'Bill / Check', speechText: 'Can we get the check please', emoji: '🧾', category: 'personal', colorType: 'noun', motorIndex: 16 },
-        { id: 'sc-rest-17', label: 'Yummy', speechText: 'This is yummy and delicious', emoji: '😋', category: 'feelings', colorType: 'adjective', motorIndex: 17 },
-        { id: 'sc-rest-18', label: 'More Please', speechText: 'Can I have more please', emoji: '🤲', category: 'core', colorType: 'social', motorIndex: 18 },
-        { id: 'sc-rest-19', label: 'Thank You', speechText: 'Thank you very much', emoji: '🙏', category: 'core', colorType: 'social', motorIndex: 19 },
-        { id: 'sc-rest-20', label: 'All Done', speechText: 'I am all done eating', emoji: '✋', category: 'core', colorType: 'adjective', motorIndex: 20 },
-        { id: 'sc-rest-21', label: 'Too Loud', speechText: 'It is too loud in here', emoji: '🔊', category: 'sensory', colorType: 'emergency', motorIndex: 21 },
-        { id: 'sc-rest-22', label: 'Restroom', speechText: 'I need to use the restroom', emoji: '🚽', category: 'places', colorType: 'noun', motorIndex: 22 },
-        { id: 'sc-rest-23', label: 'Take Home Box', speechText: 'Can we take this home in a box', emoji: '🥡', category: 'food', colorType: 'noun', motorIndex: 23 },
-        { id: 'sc-rest-24', label: 'Go Home', speechText: 'I am ready to go home', emoji: '🏠', category: 'places', colorType: 'verb', motorIndex: 24 },
-      ]
-    },
-    {
-      id: 'car',
-      label: 'Car Trip',
-      emoji: '🚗',
-      description: 'Vehicle controls, comfort, motion sickness, and stops',
-      phrases: [
-        'Are we there yet?',
-        'I need to stop for the bathroom.',
-        'I feel sick to my tummy.',
-        'Can we turn on music?',
-        'Can you open the window?',
-        'It is too hot in the car.',
-        'It is too cold in the car.',
-        'How much longer will it take?',
-        'Can I have a snack?',
-        'I am tired and want to sleep.'
-      ],
-      items: [
-        { id: 'sc-car-1', label: 'Seatbelt', speechText: 'Buckle my seatbelt', emoji: '💺', category: 'personal', colorType: 'noun', motorIndex: 1 },
-        { id: 'sc-car-2', label: 'Window', speechText: 'Open the car window', emoji: '🪟', category: 'personal', colorType: 'noun', motorIndex: 2 },
-        { id: 'sc-car-3', label: 'Music', speechText: 'Play my favorite music', emoji: '🎵', category: 'activities', colorType: 'noun', motorIndex: 3 },
-        { id: 'sc-car-4', label: 'Drive', speechText: 'Drive the car', emoji: '🚗', category: 'actions', colorType: 'noun', motorIndex: 4 },
-        { id: 'sc-car-5', label: 'Stop', speechText: 'Please stop the car', emoji: '🛑', category: 'core', colorType: 'emergency', motorIndex: 5 },
-        { id: 'sc-car-6', label: 'Go', speechText: 'Keep going', emoji: '🟢', category: 'core', colorType: 'verb', motorIndex: 6 },
-        { id: 'sc-car-7', label: 'Are We There?', speechText: 'Are we there yet?', emoji: '🗺️', category: 'core', colorType: 'social', motorIndex: 7 },
-        { id: 'sc-car-8', label: 'Cold Air', speechText: 'Turn on the cold air AC', emoji: '❄️', category: 'sensory', colorType: 'verb', motorIndex: 8 },
-        { id: 'sc-car-9', label: 'Heater', speechText: 'Turn on the warm heater', emoji: '🔥', category: 'sensory', colorType: 'verb', motorIndex: 9 },
-        { id: 'sc-car-10', label: 'Snack', speechText: 'Can I have a car snack', emoji: '🥨', category: 'food', colorType: 'noun', motorIndex: 10 },
-        { id: 'sc-car-11', label: 'Water', speechText: 'Can I have my water bottle', emoji: '💧', category: 'drinks', colorType: 'noun', motorIndex: 11 },
-        { id: 'sc-car-12', label: 'Car Sick', speechText: 'I feel nauseous and car sick', emoji: '🤢', category: 'feelings', colorType: 'emergency', motorIndex: 12 },
-        { id: 'sc-car-13', label: 'Bathroom Stop', speechText: 'I need a restroom stop right away', emoji: '🚻', category: 'places', colorType: 'emergency', motorIndex: 13 },
-        { id: 'sc-car-14', label: 'Headphones', speechText: 'I want my headphones', emoji: '🎧', category: 'sensory', colorType: 'noun', motorIndex: 14 },
-        { id: 'sc-car-15', label: 'Look Outside', speechText: 'Look out the window', emoji: '👀', category: 'actions', colorType: 'verb', motorIndex: 15 },
-        { id: 'sc-car-16', label: 'Sleep / Nap', speechText: 'I am taking a nap', emoji: '😴', category: 'feelings', colorType: 'verb', motorIndex: 16 },
-        { id: 'sc-car-17', label: 'Too Long', speechText: 'This drive is taking too long', emoji: '⏳', category: 'feelings', colorType: 'adjective', motorIndex: 17 },
-        { id: 'sc-car-18', label: 'Happy', speechText: 'I am enjoying the drive', emoji: '😊', category: 'feelings', colorType: 'adjective', motorIndex: 18 },
-        { id: 'sc-car-19', label: 'Arrived', speechText: 'We arrived! We are here!', emoji: '🏁', category: 'places', colorType: 'adjective', motorIndex: 19 },
-        { id: 'sc-car-20', label: 'Open Door', speechText: 'Please open my car door', emoji: '🚪', category: 'actions', colorType: 'verb', motorIndex: 20 },
-        { id: 'sc-car-21', label: 'Park', speechText: 'Park the car', emoji: '🅿️', category: 'places', colorType: 'verb', motorIndex: 21 },
-        { id: 'sc-car-22', label: 'Too Bumpy', speechText: 'The road is too bumpy', emoji: '📳', category: 'sensory', colorType: 'adjective', motorIndex: 22 },
-        { id: 'sc-car-23', label: 'Tablet / Video', speechText: 'Can I watch a video on tablet', emoji: '📱', category: 'activities', colorType: 'noun', motorIndex: 23 },
-        { id: 'sc-car-24', label: 'Thank You', speechText: 'Thank you for driving', emoji: '🙏', category: 'core', colorType: 'social', motorIndex: 24 },
-      ]
-    },
-    {
-      id: 'playground',
-      label: 'Playground',
-      emoji: '🛝',
-      description: 'Outdoor play equipment, turn taking, friends, and safety',
-      phrases: [
-        'Can I play on the slide?',
-        'Can you push me on the swing?',
-        'It is my turn now.',
-        'Stop that please, I do not like it.',
-        'I fell down and need help.',
-        'Can I have a drink of water?',
-        'I am hot from playing.',
-        'Let us play tag together.',
-        'I am ready to go home.',
-        'This is so much fun!'
-      ],
-      items: [
-        { id: 'sc-play-1', label: 'Slide', speechText: 'Go down the slide', emoji: '🛝', category: 'activities', colorType: 'noun', motorIndex: 1 },
-        { id: 'sc-play-2', label: 'Swing', speechText: 'Push me on the swing', emoji: '🎪', category: 'activities', colorType: 'noun', motorIndex: 2 },
-        { id: 'sc-play-3', label: 'Sandbox', speechText: 'Play in the sandbox', emoji: '🏖️', category: 'activities', colorType: 'noun', motorIndex: 3 },
-        { id: 'sc-play-4', label: 'Climb', speechText: 'Climb the playground ladder', emoji: '🧗', category: 'activities', colorType: 'verb', motorIndex: 4 },
-        { id: 'sc-play-5', label: 'Run', speechText: 'Run around the grass', emoji: '🏃', category: 'actions', colorType: 'verb', motorIndex: 5 },
-        { id: 'sc-play-6', label: 'Ball', speechText: 'Throw and catch the ball', emoji: '⚽', category: 'activities', colorType: 'noun', motorIndex: 6 },
-        { id: 'sc-play-7', label: 'Tag Game', speechText: 'Let us play tag chase', emoji: '🏃‍♂️', category: 'activities', colorType: 'verb', motorIndex: 7 },
-        { id: 'sc-play-8', label: 'My Turn', speechText: 'It is my turn to play', emoji: '🙋', category: 'core', colorType: 'social', motorIndex: 8 },
-        { id: 'sc-play-9', label: 'Your Turn', speechText: 'It is your turn to go', emoji: '👉', category: 'core', colorType: 'social', motorIndex: 9 },
-        { id: 'sc-play-10', label: 'Push Me', speechText: 'Please push me higher', emoji: '🤲', category: 'actions', colorType: 'verb', motorIndex: 10 },
-        { id: 'sc-play-11', label: 'High Up', speechText: 'So high up in the air', emoji: '⬆️', category: 'core', colorType: 'adjective', motorIndex: 11 },
-        { id: 'sc-play-12', label: 'Fast', speechText: 'Going super fast', emoji: '⏩', category: 'core', colorType: 'adjective', motorIndex: 12 },
-        { id: 'sc-play-13', label: 'Careful', speechText: 'Be careful and safe', emoji: '⚠️', category: 'core', colorType: 'emergency', motorIndex: 13 },
-        { id: 'sc-play-14', label: 'Water Break', speechText: 'I need a water break', emoji: '💧', category: 'drinks', colorType: 'noun', motorIndex: 14 },
-        { id: 'sc-play-15', label: 'Snack', speechText: 'Time for park snack', emoji: '🍎', category: 'food', colorType: 'noun', motorIndex: 15 },
-        { id: 'sc-play-16', label: 'Hot Sun', speechText: 'It is very sunny and hot', emoji: '☀️', category: 'sensory', colorType: 'adjective', motorIndex: 16 },
-        { id: 'sc-play-17', label: 'Hurt / Fell', speechText: 'I fell down and hurt myself', emoji: '🤕', category: 'feelings', colorType: 'emergency', motorIndex: 17 },
-        { id: 'sc-play-18', label: 'Help Please', speechText: 'Help me please', emoji: '🛟', category: 'core', colorType: 'emergency', motorIndex: 18 },
-        { id: 'sc-play-19', label: 'Friends', speechText: 'Playing with my friends', emoji: '👥', category: 'people', colorType: 'subject', motorIndex: 19 },
-        { id: 'sc-play-20', label: 'Go Home', speechText: 'I am ready to go home now', emoji: '🏠', category: 'places', colorType: 'verb', motorIndex: 20 },
-        { id: 'sc-play-21', label: 'Sit Down', speechText: 'Sit on the park bench', emoji: '🪑', category: 'actions', colorType: 'verb', motorIndex: 21 },
-        { id: 'sc-play-22', label: 'Fun!', speechText: 'This is so much fun!', emoji: '🎉', category: 'feelings', colorType: 'social', motorIndex: 22 },
-        { id: 'sc-play-23', label: 'Restroom', speechText: 'I need the park bathroom', emoji: '🚽', category: 'places', colorType: 'noun', motorIndex: 23 },
-        { id: 'sc-play-24', label: 'All Done', speechText: 'All done playing', emoji: '✅', category: 'core', colorType: 'adjective', motorIndex: 24 },
-      ]
-    },
-    {
-      id: 'store',
-      label: 'Store',
-      emoji: '🛒',
-      description: 'Grocery shopping, buying items, paying, and waiting',
-      phrases: [
-        'Can I push the shopping cart?',
-        'Can we buy this please?',
-        'I want to look at the toys.',
-        'It is too crowded and loud.',
-        'How much does this cost?',
-        'Can I hold the basket?',
-        'I am tired of waiting in line.',
-        'I need to use the restroom.',
-        'Can I help scan the items?',
-        'Are we ready to pay and leave?'
-      ],
-      items: [
-        { id: 'sc-sto-1', label: 'Shopping Cart', speechText: 'Push the shopping cart', emoji: '🛒', category: 'personal', colorType: 'noun', motorIndex: 1 },
-        { id: 'sc-sto-2', label: 'Buy', speechText: 'Buy items', emoji: '💳', category: 'actions', colorType: 'verb', motorIndex: 2 },
-        { id: 'sc-sto-3', label: 'Money', speechText: 'Pay with money', emoji: '💵', category: 'personal', colorType: 'noun', motorIndex: 3 },
-        { id: 'sc-sto-4', label: 'Snacks', speechText: 'I want to pick a snack', emoji: '🍪', category: 'food', colorType: 'noun', motorIndex: 4 },
-        { id: 'sc-sto-5', label: 'Fruit', speechText: 'Fresh fruit and apples', emoji: '🍎', category: 'food', colorType: 'noun', motorIndex: 5 },
-        { id: 'sc-sto-6', label: 'Milk', speechText: 'Get milk from the dairy fridge', emoji: '🥛', category: 'drinks', colorType: 'noun', motorIndex: 6 },
-        { id: 'sc-sto-7', label: 'Bread', speechText: 'Loaf of bread', emoji: '🍞', category: 'food', colorType: 'noun', motorIndex: 7 },
-        { id: 'sc-sto-8', label: 'Toy', speechText: 'Can I look at the toy aisle?', emoji: '🧸', category: 'activities', colorType: 'noun', motorIndex: 8 },
-        { id: 'sc-sto-9', label: 'Look', speechText: 'Look at the shelves', emoji: '👀', category: 'actions', colorType: 'verb', motorIndex: 9 },
-        { id: 'sc-sto-10', label: 'Hold Item', speechText: 'Can I hold this item in my hands?', emoji: '🤲', category: 'actions', colorType: 'verb', motorIndex: 10 },
-        { id: 'sc-sto-11', label: 'Can I Have?', speechText: 'Can I please have this?', emoji: '🙋', category: 'core', colorType: 'social', motorIndex: 11 },
-        { id: 'sc-sto-12', label: 'Too Crowded', speechText: 'The store is too crowded and overwhelming', emoji: '👥', category: 'sensory', colorType: 'emergency', motorIndex: 12 },
-        { id: 'sc-sto-13', label: 'Wait in Line', speechText: 'Waiting patiently in checkout line', emoji: '⏳', category: 'actions', colorType: 'verb', motorIndex: 13 },
-        { id: 'sc-sto-14', label: 'Bag', speechText: 'Put items in the grocery bag', emoji: '🛍️', category: 'personal', colorType: 'noun', motorIndex: 14 },
-        { id: 'sc-sto-15', label: 'Help', speechText: 'Need help finding something', emoji: '🆘', category: 'core', colorType: 'emergency', motorIndex: 15 },
-        { id: 'sc-sto-16', label: 'Restroom', speechText: 'Where is the store restroom?', emoji: '🚽', category: 'places', colorType: 'noun', motorIndex: 16 },
-        { id: 'sc-sto-17', label: 'All Done', speechText: 'We are all finished shopping', emoji: '✅', category: 'core', colorType: 'adjective', motorIndex: 17 },
-        { id: 'sc-sto-18', label: 'Leave Store', speechText: 'Walk out to the car', emoji: '🚪', category: 'places', colorType: 'verb', motorIndex: 18 },
-        { id: 'sc-sto-19', label: 'Cashier', speechText: 'Say hello to the store cashier', emoji: '🧑‍💼', category: 'people', colorType: 'subject', motorIndex: 19 },
-        { id: 'sc-sto-20', label: 'Thank You', speechText: 'Thank you and have a nice day', emoji: '🙏', category: 'core', colorType: 'social', motorIndex: 20 },
-      ]
-    },
-  ];
 
   const activeSceneData = aacActiveScene ? AAC_SCENES.find((s) => s.id === aacActiveScene) : null;
 
@@ -1062,7 +500,7 @@ export const AACView: React.FC = () => {
         {activeSceneData && (
           <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-2 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900">
-              <span>{activeSceneData.emoji}</span>
+              <span className="px-1.5 py-0.5 rounded bg-indigo-200/60 text-indigo-900 font-extrabold text-[10px] uppercase tracking-wide">Scene</span>
               <span>{activeSceneData.label} — Quick Phrases</span>
             </div>
             <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
@@ -1080,270 +518,27 @@ export const AACView: React.FC = () => {
         )}
 
         {/* 2. SENTENCE BUILDER STRIP (Message Window) */}
-        {!isSentenceBarCollapsed && (
-          <section
-            data-tour="aac-sentence-strip"
-            aria-label="Sentence builder"
-            className={`w-full ${
-              isFrogTheme
-                ? 'bg-lime-50/70 border-lime-300/80'
-                : isDinoTheme
-                ? 'bg-green-50/70 border-green-300/80'
-                : isTurtleTheme
-                ? 'bg-emerald-50/70 border-emerald-300/80'
-                : isFairytaleTheme
-                ? 'bg-pink-50/70 border-pink-300/80'
-                : isRacingTheme
-                ? 'bg-zinc-100/90 border-zinc-300/90'
-                : isOceanTheme
-                ? 'bg-cyan-50/70 border-cyan-300/80'
-                : isTrainTheme
-                ? 'bg-sky-50/70 border-sky-300/80'
-                : isSpaceTheme
-                ? 'bg-purple-50/70 border-purple-300/80'
-                : 'bg-[#FCF9F2] border-[#E0D8CB]'
-            } rounded-3xl border-2 shadow-[0_4px_16px_rgba(0,0,0,0.04)] p-2.5 animate-in fade-in duration-150`}
-          >
-            <div className="flex items-center gap-2">
-              {/* Sentence Display Area (Debossed Silicone Slot) */}
-              <button 
-                type="button"
-                onClick={sentence.length > 0 ? () => speakSentence(performance.now()) : undefined}
-                aria-label={sentence.length > 0 ? `Speak sentence: ${autocorrectAacGrammar(sentence, settings.language)}` : 'Sentence builder. Tap words below to build sentence'}
-                className={`flex-1 min-w-0 min-h-[56px] sm:min-h-[62px] ${
-                  isFrogTheme
-                    ? 'bg-lime-100/50 border-lime-300/60'
-                    : isDinoTheme
-                    ? 'bg-green-100/50 border-green-300/60'
-                    : isTurtleTheme
-                    ? 'bg-emerald-100/50 border-emerald-300/60'
-                    : isFairytaleTheme
-                    ? 'bg-pink-100/50 border-pink-300/60'
-                    : isRacingTheme
-                    ? 'bg-zinc-200/60 border-zinc-300/80'
-                    : isOceanTheme
-                    ? 'bg-cyan-100/50 border-cyan-300/60'
-                    : isTrainTheme
-                    ? 'bg-sky-100/50 border-sky-300/60'
-                    : isSpaceTheme
-                    ? 'bg-purple-100/50 border-purple-300/60'
-                    : 'bg-[#EFE9DF] border-[#E0D8CB]'
-                } border-2 rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shadow-[inset_0_2px_5px_rgba(0,0,0,0.07)] transition-colors text-left focus-visible:ring-4 focus-visible:outline-none ${
-                  sentence.length > 0
-                    ? isFrogTheme
-                      ? 'cursor-pointer hover:bg-lime-100/70'
-                      : isDinoTheme
-                      ? 'cursor-pointer hover:bg-green-100/70'
-                      : isTurtleTheme
-                      ? 'cursor-pointer hover:bg-emerald-100/70'
-                      : 'cursor-pointer hover:bg-[#EAE3D7]'
-                    : ''
-                }`}
-                title={sentence.length > 0 ? "Tap message window to speak sentence aloud" : undefined}
-              >
-                {sentence.length === 0 ? (
-                  <div className={`flex items-center gap-2 ${isFrogTheme ? 'text-lime-800/70' : isDinoTheme ? 'text-green-800/70' : isTurtleTheme ? 'text-emerald-800/70' : 'text-[#8C7E72]'} text-xs sm:text-sm font-semibold px-2 select-none truncate`}>
-                    {instantSpeakMode ? (
-                      <span className={`${isFrogTheme ? 'text-lime-800' : isDinoTheme ? 'text-green-800' : isTurtleTheme ? 'text-emerald-800' : 'text-[#A76318]'} font-bold flex items-center gap-1`}>
-                        <Zap className="w-4 h-4" /> Instant Speak is ON — tap any word to hear aloud
-                      </span>
-                    ) : (
-                      <span className="truncate">Tap words below to build a sentence...</span>
-                    )}
-                  </div>
-                ) : (
-                  <>
-                    {sentence.map((item, idx) => (
-                      <div
-                        key={`${item.id}-${idx}`}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] animate-in fade-in zoom-in-95 duration-150 select-none shrink-0 ${getColorStyles(
-                          item.colorType
-                        )}`}
-                      >
-                        <img
-                          src={resolveAacImageUrl(item)}
-                          alt=""
-                          aria-hidden="true"
-                          className="w-6 h-6 object-contain rounded shrink-0 pointer-events-none"
-                          onError={(e) => {
-                            const target = e.currentTarget as HTMLElement;
-                            target.style.display = 'none';
-                            if (target.nextElementSibling) {
-                              (target.nextElementSibling as HTMLElement).style.display = 'inline';
-                            }
-                          }}
-                        />
-                        <span aria-hidden="true" className="hidden text-base select-none shrink-0">{item.emoji || '💬'}</span>
-                        <span className="font-bold text-xs sm:text-sm tracking-tight">{item.label}</span>
-                        {item.audioDataUrl && (
-                          <span className="w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-2xs" title={`Recorded by ${item.audioRecordedBy || 'Voice'}`}>
-                            <Mic className="w-2.5 h-2.5" />
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                    {sentence.length > 1 && (
-                      <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${
-                        isFrogTheme
-                          ? 'bg-lime-500/15 border-lime-300 text-lime-950'
-                          : isDinoTheme
-                          ? 'bg-green-500/15 border-green-300 text-green-950'
-                          : isTurtleTheme
-                          ? 'bg-emerald-500/15 border-emerald-300 text-emerald-950'
-                          : 'bg-amber-500/15 border-amber-300 text-amber-950'
-                      } border font-black text-xs shrink-0 animate-in fade-in select-none`}>
-                        <Lightbulb className={`w-3.5 h-3.5 ${isFrogTheme ? 'text-lime-700' : isDinoTheme ? 'text-green-700' : isTurtleTheme ? 'text-emerald-700' : 'text-amber-600'} shrink-0`} />
-                        <span>&quot;{autocorrectAacGrammar(sentence, settings.language)}&quot;</span>
-                      </div>
-                    )}
-                  </>
-                )}
-              </button>
-
-              {/* Controls: Backspace, Clear, Speak, Save, Collapse */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                {sentence.length > 0 && (
-                  <>
-                    <button
-                      onClick={removeLastFromSentence}
-                      className={`p-2.5 rounded-2xl ${
-                        isFrogTheme
-                          ? 'bg-lime-100/70 hover:bg-lime-100 text-lime-900 border-lime-300'
-                          : isDinoTheme
-                          ? 'bg-green-100/70 hover:bg-green-100 text-green-900 border-green-300'
-                          : isTurtleTheme
-                          ? 'bg-emerald-100/70 hover:bg-emerald-100 text-emerald-900 border-emerald-300'
-                          : 'bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#5D5045] border-[#E0D8CB]'
-                      } border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer`}
-                      title="Remove last word"
-                      aria-label="Backspace"
-                    >
-                      <Delete className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button
-                      onClick={clearSentence}
-                      className="p-2.5 rounded-2xl bg-[#FBEAE9] hover:bg-[#F6D6D4] text-[#9E3636] border border-[#EAC2C0] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer"
-                      title="Clear sentence"
-                      aria-label="Clear all"
-                    >
-                      <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={saveSentenceAsQuickPhrase}
-                      className={`p-2.5 rounded-2xl ${
-                        isFrogTheme
-                          ? 'bg-lime-100/50 hover:bg-lime-100 text-lime-950 border-lime-300'
-                          : isDinoTheme
-                          ? 'bg-green-100/50 hover:bg-green-100 text-green-950 border-green-300'
-                          : isTurtleTheme
-                          ? 'bg-emerald-100/50 hover:bg-emerald-100 text-emerald-950 border-emerald-300'
-                          : 'bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border-[#CBD2D9]'
-                      } border shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer hidden sm:block focus-visible:ring-4 focus-visible:outline-none`}
-                      title="Save to quick phrases"
-                      aria-label="Save current sentence to quick phrases"
-                    >
-                      <BookmarkPlus className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
-                    </button>
-                  </>
-                )}
-
-                {isSpeaking ? (
-                  <button
-                    onClick={stopSpeaking}
-                    className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm shadow-[0_4px_12px_rgba(230,142,142,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.7)] transition-all active:scale-95 bg-[#E68E8E] hover:bg-[#D57B7B] text-[#4A1616] border-2 border-[#D57B7B] animate-pulse cursor-pointer"
-                    title="Stop speaking"
-                  >
-                    <div className="flex items-center gap-0.5 mr-0.5">
-                      <span className="w-1.5 h-3.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1.5 h-4.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1.5 h-2.5 bg-[#4A1616] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
-                    <span>{t('STOP')}</span>
-                  </button>
-                ) : isPreparingSpeech ? (
-                  <button
-                    onClick={stopSpeaking}
-                    className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.7)] transition-all active:scale-95 bg-amber-200 hover:bg-amber-300 text-amber-950 border-2 border-amber-400 animate-pulse cursor-pointer"
-                    title="Cancel speech preparation"
-                  >
-                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-amber-900" />
-                    <span>{t('PREPARING...')}</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => speakSentence(performance.now())}
-                    disabled={sentence.length === 0}
-                    className={`flex items-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
-                      sentence.length > 0
-                        ? isFrogTheme
-                          ? 'bg-lime-600 hover:bg-lime-700 text-white border-2 border-lime-700 shadow-[0_4px_12px_rgba(101,163,13,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
-                          : isDinoTheme
-                          ? 'bg-green-600 hover:bg-green-700 text-white border-2 border-green-700 shadow-[0_4px_12px_rgba(22,163,74,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
-                          : isTurtleTheme
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-2 border-emerald-700 shadow-[0_4px_12px_rgba(5,150,105,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
-                          : 'bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.35),inset_0_1.5px_0.5px_rgba(255,255,255,0.8)]'
-                        : isFrogTheme
-                        ? 'bg-lime-100/60 text-lime-800/50 border border-lime-200 cursor-not-allowed'
-                        : isDinoTheme
-                        ? 'bg-green-100/60 text-green-800/50 border border-green-200 cursor-not-allowed'
-                        : isTurtleTheme
-                        ? 'bg-emerald-100/60 text-emerald-800/50 border border-emerald-200 cursor-not-allowed'
-                        : 'bg-[#EAE4D9] text-[#A89C8F] border border-[#DCD3C4] cursor-not-allowed'
-                    }`}
-                  >
-                    <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>{t('SPEAK')}</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAacKeyboardModal(true);
-                    playChime('tap');
-                  }}
-                  className="p-2.5 rounded-2xl bg-[#EEF2F6] hover:bg-[#DDE5ED] text-[#334E68] border border-[#CBD2D9] shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.9)] active:scale-95 transition-all cursor-pointer flex items-center justify-center"
-                  title="Type with Dyslexia-Friendly AAC Keyboard"
-                  aria-label="Open AAC Keyboard"
-                >
-                  <Keyboard className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
-                </button>
-
-                <button
-                  onClick={() => setIsSentenceBarCollapsed(true)}
-                  className="p-2 rounded-2xl bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#7A6C60] border border-[#E0D8CB] transition-all cursor-pointer hidden md:block"
-                  title="Minimize sentence bar"
-                >
-                  <ChevronUp className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Minimized Sentence Bar Restorer */}
-        {isSentenceBarCollapsed && (
-          <div className="flex items-center justify-between bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-2xl px-3.5 py-2 text-xs font-bold text-[#6B5E52] shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
-            <span className="flex items-center gap-2">
-              <img
-                src="/assets/stickers/aac_sentences.webp"
-                alt=""
-                aria-hidden="true"
-                className="w-4 h-4 object-contain pointer-events-none drop-shadow-2xs select-none"
-              />
-              <span>{t('Sentence Bar Minimized')}</span>
-              {instantSpeakMode && <span className="text-[#A76318] font-black">({t('Instant Speak is Active')})</span>}
-            </span>
-            <button
-              onClick={() => setIsSentenceBarCollapsed(false)}
-              className="flex items-center gap-1 text-[#8B571A] hover:underline cursor-pointer font-black"
-            >
-              <span>{t('Show Bar')}</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        <AACSentenceStrip
+          sentence={sentence}
+          isSentenceBarCollapsed={isSentenceBarCollapsed}
+          setIsSentenceBarCollapsed={setIsSentenceBarCollapsed}
+          instantSpeakMode={instantSpeakMode}
+          isSpeaking={isSpeaking}
+          isPreparingSpeech={isPreparingSpeech}
+          onSpeak={() => speakSentence(performance.now())}
+          onStopSpeaking={stopSpeaking}
+          onRemoveLast={removeLastFromSentence}
+          onClear={clearSentence}
+          onSaveQuickPhrase={saveSentenceAsQuickPhrase}
+          onOpenKeyboard={() => {
+            setShowAacKeyboardModal(true);
+            playChime('tap');
+          }}
+          getColorStyles={getColorStyles}
+          themeCategory={activeTheme?.category}
+          themeId={activeTheme?.id}
+          language={settings.language}
+        />
 
         {/* 3. CONTEXTUAL AAC STRIP (Plans changed / Dentist visit) */}
         {plansChanged.active ? (
@@ -1372,406 +567,47 @@ export const AACView: React.FC = () => {
           </div>
         ) : null}
 
-        {/* 4. PROLOQUO2GO BREADCRUMB STRIP (If Inside A Category Folder) */}
-        {activeCategory !== 'core' && activeCategory !== 'all' && activeCategory !== 'favorites' && !activeSceneData && (
-          <div className="flex items-center justify-between bg-[#FCF9F2] border-2 border-[#E0D8CB] rounded-2xl px-3.5 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.03)] animate-in fade-in">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveCategory('core');
-                  playChime('tap');
-                }}
-                className="px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-[#F5B865] hover:bg-[#EDA548] text-[#4A2F0F] font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_2px_6px_rgba(0,0,0,0.05),inset_0_1px_0.5px_rgba(255,255,255,0.8)] border border-[#E2A44E] active:scale-95 transition-all cursor-pointer min-h-[40px] sm:min-h-[44px]"
-              >
-                <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span>Core Board</span>
-              </button>
-              <span className="text-[#C8BCAC] font-bold text-sm">/</span>
-              <span className="font-black text-xs sm:text-sm text-[#3E342B] flex items-center gap-1.5">
-                {categories.find(c => c.id === activeCategory)?.iconSrc && (
-                  <img
-                    src={categories.find(c => c.id === activeCategory)?.iconSrc}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-4 h-4 sm:w-5 sm:h-5 object-contain pointer-events-none drop-shadow-2xs select-none"
-                  />
-                )}
-                <span className="truncate max-w-[140px] sm:max-w-none">{categories.find(c => c.id === activeCategory)?.label}</span>
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <span className="text-[11px] font-bold text-[#8C7E72] hidden sm:inline">
-                {displayedItems.length} words
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* 5. TOOLBAR & PROLOQUO2GO QUICK ACTIONS */}
-        <div className="flex items-center justify-between gap-1.5 overflow-x-auto py-1 scrollbar-thin">
-          
-          {/* Category Navigation Pills */}
-          <div data-tour="aac-categories" className={`flex items-center gap-2 sm:gap-2.5 shrink-0 ${
-            isFrogTheme
-              ? 'bg-lime-100/70 border-lime-300/80'
-              : isDinoTheme
-              ? 'bg-green-100/70 border-green-300/80'
-              : isTurtleTheme
-              ? 'bg-emerald-100/70 border-emerald-300/80'
-              : isFairytaleTheme
-              ? 'bg-pink-100/70 border-pink-300/80'
-              : isRacingTheme
-              ? 'bg-zinc-200/80 border-zinc-400/80'
-              : isOceanTheme
-              ? 'bg-cyan-100/70 border-cyan-300/80'
-              : isTrainTheme
-              ? 'bg-sky-100/70 border-sky-300/80'
-              : isSpaceTheme
-              ? 'bg-purple-100/70 border-purple-300/80'
-              : 'bg-[#EFE9DF] border-[#E0D8CB]'
-          } p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border-2 shadow-xs`}>
-            {categories
-              .filter((cat) => gridStage === 3 || ['core', 'favorite_sentences', 'favorites'].includes(cat.id))
-              .map((cat) => {
-                const iconSrc = isFairytaleTheme && FAIRYTALE_CATEGORY_ICONS[cat.id]
-                  ? FAIRYTALE_CATEGORY_ICONS[cat.id]
-                  : isRacingTheme && RACING_CATEGORY_ICONS[cat.id]
-                  ? RACING_CATEGORY_ICONS[cat.id]
-                  : isOceanTheme && OCEAN_CATEGORY_ICONS[cat.id]
-                  ? OCEAN_CATEGORY_ICONS[cat.id]
-                  : isSpaceTheme && SPACE_CATEGORY_ICONS[cat.id]
-                  ? SPACE_CATEGORY_ICONS[cat.id]
-                  : isTrainTheme && TRAIN_CATEGORY_ICONS[cat.id]
-                  ? TRAIN_CATEGORY_ICONS[cat.id]
-                  : isFrogTheme && FROG_CATEGORY_ICONS[cat.id]
-                  ? FROG_CATEGORY_ICONS[cat.id]
-                  : isDinoTheme && DINO_CATEGORY_ICONS[cat.id]
-                  ? DINO_CATEGORY_ICONS[cat.id]
-                  : isTurtleTheme && TURTLE_CATEGORY_ICONS[cat.id]
-                  ? TURTLE_CATEGORY_ICONS[cat.id]
-                  : cat.iconSrc;
-                const isActive = !activeSceneData && activeCategory === cat.id;
-
-                let activeStyle = '';
-                if (isActive) {
-                  if (isFrogTheme) {
-                    if (cat.id === 'core') {
-                      activeStyle = 'bg-lime-600 text-white border-2 border-lime-700 shadow-[0_4px_12px_rgba(101,163,13,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else if (cat.id === 'favorites') {
-                      activeStyle = 'bg-teal-600 text-white border-2 border-teal-700 shadow-[0_4px_12px_rgba(13,148,136,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else {
-                      activeStyle = 'bg-lime-800 text-white border-2 border-lime-900 shadow-[0_4px_12px_rgba(63,98,18,0.3)]';
-                    }
-                  } else if (isDinoTheme) {
-                    if (cat.id === 'core') {
-                      activeStyle = 'bg-green-600 text-white border-2 border-green-700 shadow-[0_4px_12px_rgba(22,163,74,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else if (cat.id === 'favorites') {
-                      activeStyle = 'bg-amber-600 text-white border-2 border-amber-700 shadow-[0_4px_12px_rgba(217,119,6,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else {
-                      activeStyle = 'bg-green-800 text-white border-2 border-green-900 shadow-[0_4px_12px_rgba(20,83,45,0.3)]';
-                    }
-                  } else if (isTurtleTheme) {
-                    if (cat.id === 'core') {
-                      activeStyle = 'bg-emerald-600 text-white border-2 border-emerald-700 shadow-[0_4px_12px_rgba(5,150,105,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else if (cat.id === 'favorites') {
-                      activeStyle = 'bg-emerald-700 text-white border-2 border-emerald-800 shadow-[0_4px_12px_rgba(4,120,87,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else {
-                      activeStyle = 'bg-emerald-800 text-white border-2 border-emerald-900 shadow-[0_4px_12px_rgba(6,78,59,0.3)]';
-                    }
-                  } else if (isFairytaleTheme) {
-                    if (cat.id === 'core') {
-                      activeStyle = 'bg-pink-600 text-white border-2 border-pink-700 shadow-[0_4px_12px_rgba(219,39,119,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else if (cat.id === 'favorites') {
-                      activeStyle = 'bg-rose-600 text-white border-2 border-rose-700 shadow-[0_4px_12px_rgba(225,29,72,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else {
-                      activeStyle = 'bg-pink-800 text-white border-2 border-pink-900 shadow-[0_4px_12px_rgba(157,23,77,0.3)]';
-                    }
-                  } else if (isRacingTheme) {
-                    if (cat.id === 'core') {
-                      activeStyle = 'bg-zinc-900 text-white border-2 border-black shadow-[0_4px_12px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.3)]';
-                    } else if (cat.id === 'favorites') {
-                      activeStyle = 'bg-red-700 text-white border-2 border-red-800 shadow-[0_4px_12px_rgba(185,28,28,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else {
-                      activeStyle = 'bg-zinc-800 text-white border-2 border-zinc-900 shadow-[0_4px_12px_rgba(24,24,27,0.4)]';
-                    }
-                  } else if (isOceanTheme) {
-                    if (cat.id === 'core') {
-                      activeStyle = 'bg-cyan-600 text-white border-2 border-cyan-700 shadow-[0_4px_12px_rgba(8,145,178,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else if (cat.id === 'favorites') {
-                      activeStyle = 'bg-teal-600 text-white border-2 border-teal-700 shadow-[0_4px_12px_rgba(13,148,136,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else {
-                      activeStyle = 'bg-cyan-800 text-white border-2 border-cyan-900 shadow-[0_4px_12px_rgba(21,94,117,0.3)]';
-                    }
-                  } else {
-                    if (cat.id === 'core') {
-                      activeStyle = 'bg-[#F5B865] text-[#4A2F0F] border-2 border-[#E2A44E] shadow-[0_4px_12px_rgba(245,184,101,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else if (cat.id === 'favorites') {
-                      activeStyle = 'bg-[#E68E8E] text-[#4A1616] border-2 border-[#D57B7B] shadow-[0_4px_12px_rgba(230,142,142,0.4),inset_0_1px_1px_rgba(255,255,255,0.9)]';
-                    } else {
-                      activeStyle = 'bg-[#4A3E34] text-white border-2 border-[#382F27] shadow-[0_4px_12px_rgba(74,62,52,0.3)]';
-                    }
-                  }
-                } else {
-                  activeStyle = isFrogTheme
-                    ? 'bg-lime-50/70 hover:bg-lime-50 text-lime-900 hover:text-lime-950 border-2 border-lime-200/80 hover:border-lime-300 shadow-2xs'
-                    : isDinoTheme
-                    ? 'bg-green-50/70 hover:bg-green-50 text-green-900 hover:text-green-950 border-2 border-green-200/80 hover:border-green-300 shadow-2xs'
-                    : isTurtleTheme
-                    ? 'bg-emerald-50/70 hover:bg-emerald-50 text-emerald-900 hover:text-emerald-950 border-2 border-emerald-200/80 hover:border-emerald-300 shadow-2xs'
-                    : isFairytaleTheme
-                    ? 'bg-pink-50/70 hover:bg-pink-50 text-pink-900 hover:text-pink-950 border-2 border-pink-200/80 hover:border-pink-300 shadow-2xs'
-                    : isRacingTheme
-                    ? 'bg-zinc-100 hover:bg-white text-zinc-900 hover:text-black border-2 border-zinc-300 hover:border-zinc-400 shadow-2xs'
-                    : isOceanTheme
-                    ? 'bg-cyan-50/70 hover:bg-cyan-50 text-cyan-900 hover:text-cyan-950 border-2 border-cyan-200/80 hover:border-cyan-300 shadow-2xs'
-                    : 'bg-[#FCF9F2] hover:bg-white text-[#6B5E52] hover:text-[#3E342B] border-2 border-[#E0D8CB] hover:border-[#D1C6B5] shadow-2xs';
-                }
-
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => {
-                      setAacActiveScene(null);
-                      setActiveCategory(cat.id);
-                      setSearchQuery('');
-                      playChime('tap');
-                    }}
-                    className={`px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm min-h-[40px] sm:min-h-[48px] flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer select-none active:scale-95 shrink-0 touch-manipulation ${activeStyle}`}
-                  >
-                    <img
-                      src={iconSrc}
-                      alt=""
-                      aria-hidden="true"
-                      className="w-5 h-5 sm:w-6 sm:h-6 object-contain pointer-events-none drop-shadow-2xs select-none shrink-0"
-                      loading="eager"
-                    />
-                    <span className="whitespace-nowrap tracking-tight">{cat.label}</span>
-                  </button>
-                );
-              })}
-          </div>
-
-          {/* Clinical AAC Tools: Quick-Chat, Masking Mode, Instant Speak, Add Word, Symbol Picker */}
-          <div className="flex items-center gap-2 shrink-0 ml-auto flex-wrap">
-            
-            {/* Quick-Chat Expressions Drawer Button */}
-            <button
-              data-tour="aac-quickchat"
-              type="button"
-              onClick={() => {
-                setShowQuickChatDrawer(true);
-                playChime('tap');
-              }}
-              className="px-3.5 sm:px-4 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 border-[#B8B4DC] bg-[#D7D4F0] hover:bg-[#CBC8E8] text-[#2C2954] flex items-center gap-2 transition-all cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.8)] active:scale-95"
-              title="Quick-Chat: Instant expressions that won't clear your sentence"
-            >
-              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#51488C]" />
-              <span className="whitespace-nowrap">{t('Quick Chat')}</span>
-            </button>
-
-            {/* Motor Masking / Blank Slots Mode */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsMaskingMode(!isMaskingMode);
-                playChime('tap');
-              }}
-              className={`px-3 sm:px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                isMaskingMode
-                  ? 'bg-[#99C2A2] text-[#1C3E25] border-[#85AE8E] shadow-[0_2px_6px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
-                  : 'bg-[#FCF9F2] text-[#6B5E52] border-[#E0D8CB] hover:bg-white'
-              }`}
-              title="Vocabulary Masking: Hide words while preserving exact motor planning coordinates"
-            >
-              {isMaskingMode ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-              <span className="hidden sm:inline whitespace-nowrap">{isMaskingMode ? t('Masking ON') : t('Mask')}</span>
-            </button>
-
-            {/* Instant Speak Mode */}
-            <button
-              type="button"
-              onClick={() => {
-                setInstantSpeakMode(!instantSpeakMode);
-                playChime('tap');
-              }}
-              className={`px-3 sm:px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                instantSpeakMode
-                  ? 'bg-[#F5B865] text-[#4A2F0F] border-[#E2A44E] shadow-[0_2px_6px_rgba(0,0,0,0.06),inset_0_1px_0.5px_rgba(255,255,255,0.8)]'
-                  : 'bg-[#FCF9F2] text-[#6B5E52] border-[#E0D8CB] hover:bg-white'
-              }`}
-              title="Instant Speak Mode: Tap any tile to speak it aloud immediately"
-            >
-              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-[#A76318]" />
-              <span className="hidden sm:inline whitespace-nowrap">{t('Instant')}</span>
-            </button>
-
-            {/* Add Word Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setEditingItem(null);
-                setShowWordEditor(true);
-              }}
-              className="px-3 sm:px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 border-[#E2A44E] bg-[#FDE293] hover:bg-[#FCD876] text-[#4A2F0F] flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.04),inset_0_1px_0.5px_rgba(255,255,255,0.8)] active:scale-95"
-              title="Add a custom word or favorite phrase"
-            >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B571A]" />
-              <span className="hidden sm:inline whitespace-nowrap">{t('Add Word')}</span>
-            </button>
-
-            {/* Edit Mode Toggle */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsEditMode(!isEditMode);
-                playChime('tap');
-              }}
-              className={`px-3 sm:px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                isEditMode
-                  ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs ring-2 ring-indigo-400'
-                  : 'bg-[#FCF9F2] text-[#6B5E52] border-[#E0D8CB] hover:bg-white'
-              }`}
-              title="Toggle Edit Mode to customize words or set favorites"
-            >
-              <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline whitespace-nowrap">{isEditMode ? t('Done') : t('Edit')}</span>
-            </button>
-
-            {/* Mulberry Symbols Picker */}
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                data-tour="aac-symbols"
-                type="button"
-                onClick={() => {
-                  setShowSymbolPicker(true);
-                  playChime('tap');
-                }}
-                className="px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
-                title="Add words from the Mulberry Symbols AAC library (CC BY-SA)"
-              >
-                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 shrink-0" />
-                <span className="whitespace-nowrap">{t('Symbols')}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAttributionModal(true);
-                  playChime('tap');
-                }}
-                className="p-2.5 rounded-xl sm:rounded-2xl text-slate-500 hover:text-indigo-700 hover:bg-indigo-50 transition-all cursor-pointer min-h-[46px] sm:min-h-[52px] flex items-center justify-center border-2 border-transparent hover:border-indigo-200"
-                title="Mulberry Symbols License & Attribution"
-              >
-                <Info className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </div>
-
-            {/* AAC Guide Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsCoachMarksActive(true);
-                playChime('tap');
-              }}
-              className="px-3.5 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black min-h-[46px] sm:min-h-[52px] border-2 border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
-              title="Open Interactive AAC Coach Marks Guide"
-            >
-              <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 shrink-0" />
-              <span className="whitespace-nowrap">{t('AAC Guide')} 💡</span>
-            </button>
-
-            {/* Standard Clinical AAC Button Size Selector (Small, Medium, Large) */}
-            <div
-              data-tour="aac-button-size"
-              className="flex items-center gap-1 bg-[#EFE9DF] p-1 rounded-2xl border border-[#E0D8CB] shadow-2xs"
-              role="group"
-              aria-label="AAC Button Size Selection"
-            >
-              <span className="text-[10px] font-black uppercase text-stone-500 px-1 hidden md:inline">
-                Size:
-              </span>
-              {[
-                { size: 'small' as AACButtonSize, label: 'Small', short: 'S', title: 'Small buttons (High density: 6–8 cols, TouchChat / Proloquo standard)' },
-                { size: 'medium' as AACButtonSize, label: 'Medium', short: 'M', title: 'Medium buttons (Standard balanced grid: 4–6 cols)' },
-                { size: 'large' as AACButtonSize, label: 'Large', short: 'L', title: 'Large buttons (Oversized touch targets: 2–4 cols, LAMP / Big keys)' },
-              ].map((s) => (
-                <button
-                  key={s.size}
-                  type="button"
-                  onClick={() => handleSetButtonSize(s.size)}
-                  className={`px-2 py-0.5 rounded-xl text-[10px] sm:text-xs font-black transition-all cursor-pointer ${
-                    buttonSize === s.size
-                      ? 'bg-amber-500 text-white shadow-xs'
-                      : 'bg-white hover:bg-stone-50 text-stone-700 border border-stone-200'
-                  }`}
-                  title={s.title}
-                  aria-label={`${s.label} button size`}
-                  aria-pressed={buttonSize === s.size}
-                >
-                  <span className="hidden sm:inline">{s.label}</span>
-                  <span className="sm:hidden">{s.short}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Stage Selector Pills (4 Tiles, 12 Tiles, Full Matrix) */}
-            {activeCategory === 'core' && !searchQuery.trim() && (
-              <div data-tour="aac-grid-stages" className="flex items-center gap-1 bg-[#EFE9DF] p-1 rounded-2xl border border-[#E0D8CB] shadow-2xs">
-                <span className="text-[10px] font-black uppercase text-stone-500 px-1 hidden md:inline">
-                  Stage:
-                </span>
-                {[
-                  { stage: 1 as GridStage, label: '4' },
-                  { stage: 2 as GridStage, label: '12' },
-                  { stage: 3 as GridStage, label: 'Full' },
-                ].map((s) => (
-                  <button
-                    key={s.stage}
-                    type="button"
-                    onClick={() => {
-                      setGridStage(s.stage);
-                      if (s.stage !== 3 && !['core', 'favorite_sentences', 'favorites'].includes(activeCategory)) {
-                        setActiveCategory('core');
-                      }
-                      try {
-                        localStorage.setItem(STORAGE_KEYS.GRID_STAGE, s.stage.toString());
-                      } catch {}
-                      playChime('tap');
-                    }}
-                    className={`px-2 py-0.5 rounded-xl text-[10px] sm:text-xs font-black transition-all cursor-pointer ${
-                      gridStage === s.stage
-                        ? 'bg-amber-500 text-white shadow-xs'
-                        : 'bg-white hover:bg-stone-50 text-stone-700 border border-stone-200'
-                    }`}
-                    title={`Switch to Stage ${s.stage} (${s.label})`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-          </div>
-        </div>
-
-        {/* Masking Mode Helper Banner */}
-        {isMaskingMode && (
-          <div className="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-2 flex items-center justify-between text-emerald-950 animate-in fade-in">
-            <div className="flex items-center gap-2">
-              <EyeOff className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs font-bold">
-                <strong>Vocabulary Masking:</strong> Tap any tile to hide/unhide it. Blank slots preserve motor planning!
-              </span>
-            </div>
-            <button
-              onClick={() => setIsMaskingMode(false)}
-              className="px-2.5 py-0.5 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer"
-            >
-              Done
-            </button>
-          </div>
-        )}
+        <AACToolbar
+          categories={categories}
+          activeCategory={activeCategory}
+          gridStage={gridStage}
+          searchQuery={searchQuery}
+          activeSceneData={activeSceneData}
+          displayedItemsCount={displayedItems.length}
+          isMaskingMode={isMaskingMode}
+          isEditMode={isEditMode}
+          instantSpeakMode={instantSpeakMode}
+          buttonSize={buttonSize}
+          themeCategory={activeTheme?.category}
+          themeId={activeTheme?.id}
+          onSelectCategory={(catId) => {
+            setAacActiveScene(null);
+            setActiveCategory(catId);
+            setSearchQuery('');
+          }}
+          onOpenQuickChat={() => setShowQuickChatDrawer(true)}
+          onToggleMaskingMode={() => setIsMaskingMode(!isMaskingMode)}
+          onToggleInstantSpeakMode={() => setInstantSpeakMode(!instantSpeakMode)}
+          onAddWord={() => {
+            setEditingItem(null);
+            setShowWordEditor(true);
+          }}
+          onToggleEditMode={() => setIsEditMode(!isEditMode)}
+          onOpenSymbols={() => setShowSymbolPicker(true)}
+          onOpenAttribution={() => setShowAttributionModal(true)}
+          onOpenGuide={() => setIsCoachMarksActive(true)}
+          onChangeButtonSize={handleSetButtonSize}
+          onChangeGridStage={(stage) => {
+            setGridStage(stage);
+            if (stage !== 3 && !['core', 'favorite_sentences', 'favorites'].includes(activeCategory)) {
+              setActiveCategory('core');
+            }
+            try {
+              localStorage.setItem(STORAGE_KEYS.GRID_STAGE, stage.toString());
+            } catch {}
+          }}
+          playChime={playChime}
+        />
       </div>
 
       {/* 6. SCROLLABLE MOTOR-PLANNING VOCABULARY GRID */}
@@ -1785,7 +621,7 @@ export const AACView: React.FC = () => {
         {activeSceneData && (
           <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white rounded-2xl p-2.5 sm:p-3 flex items-center justify-between shadow-xs mb-2 animate-in fade-in">
             <div className="flex items-center gap-2.5">
-              <span className="text-2xl sm:text-3xl p-1 bg-white/20 rounded-xl">{activeSceneData.emoji}</span>
+              <span className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black text-xs uppercase tracking-wider">{activeSceneData.label.slice(0, 2)}</span>
               <div>
                 <div className="font-black text-xs sm:text-sm leading-tight flex items-center gap-1.5">
                   <span>{activeSceneData.label} Scene</span>
@@ -1815,643 +651,70 @@ export const AACView: React.FC = () => {
 
         {/* FAVORITE SENTENCES VIEW */}
         {activeCategory === 'favorite_sentences' && !activeSceneData ? (
-          <div className="space-y-4 pb-12 animate-in fade-in">
-            {/* Header banner */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-indigo-500/10 border-2 border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shadow-xs shrink-0 p-1 border border-amber-200">
-                  <img src="/assets/stickers/aac_sentences.webp" alt="" className="w-10 h-10 object-contain drop-shadow-sm" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-                    <span>Favorite Sentences & Frequent Phrases</span>
-                    <span className="px-2 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black uppercase">
-                      {favoriteSentences.length} Saved
-                    </span>
-                  </h3>
-                  <p className="text-xs text-slate-600 font-medium">
-                    Tap any sentence to speak it aloud. Phrases used most frequently automatically rise to the top!
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 self-start sm:self-auto">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddSentenceForm(!showAddSentenceForm);
-                    playChime('tap');
-                  }}
-                  className="px-4 py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{showAddSentenceForm ? 'Close Form' : '+ Add Favorite Sentence'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Add Form */}
-            {showAddSentenceForm && (
-              <div className="p-4 rounded-3xl bg-white border-2 border-amber-300 space-y-3 shadow-md animate-in fade-in">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <h4 className="font-black text-xs sm:text-sm text-slate-900 flex items-center gap-2">
-                    <span>Add Custom Favorite Sentence</span>
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddSentenceForm(false)}
-                    className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
-                    <span className="text-[11px] font-bold text-slate-400 mr-1">Icon:</span>
-                    {['💬', '🧱', '🛁', '🥪', '💧', '🛋️', '🆘', '🌳', '💖', '😴', '🎧', '🛑', '😊', '🍦', '🚗', '🎨'].map((em) => {
-                      const stk = getFavoriteSentenceSticker({ emoji: em });
-                      return (
-                        <button
-                          key={em}
-                          type="button"
-                          onClick={() => {
-                            setNewFavSentenceEmoji(em);
-                            playChime('tap');
-                          }}
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center p-1 cursor-pointer transition-all shrink-0 ${
-                            newFavSentenceEmoji === em ? 'bg-amber-400 scale-110 shadow-xs' : 'bg-slate-100 hover:bg-slate-200'
-                          }`}
-                          title={`Select ${em}`}
-                        >
-                          {stk ? (
-                            <img src={stk} alt="" className="w-full h-full object-contain pointer-events-none drop-shadow-2xs" />
-                          ) : (
-                            <span className="text-base">{em}</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <input
-                      type="text"
-                      value={newFavSentenceText}
-                      onChange={(e) => setNewFavSentenceText(e.target.value)}
-                      placeholder="e.g. I want to play lego, I want to take a bath..."
-                      className="flex-1 px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-300 text-xs sm:text-sm font-bold focus:border-amber-500 focus:bg-white outline-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && newFavSentenceText.trim()) {
-                          addFavoriteSentence({
-                            text: newFavSentenceText.trim(),
-                            speechText: newFavSentenceText.trim(),
-                            emoji: newFavSentenceEmoji,
-                            stickerSrc: getFavoriteSentenceSticker({ emoji: newFavSentenceEmoji, text: newFavSentenceText.trim() }),
-                            isParentPinned: true,
-                          });
-                          setNewFavSentenceText('');
-                          setShowAddSentenceForm(false);
-                        }
-                      }}
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!newFavSentenceText.trim()) return;
-                        addFavoriteSentence({
-                          text: newFavSentenceText.trim(),
-                          speechText: newFavSentenceText.trim(),
-                          emoji: newFavSentenceEmoji,
-                          stickerSrc: getFavoriteSentenceSticker({ emoji: newFavSentenceEmoji, text: newFavSentenceText.trim() }),
-                          isParentPinned: true,
-                        });
-                        setNewFavSentenceText('');
-                        setShowAddSentenceForm(false);
-                      }}
-                      disabled={!newFavSentenceText.trim()}
-                      className={`px-5 py-2.5 rounded-2xl font-black text-xs shadow-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-1.5 ${
-                        newFavSentenceText.trim()
-                          ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                      }`}
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Save Sentence</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* List of Favorite Sentences */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {[...favoriteSentences]
-                .sort((a, b) => {
-                  if (a.isParentPinned && !b.isParentPinned) return -1;
-                  if (!a.isParentPinned && b.isParentPinned) return 1;
-                  return (b.usageCount || 0) - (a.usageCount || 0);
-                })
-                .map((fav) => (
-                  <div
-                    key={fav.id}
-                    className={`p-3.5 sm:p-4 rounded-3xl border-2 transition-all flex items-center justify-between gap-3 shadow-xs hover:border-amber-400 group bg-white dark:bg-slate-850 ${
-                      fav.isParentPinned ? 'border-amber-300/90 bg-amber-50/20' : 'border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onMouseDown={() => handleSentencePressStart(fav)}
-                      onMouseUp={handleSentencePressEnd}
-                      onMouseLeave={handleSentencePressEnd}
-                      onTouchStart={() => handleSentencePressStart(fav)}
-                      onTouchEnd={handleSentencePressEnd}
-                      onTouchCancel={handleSentencePressEnd}
-                      onClick={() => {
-                        if (isSentenceLongPressRef.current) {
-                          isSentenceLongPressRef.current = false;
-                          return;
-                        }
-                        const spoken = t(fav.speechText || fav.text);
-                        if (fav.audioDataUrl) {
-                          playAudioUrl(fav.audioDataUrl, spoken);
-                        } else {
-                          speak(spoken);
-                        }
-                        recordSentenceSpoken(fav.text, fav.emoji);
-                        playChime('speak');
-                        addToSentence({
-                          id: `fav-${Date.now()}`,
-                          label: t(fav.text),
-                          originalLabel: fav.text,
-                          speechText: spoken,
-                          emoji: fav.emoji || '💬',
-                          photoUrl: fav.stickerSrc || getFavoriteSentenceSticker(fav),
-                          category: 'favorites',
-                          colorType: 'social',
-                          motorIndex: 0,
-                          audioDataUrl: fav.audioDataUrl,
-                          audioRecordedBy: fav.audioRecordedBy,
-                        });
-                      }}
-                      className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer text-left focus-visible:ring-4 focus-visible:ring-amber-500/70 focus-visible:outline-none rounded-xl"
-                      title={t(fav.speechText || fav.text)}
-                      aria-label={`Speak favorite phrase: ${t(fav.speechText || fav.text)}`}
-                    >
-                      <div className="w-13 h-13 sm:w-14 sm:h-14 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl shrink-0 group-hover:scale-105 transition-transform flex items-center justify-center">
-                        {(() => {
-                          const stickerPath = fav.stickerSrc || getFavoriteSentenceSticker(fav);
-                          if (stickerPath) {
-                            return (
-                              <img
-                                src={stickerPath}
-                                alt={fav.text}
-                                className="w-full h-full object-contain drop-shadow-2xs select-none pointer-events-none"
-                              />
-                            );
-                          }
-                          return <span className="text-3xl sm:text-4xl">{fav.emoji || '💬'}</span>;
-                        })()}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white leading-snug select-none">
-                          {t(fav.text)}
-                        </h4>
-                        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500 font-medium flex-wrap">
-                          <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-black text-[10px] shrink-0">
-                            {fav.usageCount || 1}x spoken
-                          </span>
-                          {fav.audioDataUrl && (
-                            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 font-bold text-[10px] flex items-center gap-1 shrink-0">
-                              <Mic className="w-3 h-3 text-purple-700" />
-                              <span>{fav.audioRecordedBy || 'Voice'}</span>
-                            </span>
-                          )}
-                          {fav.isParentPinned && (
-                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] flex items-center gap-1 shrink-0">
-                              <img src="/assets/stickers/aac_core.webp" alt="" className="w-3.5 h-3.5 object-contain" />
-                              <span>Pinned</span>
-                            </span>
-                          )}
-                          <span className="text-slate-400 hidden sm:inline">• {t('Tap to speak')}</span>
-                        </div>
-                      </div>
-                    </button>
-
-                    <div className="flex items-center gap-1 shrink-0 ml-1">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setInspectingSentence(fav);
-                          playChime('tap');
-                        }}
-                        className="p-2 rounded-xl text-slate-400 hover:text-amber-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all cursor-pointer"
-                        title="Show full sentence"
-                        aria-label="Show full sentence"
-                      >
-                        <Maximize2 className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePinFavoriteSentence(fav.id);
-                        }}
-                        className={`p-2 rounded-xl transition-all cursor-pointer ${
-                          fav.isParentPinned
-                            ? 'text-amber-600 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40'
-                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800'
-                        }`}
-                        title={fav.isParentPinned ? 'Unpin sentence' : 'Pin sentence to top'}
-                        aria-label={fav.isParentPinned ? 'Unpin sentence' : 'Pin sentence to top'}
-                      >
-                        <Heart className={`w-4 h-4 ${fav.isParentPinned ? 'fill-amber-400 text-amber-600' : ''}`} />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteFavoriteSentence(fav.id);
-                        }}
-                        className="p-2 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
-                        title="Delete sentence"
-                        aria-label="Delete sentence"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
+          <AACFavoritesView
+            favoriteSentences={favoriteSentences}
+            speak={speak}
+            recordSentenceSpoken={recordSentenceSpoken}
+            addToSentence={addToSentence}
+            addFavoriteSentence={addFavoriteSentence}
+            deleteFavoriteSentence={deleteFavoriteSentence}
+            togglePinFavoriteSentence={togglePinFavoriteSentence}
+            setInspectingSentence={setInspectingSentence}
+            handleSentencePressStart={handleSentencePressStart}
+            handleSentencePressEnd={handleSentencePressEnd}
+            isSentenceLongPressRef={isSentenceLongPressRef}
+          />
         ) : (
-        <main
-          className={`grid ${gridColsClass} ${
-            buttonSize === 'small' ? 'gap-1.5 sm:gap-2.5' : buttonSize === 'large' ? 'gap-3.5 sm:gap-5' : 'gap-2.5 sm:gap-3.5'
-          } pb-10 ${
-            isFrogTheme
-              ? 'bg-lime-100/50 border-lime-300/70'
-              : isDinoTheme
-              ? 'bg-green-100/50 border-green-300/70'
-              : isTurtleTheme
-              ? 'bg-emerald-100/50 border-emerald-300/70'
-              : isFairytaleTheme
-              ? 'bg-pink-100/50 border-pink-300/70'
-              : isRacingTheme
-              ? 'bg-zinc-200/50 border-zinc-400/70'
-              : isOceanTheme
-              ? 'bg-cyan-100/50 border-cyan-300/70'
-              : isTrainTheme
-              ? 'bg-sky-100/50 border-sky-300/70'
-              : isSpaceTheme
-              ? 'bg-purple-100/50 border-purple-300/70'
-              : 'bg-[#EFE9DF] border-[#E0D8CB]'
-          } ${
-            buttonSize === 'small' ? 'p-2 sm:p-3' : buttonSize === 'large' ? 'p-3.5 sm:p-6' : 'p-2.5 sm:p-4'
-          } rounded-3xl border-2 shadow-[inset_0_2px_8px_rgba(0,0,0,0.06)] transition-all`}
-          aria-label="Vocabulary grid"
-        >
-          {/* FOLDER TILES (Rendered at top of Core View only for Full version) */}
-          {activeCategory === 'core' && gridStage === 3 && !searchQuery && !activeSceneData && FOLDER_TILES.map((folder) => {
-            const stickerSrc = isFairytaleTheme && FAIRYTALE_FOLDER_STICKERS[folder.id]
-              ? FAIRYTALE_FOLDER_STICKERS[folder.id]
-              : isRacingTheme && RACING_FOLDER_STICKERS[folder.id]
-              ? RACING_FOLDER_STICKERS[folder.id]
-              : isOceanTheme && OCEAN_FOLDER_STICKERS[folder.id]
-              ? OCEAN_FOLDER_STICKERS[folder.id]
-              : isSpaceTheme && SPACE_FOLDER_STICKERS[folder.id]
-              ? SPACE_FOLDER_STICKERS[folder.id]
-              : isTrainTheme && TRAIN_FOLDER_STICKERS[folder.id]
-              ? TRAIN_FOLDER_STICKERS[folder.id]
-              : isFrogTheme && FROG_FOLDER_STICKERS[folder.id]
-              ? FROG_FOLDER_STICKERS[folder.id]
-              : isDinoTheme && DINO_FOLDER_STICKERS[folder.id]
-              ? DINO_FOLDER_STICKERS[folder.id]
-              : isTurtleTheme && TURTLE_FOLDER_STICKERS[folder.id]
-              ? TURTLE_FOLDER_STICKERS[folder.id]
-              : (folder.stickerSrc || resolveAacImageUrl(folder));
-
-            return (
-              <div key={folder.id} className="relative group aspect-square">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveCategory(folder.category);
-                    playChime('tap');
-                  }}
-                  className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.folderPadding} rounded-2xl border-2 shadow-[0_4px_10px_rgba(0,0,0,0.05),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden touch-manipulation ${
-                    isFrogTheme
-                      ? 'bg-lime-50/80 hover:bg-lime-50 border-lime-300 text-lime-950 shadow-[0_4px_10px_rgba(101,163,13,0.08)]'
-                      : isDinoTheme
-                      ? 'bg-green-50/80 hover:bg-green-50 border-green-300 text-green-950 shadow-[0_4px_10px_rgba(22,163,74,0.08)]'
-                      : isTurtleTheme
-                      ? 'bg-emerald-50/80 hover:bg-emerald-50 border-emerald-300 text-emerald-950 shadow-[0_4px_10px_rgba(5,150,105,0.08)]'
-                      : isFairytaleTheme
-                      ? 'bg-pink-50/80 hover:bg-pink-50 border-pink-300 text-pink-950 shadow-[0_4px_10px_rgba(219,39,119,0.08)]'
-                      : isRacingTheme
-                      ? 'bg-zinc-100 hover:bg-white border-zinc-300 text-zinc-950 shadow-[0_4px_10px_rgba(0,0,0,0.08)]'
-                      : isOceanTheme
-                      ? 'bg-cyan-50/80 hover:bg-cyan-50 border-cyan-300 text-cyan-950 shadow-[0_4px_10px_rgba(8,145,178,0.08)]'
-                      : 'bg-[#FCF9F2] hover:bg-white border-[#D8CEBA] text-[#2D241E]'
-                  }`}
-                >
-                  {/* Folder Top-Right Corner Tab / Badge */}
-                  <div className={`absolute ${buttonSizeStyles.folderBadge} z-20 ${
-                    isFrogTheme
-                      ? 'bg-lime-800 text-white'
-                      : isDinoTheme
-                      ? 'bg-green-800 text-white'
-                      : isTurtleTheme
-                      ? 'bg-emerald-800 text-white'
-                      : isFairytaleTheme
-                      ? 'bg-pink-800 text-white'
-                      : isRacingTheme
-                      ? 'bg-zinc-900 text-white'
-                      : isOceanTheme
-                      ? 'bg-cyan-800 text-white'
-                      : 'bg-[#4A3E34] text-white'
-                  } font-black flex items-center shadow-2xs pointer-events-none`}>
-                    <Folder className={`${buttonSizeStyles.folderBadgeIcon} fill-white shrink-0`} />
-                    <span>{t('Folder')}</span>
-                  </div>
-
-                  {/* Symbol Area */}
-                  <div className={`relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 ${buttonSizeStyles.folderSymbolArea}`}>
-                    <img
-                      src={stickerSrc}
-                      alt={folder.label}
-                      className="w-full h-full object-contain rounded-lg pointer-events-none"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  {/* Label */}
-                  <span className={`relative z-10 font-black tracking-tight text-center leading-none select-none ${
-                    isFrogTheme
-                      ? 'text-lime-950'
-                      : isDinoTheme
-                      ? 'text-green-950'
-                      : isTurtleTheme
-                      ? 'text-emerald-950'
-                      : 'text-[#2D241E]'
-                  } drop-shadow-xs w-full mt-1 ${buttonSizeStyles.folderFont}`}>
-                    {t(folder.label)}
-                  </span>
-                </button>
-              </div>
-            );
-          })}
-
-          {/* MAIN VOCABULARY TILES */}
-          {displayedItems.map((item) => {
-            const isMasked = maskedItemIds.includes(item.id);
-            const inflections = getWordInflections(item.label, item.colorType);
-            const hasInflections = inflections.length > 1;
-            const hasThemedArt = activeTheme && activeTheme.category !== 'classic' && (settings.aacButtonColorMode || 'fitzgerald') !== 'high_contrast_white';
-
-            // When masked and not in masking mode, render as a fixed blank placeholder (Debossed well)
-            if (isMasked && !isMaskingMode) {
-              return (
-                <div
-                  key={item.id}
-                  className="relative aspect-square rounded-2xl border-2 border-dashed border-[#D8CEBA] bg-[#E5DFD4]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] select-none"
-                  aria-hidden="true"
-                />
-              );
-            }
-
-            return (
-              <div
-                key={item.id}
-                className={`relative group aspect-square ${isMasked ? 'opacity-40 grayscale ring-2 ring-[#99C2A2] rounded-2xl' : ''}`}
-                onMouseDown={() => handleLongPressStart(item)}
-                onMouseUp={handleLongPressEnd}
-                onMouseLeave={handleLongPressEnd}
-                onTouchStart={() => handleLongPressStart(item)}
-                onTouchMove={handleLongPressEnd}
-                onTouchEnd={handleLongPressEnd}
-                onTouchCancel={handleLongPressEnd}
-              >
-                <AccessibleTile
-                  variant="aac"
-                  label={t(item.label)}
-                  speechText={item.speechText ? t(item.speechText) : undefined}
-                  category={getGrammaticalCategoryLabel(item.colorType)}
-                  onClick={() => handleTileClick(item)}
-                  className={`w-full h-full flex flex-col items-center ${buttonSizeStyles.tilePadding} ${
-                    activeTheme?.aacStyling?.tileBorderRadius || 'rounded-2xl'
-                  } ${
-                    activeTheme?.aacStyling?.tileBorderWidth || 'border-2'
-                  } shadow-[0_4px_10px_rgba(0,0,0,0.04),inset_0_1.5px_0.5px_rgba(255,255,255,0.9)] transition-all active:scale-92 cursor-pointer relative overflow-hidden ${
-                    hasThemedArt ? 'border-opacity-60' : ''
-                  } ${getColorStyles(item.colorType)}`}
-                >
-                  {/* Mulberry Symbol Area */}
-                  <div className="relative z-10 flex-1 min-h-0 w-full flex items-center justify-center transition-transform group-hover:scale-105 group-active:scale-95 p-1">
-                    <img
-                      src={resolveAacImageUrl(item)}
-                      alt=""
-                      aria-hidden="true"
-                      className="w-full h-full object-contain rounded-lg pointer-events-none"
-                      loading="lazy"
-                      onError={(e) => {
-                        const target = e.currentTarget as HTMLElement;
-                        target.style.display = 'none';
-                        if (target.nextElementSibling) {
-                          (target.nextElementSibling as HTMLElement).style.display = 'flex';
-                        }
-                      }}
-                    />
-                    <span aria-hidden="true" className="hidden text-3xl sm:text-4xl items-center justify-center select-none">
-                      {item.emoji || '💬'}
-                    </span>
-                  </div>
-
-                  {/* Label */}
-                  <span
-                    className={`relative z-10 font-black tracking-tight text-center leading-none select-none text-[#2D241E] drop-shadow-xs w-full mt-1 ${buttonSizeStyles.labelFont}`}
-                  >
-                    {t(item.label)}
-                  </span>
-
-                  {/* Fitzgerald Key Category Tag (Differentiate Without Color Alone) */}
-                  <span
-                    aria-hidden="true"
-                    className={`relative z-10 ${buttonSizeStyles.categoryTag} font-black uppercase tracking-wider rounded-md bg-black/10 text-slate-800 pointer-events-none mt-0.5`}
-                  >
-                    {getGrammaticalCategoryLabel(item.colorType)}
-                  </span>
-                </AccessibleTile>
-
-                {/* Grammar Inflections Trigger Button (Proloquo2Go grammar popup indicator) */}
-                {hasInflections && !isMaskingMode && !isEditMode && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setInflectionTarget({ item, inflections });
-                      playChime('tap');
-                    }}
-                    className="absolute top-1 left-1 z-20 p-1 rounded-md bg-white/90 hover:bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs text-[9px] font-black flex items-center gap-0.5 cursor-pointer opacity-70 group-hover:opacity-100 transition-opacity"
-                    title="Grammar forms (+ed, -ing, plurals)"
-                  >
-                    <Lightbulb className="w-2.5 h-2.5 text-amber-600" />
-                  </button>
-                )}
-
-                {/* Heart (Favorite) Toggle Button */}
-                {!isMaskingMode && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleAacFavorite(item.id);
-                    }}
-                    className={`absolute top-1 right-1 z-20 p-1.5 rounded-full backdrop-blur-md transition-all cursor-pointer shadow-xs ${
-                      item.isFavorite
-                        ? 'bg-rose-500 text-white scale-100 hover:scale-110'
-                        : isEditMode
-                        ? 'bg-white/90 text-slate-400 hover:text-rose-500 border border-slate-200'
-                        : 'opacity-0 group-hover:opacity-100 bg-white/80 text-slate-400 hover:text-rose-500'
-                    }`}
-                    title={item.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                  >
-                    <Heart className={`w-3 h-3 ${item.isFavorite ? 'fill-white text-white' : ''}`} />
-                  </button>
-                )}
-
-                {/* Edit Word Button (Pencil) */}
-                {isEditMode && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingItem(item);
-                      setShowWordEditor(true);
-                    }}
-                    className="absolute top-1 left-1 z-20 p-1.5 rounded-full bg-indigo-600 text-white hover:scale-110 transition-transform cursor-pointer shadow-xs"
-                    title="Edit word details"
-                  >
-                    <Edit3 className="w-3 h-3" />
-                  </button>
-                )}
-
-                {/* Recorded Voice Badge */}
-                {item.audioDataUrl && (
-                  <div
-                    className="absolute bottom-1 right-1 z-20 px-1.5 py-0.5 rounded-full bg-purple-600/90 text-white text-[8px] font-black flex items-center gap-0.5 shadow-2xs pointer-events-none"
-                    title={`Recorded voice: ${item.audioRecordedBy || 'Voice'}`}
-                  >
-                    <Mic className="w-2 h-2" />
-                    <span className="hidden sm:inline">{item.audioRecordedBy || 'Voice'}</span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </main>
+        <AACTileGrid
+            activeCategory={activeCategory}
+            gridStage={gridStage}
+            searchQuery={searchQuery}
+            activeSceneData={activeSceneData}
+            displayedItems={displayedItems}
+            maskedItemIds={maskedItemIds}
+            isMaskingMode={isMaskingMode}
+            isEditMode={isEditMode}
+            buttonSize={buttonSize}
+            gridColsClass={gridColsClass}
+            buttonSizeStyles={buttonSizeStyles}
+            themeCategory={activeTheme?.category}
+            themeId={activeTheme?.id}
+            aacStyling={activeTheme?.aacStyling}
+            aacButtonColorMode={settings.aacButtonColorMode}
+            onSelectCategory={(cat) => {
+              setActiveCategory(cat);
+              playChime('tap');
+            }}
+            onTileClick={handleTileClick}
+            onLongPressStart={handleLongPressStart}
+            onLongPressEnd={handleLongPressEnd}
+            onOpenInflections={(item, inflections) => setInflectionTarget({ item, inflections })}
+            onToggleFavorite={toggleAacFavorite}
+            onEditItem={(item) => {
+              setEditingItem(item);
+              setShowWordEditor(true);
+            }}
+            getColorStyles={getColorStyles}
+          />
         )}
       </div>
 
-      {/* GRAMMAR INFLECTIONS POPUP (Proloquo2Go Style) */}
-      {inflectionTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border-4 border-amber-300 space-y-4 animate-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <div className="flex items-center gap-2.5">
-                <img
-                  src={resolveAacImageUrl(inflectionTarget.item)}
-                  alt=""
-                  className="w-8 h-8 object-contain rounded-lg"
-                />
-                <div>
-                  <h3 className="font-black text-slate-900 text-base">
-                    {t('Grammar Forms')}: {t(inflectionTarget.item.label)}
-                  </h3>
-                  <span className="text-[11px] font-bold text-slate-400">
-                    {t('Pick a variation to speak or insert')}
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setInflectionTarget(null)}
-                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* GRAMMAR INFLECTIONS POPUP */}
+      <GrammarInflectionsModal
+        target={inflectionTarget}
+        onClose={() => setInflectionTarget(null)}
+        onSelectInflection={handleSelectInflection}
+      />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {inflectionTarget.inflections.map((inf, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSelectInflection(inf)}
-                  className="p-3 rounded-2xl border-2 border-slate-200 hover:border-amber-400 bg-slate-50 hover:bg-amber-50 text-left transition-all active:scale-95 cursor-pointer flex flex-col justify-between"
-                >
-                  <span className="font-black text-slate-900 text-sm">{inf.label}</span>
-                  <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mt-1">
-                    {inf.badge}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* QUICK-CHAT DRAWER (Instant Speech without clearing sentence builder) */}
-      {showQuickChatDrawer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-xl w-full max-h-[85vh] flex flex-col shadow-2xl border-4 border-purple-300 overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 text-white flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl p-1 bg-white/20 rounded-xl">💬</span>
-                <div>
-                  <h3 className="font-black text-base">Quick Chat Expressions</h3>
-                  <p className="text-xs text-purple-100 font-medium">
-                    Tap any phrase to speak instantly — active sentence is preserved!
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowQuickChatDrawer(false)}
-                className="p-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {QUICK_CHAT_GROUPS.map((grp, gIdx) => (
-                <div key={gIdx} className="space-y-2">
-                  <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider">
-                    {grp.title}
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {grp.phrases.map((phrase, pIdx) => (
-                      <button
-                        key={pIdx}
-                        onClick={() => {
-                          speak(phrase.text);
-                          playChime('tap');
-                        }}
-                        className="p-3 rounded-2xl border-2 border-slate-200 hover:border-purple-300 bg-slate-50 hover:bg-purple-50 text-slate-900 font-bold text-xs sm:text-sm text-left flex items-center gap-2.5 shadow-2xs transition-all active:scale-95 cursor-pointer"
-                      >
-                        <span className="text-xl shrink-0">{phrase.emoji}</span>
-                        <span className="leading-tight">{phrase.text}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* QUICK-CHAT DRAWER */}
+      <QuickChatModal
+        isOpen={showQuickChatDrawer}
+        onClose={() => setShowQuickChatDrawer(false)}
+        onSpeakPhrase={(phraseText) => {
+          speak(phraseText);
+          playChime('tap');
+        }}
+      />
 
       {/* Word & Favorite Phrase Editor Modal */}
       {showWordEditor && (
@@ -2515,93 +778,11 @@ export const AACView: React.FC = () => {
       )}
 
       {/* Mulberry Symbols Licensing & Attribution Modal */}
-      {showAttributionModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[9999] bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in"
-        >
-          <div className="bg-white border-2 border-emerald-200 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col p-5 sm:p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl">
-                  🌿
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-900">Mulberry Symbols Attribution</h3>
-                  <span className="text-xs font-bold text-emerald-700">Open AAC Standard (CC BY-SA)</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAttributionModal(false);
-                  playChime('tap');
-                }}
-                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
-                aria-label="Close attribution modal"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs text-slate-700 leading-relaxed">
-              <p className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 font-medium text-emerald-950">
-                {MULBERRY_ATTRIBUTION.notice}
-              </p>
-              <div className="space-y-1.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                <div className="font-bold text-slate-800">License Information:</div>
-                <div className="text-slate-600">
-                  Mulberry Symbols are licensed under the Creative Commons Attribution-ShareAlike 2.0 / 4.0 License. They are free to use, share, adapt, and incorporate into commercial and non-commercial assistive technology applications.
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    playChime('tap');
-                    setParentalGateTarget({
-                      url: MULBERRY_ATTRIBUTION.url,
-                      title: 'MulberrySymbols.org',
-                    });
-                  }}
-                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-                >
-                  <span>MulberrySymbols.org</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    playChime('tap');
-                    setParentalGateTarget({
-                      url: MULBERRY_ATTRIBUTION.licenseUrl,
-                      title: 'Creative Commons CC BY-SA License',
-                    });
-                  }}
-                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span>View CC BY-SA License</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAttributionModal(false);
-                  playChime('tap');
-                }}
-                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black transition cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MulberryAttributionModal
+        isOpen={showAttributionModal}
+        onClose={() => setShowAttributionModal(false)}
+        onOpenExternalLink={(target) => setParentalGateTarget(target)}
+      />
 
       {/* Live Interactive AAC Coach Marks Walkthrough */}
       <CoachMarksOverlay
@@ -2612,147 +793,31 @@ export const AACView: React.FC = () => {
         onSkip={() => setIsCoachMarksActive(false)}
       />
 
-
-      {/* Full Sentence Inspector Modal (Triggered on Press-and-Hold or Click) */}
-      {inspectingSentence && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Sentence Details"
-          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150"
-          onClick={() => setInspectingSentence(null)}
-        >
-          <div
-            className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 max-w-lg w-full border-3 border-amber-300 shadow-2xl space-y-5 text-center relative animate-in zoom-in-95 duration-150"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setInspectingSentence(null)}
-              className="absolute top-4 right-4 p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer transition-all"
-              title="Close"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto p-2 bg-amber-50 dark:bg-amber-950/40 rounded-3xl border-2 border-amber-200 flex items-center justify-center shadow-xs">
-              {(() => {
-                const stickerPath = inspectingSentence.stickerSrc || getFavoriteSentenceSticker(inspectingSentence);
-                if (stickerPath) {
-                  return (
-                    <img
-                      src={stickerPath}
-                      alt=""
-                      className="w-full h-full object-contain drop-shadow-xs pointer-events-none select-none"
-                    />
-                  );
-                }
-                return <span className="text-4xl sm:text-5xl">{inspectingSentence.emoji || '💬'}</span>;
-              })()}
-            </div>
-
-            <div className="flex items-center justify-center gap-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 text-xs font-black">
-                🔥 Spoken {inspectingSentence.usageCount || 1} {inspectingSentence.usageCount === 1 ? 'time' : 'times'}
-              </span>
-              {inspectingSentence.isParentPinned && (
-                <span className="px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-900 dark:text-rose-200 text-xs font-black flex items-center gap-1">
-                  <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
-                  <span>Pinned Favorite</span>
-                </span>
-              )}
-            </div>
-
-            <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 dark:bg-slate-800/80 border-2 border-amber-200/80 shadow-inner">
-              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-relaxed select-text tracking-tight">
-                &ldquo;{t(inspectingSentence.text)}&rdquo;
-              </p>
-              {settings.language !== 'en' && inspectingSentence.text.toLowerCase() !== t(inspectingSentence.text).toLowerCase() && (
-                <p className="text-xs font-bold text-slate-500 mt-2">
-                  Original (EN): &ldquo;{inspectingSentence.text}&rdquo;
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  const spoken = t(inspectingSentence.speechText || inspectingSentence.text);
-                  if (inspectingSentence.audioDataUrl) {
-                    playAudioUrl(inspectingSentence.audioDataUrl, spoken);
-                  } else {
-                    speak(spoken);
-                  }
-                  recordSentenceSpoken(inspectingSentence.text, inspectingSentence.emoji);
-                  playChime('speak');
-                }}
-                className="w-full py-3.5 sm:py-4 rounded-2xl bg-amber-400 hover:bg-amber-500 active:scale-95 text-amber-950 font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all"
-              >
-                <Volume2 className="w-5 h-5" />
-                <span>Speak Sentence Aloud</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const spoken = t(inspectingSentence.speechText || inspectingSentence.text);
-                  addToSentence({
-                    id: `fav-${Date.now()}`,
-                    label: t(inspectingSentence.text),
-                    originalLabel: inspectingSentence.text,
-                    speechText: spoken,
-                    emoji: inspectingSentence.emoji || '💬',
-                    photoUrl: inspectingSentence.stickerSrc || getFavoriteSentenceSticker(inspectingSentence),
-                    category: 'favorites',
-                    colorType: 'social',
-                    motorIndex: 0,
-                    audioDataUrl: inspectingSentence.audioDataUrl,
-                    audioRecordedBy: inspectingSentence.audioRecordedBy,
-                  });
-                  playChime('star');
-                  setInspectingSentence(null);
-                }}
-                className="w-full py-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-900 dark:text-indigo-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-800 cursor-pointer transition-all"
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>Add to Sentence Bar</span>
-              </button>
-
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    togglePinFavoriteSentence(inspectingSentence.id);
-                    setInspectingSentence((prev) => prev ? { ...prev, isParentPinned: !prev.isParentPinned } : null);
-                  }}
-                  className={`flex-1 py-2.5 rounded-2xl font-black text-xs flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
-                    inspectingSentence.isParentPinned
-                      ? 'bg-amber-100 border-amber-300 text-amber-900'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <Heart className={`w-4 h-4 ${inspectingSentence.isParentPinned ? 'fill-amber-500 text-amber-600' : ''}`} />
-                  <span>{inspectingSentence.isParentPinned ? 'Pinned' : 'Pin to Top'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    deleteFavoriteSentence(inspectingSentence.id);
-                    setInspectingSentence(null);
-                  }}
-                  className="px-4 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-black text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Delete</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Full Sentence Inspector Modal */}
+      <SentenceInspectorModal
+        inspectingSentence={inspectingSentence}
+        onClose={() => setInspectingSentence(null)}
+        onSpeakSentence={(fav) => {
+          const spoken = t(fav.speechText || fav.text);
+          if (fav.audioDataUrl) {
+            playAudioUrl(fav.audioDataUrl, spoken);
+          } else {
+            speak(spoken);
+          }
+          recordSentenceSpoken(fav.text, fav.emoji);
+          playChime('speak');
+        }}
+        onAddToSentenceBar={addToSentence}
+        onTogglePin={(id) => {
+          togglePinFavoriteSentence(id);
+          setInspectingSentence((prev) => prev ? { ...prev, isParentPinned: !prev.isParentPinned } : null);
+        }}
+        onDeleteSentence={(id) => {
+          deleteFavoriteSentence(id);
+          setInspectingSentence(null);
+        }}
+        language={settings.language}
+      />
 
       {/* AAC Guide / How-To Modal */}
       {showAacGuideModal && (
