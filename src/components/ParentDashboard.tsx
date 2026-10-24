@@ -462,7 +462,7 @@ export const ParentDashboard: React.FC = () => {
         {
           id: 'voice-studio',
           label: 'Voice Studio & Preferences',
-          badge: `${getVoicePersonasForLanguage(settings.language).length} ${t('Voices')}`,
+          badge: isPremium ? `${getVoicePersonasForLanguage(settings.language).length} ${t('Voices')}` : `1 ${t('Voice')}`,
         },
       ],
     },

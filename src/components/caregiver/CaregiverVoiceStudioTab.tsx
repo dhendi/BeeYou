@@ -55,6 +55,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
 
   const activePersona = getVoicePersonaById(settings.voicePersona);
   const systemVoiceObj = VOICE_PERSONAS.find((p) => p.id === 'system') || VOICE_PERSONAS[0];
+  const effectiveActivePersona = (!isPremium) ? systemVoiceObj : activePersona;
 
   const handleAudition = async (persona: VoicePersona) => {
     if (playingVoiceId === persona.id) {
@@ -79,6 +80,10 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
   };
 
   const handleSelectVoice = (persona: VoicePersona) => {
+    if (!isPremium && persona.id !== 'system') {
+      triggerUpgrade('Piper on-device neural voices are a BeeYou Plus feature! Start your 15-day free trial.');
+      return;
+    }
     stopSpeaking();
     updateSettings({ voicePersona: persona.id });
     if (settings.soundEffects) playChime('star');
@@ -160,6 +165,33 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         </div>
       </div>
 
+      {/* Basic Plan Voice Notice */}
+      {!isPremium && (
+        <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/90 border-2 border-amber-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2.5 rounded-2xl bg-amber-100 text-amber-700 shrink-0">
+              <Crown className="w-5 h-5 fill-amber-500 text-amber-600" />
+            </div>
+            <div>
+              <h4 className="font-black text-slate-900 text-sm sm:text-base">
+                {t('Basic Plan includes 1 voice (Default Free Voice)')}
+              </h4>
+              <p className="text-xs text-stone-600 font-medium">
+                {t('Upgrade to BeeYou Plus to unlock all 20+ realistic Piper on-device neural voices.')}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => triggerUpgrade('Piper on-device neural voices are a BeeYou Plus feature! Start your 15-day free trial.')}
+            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-xs sm:text-sm shrink-0 cursor-pointer shadow-xs transition-all flex items-center gap-1.5"
+          >
+            <Crown className="w-4 h-4 fill-white text-white" />
+            <span>{t('Unlock All Voices')}</span>
+          </button>
+        </div>
+      )}
+
       {/* AAC Feature Master Switch Banner */}
       <div className={`rounded-3xl border-2 p-5 shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
         isAacActive
@@ -223,32 +255,32 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
               {t('Current Active Speech Voice')}
             </span>
             <span className="text-xs font-bold text-stone-500 capitalize">
-              • {t(activePersona.style)}
+              • {t(effectiveActivePersona.style)}
             </span>
           </div>
           <h3 className="text-base sm:text-lg font-black text-slate-900 truncate">
-            {t(activePersona.name)}
+            {t(effectiveActivePersona.name)}
           </h3>
           <p className="text-xs text-stone-600 font-medium truncate max-w-md">
-            {t(activePersona.description)}
+            {t(effectiveActivePersona.description)}
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            disabled={playingVoiceId === activePersona.id}
-            onClick={() => handleAudition(activePersona)}
+            disabled={playingVoiceId === effectiveActivePersona.id}
+            onClick={() => handleAudition(effectiveActivePersona)}
             className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-xs sm:text-sm shadow-xs transition-all cursor-pointer disabled:opacity-50"
           >
-            <span>{playingVoiceId === activePersona.id ? t('Speaking...') : t('Audition Sample')}</span>
+            <span>{playingVoiceId === effectiveActivePersona.id ? t('Speaking...') : t('Audition Sample')}</span>
           </button>
         </div>
       </div>
 
       {/* Featured Free Default Voice Card */}
       <div className={`rounded-3xl border-2 p-5 shadow-xs transition-all ${
-        (settings.voicePersona || 'system') === 'system'
+        (!isPremium || (settings.voicePersona || 'system') === 'system')
           ? 'bg-emerald-50/90 border-emerald-400 shadow-xs'
           : 'bg-white border-emerald-300 hover:border-emerald-400'
       }`}>
@@ -258,7 +290,7 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
                 {t('100% Free • Zero API Credits • Offline')}
               </span>
-              {(settings.voicePersona || 'system') === 'system' && (
+              {(!isPremium || (settings.voicePersona || 'system') === 'system') && (
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-black">
                   {t('Active Default Voice')}
                 </span>
@@ -286,12 +318,12 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
               type="button"
               onClick={() => handleSelectVoice(systemVoiceObj)}
               className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
-                (settings.voicePersona || 'system') === 'system'
+                (!isPremium || (settings.voicePersona || 'system') === 'system')
                   ? 'bg-emerald-600 text-white border border-emerald-700'
                   : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300'
               }`}
             >
-              {(settings.voicePersona || 'system') === 'system' ? t('Selected (Default Free)') : t('Use Free Voice')}
+              {(!isPremium || (settings.voicePersona || 'system') === 'system') ? t('Selected (Default Free)') : t('Use Free Voice')}
             </button>
           </div>
         </div>
@@ -407,9 +439,10 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
         {/* Personas Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
           {filteredPersonas.map((persona) => {
-            const effectiveVoicePersona = settings.voicePersona || 'amy';
+            const effectiveVoicePersona = !isPremium ? 'system' : (settings.voicePersona || 'system');
             const isSelected = effectiveVoicePersona === persona.id;
             const isPlaying = playingVoiceId === persona.id;
+            const isLockedForBasic = !isPremium && persona.id !== 'system';
 
             return (
               <div
@@ -417,6 +450,8 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                 className={`p-4 rounded-2xl border-2 flex flex-col justify-between transition-all relative ${
                   isSelected
                     ? 'border-amber-400 bg-amber-50/60 shadow-xs'
+                    : isLockedForBasic
+                    ? 'border-stone-200/90 bg-stone-50/60 hover:border-amber-300'
                     : 'border-stone-200/90 bg-stone-50/40 hover:bg-white hover:border-amber-200'
                 }`}
               >
@@ -440,6 +475,12 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                         {persona.piperVoice && (
                           <span className="px-1.5 py-0.2 rounded-full bg-blue-50 border border-blue-200 text-[10px] font-bold text-blue-900 shrink-0">
                             {t('On-Device')}
+                          </span>
+                        )}
+                        {isLockedForBasic && (
+                          <span className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-900 flex items-center gap-1 shrink-0">
+                            <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                            {t('Plus')}
                           </span>
                         )}
                       </div>
@@ -470,17 +511,31 @@ export const CaregiverVoiceStudioTab: React.FC<CaregiverVoiceStudioTabProps> = (
                     <span>{isPlaying ? t('Playing...') : t('Audition')}</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleSelectVoice(persona)}
-                    className={`py-1.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
-                      isSelected
-                        ? 'bg-amber-500 text-white border border-amber-600'
-                        : 'bg-stone-100 hover:bg-amber-100 text-stone-700 hover:text-amber-950 border border-stone-200'
-                    }`}
-                  >
-                    {isSelected ? t('Selected') : t('Use Voice')}
-                  </button>
+                  {isLockedForBasic ? (
+                    <button
+                      type="button"
+                      onClick={() => triggerUpgrade('Piper on-device neural voices are a BeeYou Plus feature! Start your 15-day free trial.')}
+                      className="py-1.5 px-3 rounded-xl text-xs font-black bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
+                    >
+                      <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
+                      <span>{t('Unlock')}</span>
+                      <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-amber-950 text-[9px] font-black uppercase">
+                        {t('Plus')}
+                      </span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleSelectVoice(persona)}
+                      className={`py-1.5 px-3 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
+                        isSelected
+                          ? 'bg-amber-500 text-white border border-amber-600'
+                          : 'bg-stone-100 hover:bg-amber-100 text-stone-700 hover:text-amber-950 border border-stone-200'
+                      }`}
+                    >
+                      {isSelected ? t('Selected') : t('Use Voice')}
+                    </button>
+                  )}
                 </div>
               </div>
             );

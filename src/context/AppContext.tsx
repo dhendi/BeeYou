@@ -802,7 +802,12 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   // 1. Subscription Hook
   const subscriptionState = useSubscriptionState();
 
-
+  // Basic tier safeguard: Ensure basic users are strictly set to the default free voice ('system')
+  useEffect(() => {
+    if (!subscriptionState.isPremium && settings.voicePersona && settings.voicePersona !== 'system') {
+      setSettings((prev) => ({ ...prev, voicePersona: 'system' }));
+    }
+  }, [subscriptionState.isPremium, settings.voicePersona]);
 
   const [voiceLoadingState, setVoiceLoadingState] = useState<{
     isOpen: boolean;
@@ -815,7 +820,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
   });
 
   const triggerVoicePreload = useCallback(async (persona?: string, lang?: string, force = false) => {
-    const p = persona || settings.voicePersona || 'system';
+    const targetPersona = !subscriptionState.isPremium ? 'system' : (persona || settings.voicePersona || 'system');
+    const p = targetPersona;
     const l = lang || settings.language || 'en';
     if (p === 'system') {
       // System native voice runs 100% on-device via Web Speech API, zero download required
@@ -838,12 +844,19 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
       persona: p,
       language: l,
     });
-  }, [settings.voicePersona, settings.language, settings.features, enabledFeatures]);
+  }, [settings.voicePersona, settings.language, settings.features, enabledFeatures, subscriptionState.isPremium]);
 
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     if (newSettings.pin) {
       saveSecureCaregiverPin(newSettings.pin).catch(() => {});
     }
+
+    // Basic tier restriction: Only the default system voice is available to use for basic users
+    if (!subscriptionState.isPremium && newSettings.voicePersona && newSettings.voicePersona !== 'system') {
+      newSettings.voicePersona = 'system';
+      subscriptionState.triggerUpgrade('Piper on-device neural voices are a BeeYou Plus feature! Start your 15-day free trial.');
+    }
+
     if (newSettings.language) {
       setLanguage(newSettings.language).catch(() => {});
 
@@ -853,8 +866,8 @@ export const AppProvider: React.FC<{ children: ReactNode; initialRole?: 'caregiv
         const newNormLang = newSettings.language.toLowerCase().split(/[-_]/)[0];
         const currentVoiceLang = (currentVoice.language || 'en').toLowerCase().split(/[-_]/)[0];
 
-        // If the current persona is not dedicated to the new language, auto-switch to new language default
-        if (currentVoice.id !== 'system' && currentVoiceLang !== newNormLang) {
+        // If the current persona is not dedicated to the new language, auto-switch to new language default for premium users
+        if (subscriptionState.isPremium && currentVoice.id !== 'system' && currentVoiceLang !== newNormLang) {
           newSettings.voicePersona = getDefaultVoicePersonaForLanguage(newSettings.language);
         }
       }

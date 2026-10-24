@@ -847,7 +847,7 @@ const LEGACY_PERSONA_ALIASES: Record<string, string> = {
 };
 
 export function getVoicePersonaById(id?: string | null): VoicePersona {
-  if (!id) return VOICE_PERSONAS[1]; // Default to Amy
+  if (!id) return VOICE_PERSONAS[0]; // Default to Free System Voice
   const clean = id.trim().toLowerCase();
   if (clean === 'default' || clean === 'free' || clean === 'system') {
     return VOICE_PERSONAS[0];
@@ -862,5 +862,5 @@ export function getVoicePersonaById(id?: string | null): VoicePersona {
       p.name.toLowerCase() === mappedId ||
       (p.piperVoice && p.piperVoice.toLowerCase() === mappedId)
   );
-  return found || VOICE_PERSONAS[1];
+  return found || VOICE_PERSONAS[0];
 }

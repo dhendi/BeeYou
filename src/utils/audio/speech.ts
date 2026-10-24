@@ -991,6 +991,11 @@ export async function speakText(
   const personaObj = getVoicePersonaById(rawPersona);
   let selectedPersonaId = personaObj.id;
 
+  // Basic tier safeguard: For basic users, only the default voice ('system') is available to use for speech vocalization
+  if (!options?.previewAudio && selectedPersonaId !== 'system' && !isDeviceEntitledToPremiumVoices()) {
+    selectedPersonaId = 'system';
+  }
+
   // Dynamically resolve active application language from options, dedicated persona, or global translation state
   const personaLang = personaObj.language && personaObj.language !== 'all' ? personaObj.language : undefined;
   const activeAppLang = (options?.lang && options.lang !== 'en')

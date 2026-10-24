@@ -263,14 +263,14 @@ export const AACView: React.FC = () => {
 
   // Pre-warm high-frequency core communication vocabulary for 0ms offline audio playback
   useEffect(() => {
-    const p = settings?.voicePersona || 'system';
+    const p = !isPremium ? 'system' : (settings?.voicePersona || 'system');
     const l = settings?.language || 'en';
     if (!isVoicePackLoaded(p, l)) {
       triggerVoicePreload(p, l);
     } else if (p !== 'system') {
       preloadPiperVoice(p, l).catch(() => {});
     }
-  }, [settings?.voicePersona, settings?.language]);
+  }, [settings?.voicePersona, settings?.language, isPremium]);
 
   // Favorite Sentences Form state
   const [newFavSentenceText, setNewFavSentenceText] = useState('');
@@ -568,11 +568,11 @@ export const AACView: React.FC = () => {
     if (filteredItems && filteredItems.length > 0) {
       prewarmPhrases(
         filteredItems.map((i) => (i.speechText && t(i.speechText) !== i.speechText ? t(i.speechText) : t(i.label))),
-        settings?.voicePersona || 'amy',
+        !isPremium ? 'system' : (settings?.voicePersona || 'system'),
         settings?.language || 'en'
       );
     }
-  }, [activeCategory, filteredItems?.length, settings?.voicePersona, settings?.language]);
+  }, [activeCategory, filteredItems?.length, settings?.voicePersona, settings?.language, isPremium]);
 
   // Styling based on AAC Button Color Mode: Fitzgerald Key (default) vs Theme Tinted vs High Contrast White vs Neutral Monochrome
   const getColorStyles = (colorType: AACItem['colorType']) => {

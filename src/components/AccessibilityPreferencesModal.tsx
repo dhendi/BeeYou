@@ -7,6 +7,7 @@ import {
   Sliders, 
   SlidersHorizontal,
   Check, 
+  Crown,
   Star,
   VolumeX,
   Zap,
@@ -670,9 +671,28 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                   {/* Active Voice Pill */}
                   <div className="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-[#FDF4E7] border border-[#E2A44E] text-[#4A2F0F] text-xs font-black flex items-center gap-1.5 shrink-0 shadow-2xs">
                     <span>{t("Active:")}</span>
-                    <span className="truncate max-w-[130px]">{t(getVoicePersonaById(settings.voicePersona || 'amy').name)}</span>
+                    <span className="truncate max-w-[130px]">{t(getVoicePersonaById(!isPremium ? 'system' : (settings.voicePersona || 'system')).name)}</span>
                   </div>
                 </div>
+
+                {/* Basic Plan Voice Notice */}
+                {!isPremium && (
+                  <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-2 shadow-2xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Crown className="w-4 h-4 text-amber-600 fill-amber-500 shrink-0" />
+                      <span className="text-xs font-bold text-amber-950 truncate">
+                        {t("Basic Plan includes 1 voice (Default Free Voice)")}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => triggerUpgrade('Piper on-device neural voices are a BeeYou Plus feature! Start your 15-day free trial.')}
+                      className="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black text-xs shrink-0 cursor-pointer shadow-2xs transition-all"
+                    >
+                      {t("Upgrade")}
+                    </button>
+                  </div>
+                )}
 
                 {/* Category Filter Pills (Silicone Tray Style) */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
@@ -710,12 +730,18 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                     if (voiceCategoryFilter === 'pro') return p.category === 'pro_women' || p.category === 'pro_men';
                     return true;
                   }).map((persona) => {
-                    const effectiveVoicePersona = settings.voicePersona || 'amy';
+                    const effectiveVoicePersona = !isPremium ? 'system' : (settings.voicePersona || 'system');
                     const isSelected = effectiveVoicePersona.toLowerCase() === persona.id.toLowerCase();
+                    const isLockedForBasic = !isPremium && persona.id !== 'system';
+
                     return (
                       <div
                         key={persona.id}
                         onClick={() => {
+                          if (isLockedForBasic) {
+                            triggerUpgrade('Piper on-device neural voices are a BeeYou Plus feature! Start your 15-day free trial.');
+                            return;
+                          }
                           stopSpeaking();
                           updateSettings({ voicePersona: persona.id });
                           playChime('tap');
@@ -723,6 +749,8 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                         className={`p-3 sm:p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col gap-2.5 ${
                           isSelected
                             ? 'bg-[#FDF4E7] border-[#E2A44E] shadow-xs'
+                            : isLockedForBasic
+                            ? 'bg-[#FAF8F5] border-[#E8E2D7] hover:border-amber-300'
                             : 'bg-white hover:bg-[#FAF7F2] border-[#E0D8CB]'
                         }`}
                       >
@@ -740,6 +768,12 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                               {persona.piperVoice && (
                                 <span className="px-1.5 py-0.5 rounded-md bg-blue-100 border border-blue-200 text-blue-950 text-[9px] font-black">
                                   {t("On-Device")}
+                                </span>
+                              )}
+                              {isLockedForBasic && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-amber-950 text-[9px] font-black flex items-center gap-1">
+                                  <Crown className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                                  <span>{t("Plus")}</span>
                                 </span>
                               )}
                               <span className="px-1.5 py-0.5 rounded-md bg-[#EFE9DF] text-[#7A6C60] text-[9px] font-bold">
@@ -774,13 +808,27 @@ export const AccessibilityPreferencesModal: React.FC = () => {
                             >
                               <span>{t("Audition")}</span>
                             </button>
-                            <div
-                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                                isSelected ? 'border-[#E2A44E] bg-[#E2A44E] text-white' : 'border-[#C8BFB3]'
-                              }`}
-                            >
-                              {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                            </div>
+                            {isLockedForBasic ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  triggerUpgrade('Piper on-device neural voices are a BeeYou Plus feature! Start your 15-day free trial.');
+                                }}
+                                className="px-2 py-1 rounded-xl bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-950 text-xs font-black flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                              >
+                                <Crown className="w-3 h-3 fill-amber-500 text-amber-600" />
+                                <span>{t("Plus")}</span>
+                              </button>
+                            ) : (
+                              <div
+                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                                  isSelected ? 'border-[#E2A44E] bg-[#E2A44E] text-white' : 'border-[#C8BFB3]'
+                                }`}
+                              >
+                                {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                              </div>
+                            )}
                           </div>
                         </div>
 
