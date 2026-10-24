@@ -176,7 +176,7 @@ export async function preloadVoicePack(
         loaded: i + 1,
         total: numCoreTiles,
         percent: tilePercent,
-        currentPhrase: `Optimizing tile: ${item.phrase}`,
+        currentPhrase: 'Preparing your voice...',
         loadedBytes: modelTotalBytes,
         totalBytes: modelTotalBytes,
         stage: 'tiles',

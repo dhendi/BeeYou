@@ -8,6 +8,7 @@ import { t, subscribeToLanguage, getLanguage } from '../../services/translator';
 const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
   es: {
     'Preparing Your Voice': 'Preparando tu voz',
+    'Preparing your voice...': 'Preparando tu voz...',
     'Loading Your Voice': 'Preparando tu voz',
     'Voice Ready!': '¡Voz lista!',
     'Voice Pack Ready!': '¡Voz lista!',
@@ -31,6 +32,7 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
   },
   fr: {
     'Preparing Your Voice': 'Préparation de votre voix',
+    'Preparing your voice...': 'Préparation de votre voix...',
     'Loading Your Voice': 'Préparation de votre voix',
     'Voice Ready!': 'Voix prête !',
     'Voice Pack Ready!': 'Voix prête !',
@@ -54,6 +56,7 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
   },
   fr_ca: {
     'Preparing Your Voice': 'Préparation de votre voix québécoise',
+    'Preparing your voice...': 'Préparation de votre voix québécoise...',
     'Loading Your Voice': 'Préparation de votre voix québécoise',
     'Voice Ready!': 'Voix québécoise prête !',
     'Voice Pack Ready!': 'Voix québécoise prête !',
@@ -77,6 +80,7 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
   },
   de: {
     'Preparing Your Voice': 'Bereite deine Stimme vor',
+    'Preparing your voice...': 'Bereite deine Stimme vor...',
     'Loading Your Voice': 'Bereite deine Stimme vor',
     'Voice Ready!': 'Stimme bereit!',
     'Voice Pack Ready!': 'Stimme bereit!',
@@ -99,8 +103,10 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
     'Voice': 'Stimme',
   },
   it: {
+    'Preparing Your Voice': 'Caricamento della tua voce',
+    'Preparing your voice...': 'Preparazione della tua voce...',
     'Loading Your Voice': 'Caricamento della tua voce',
-    'Voice Pack Ready!': 'Pacchetto vocale pronto!',
+    'Voice Ready!': 'Pacchetto vocale pronto!',
     'Pre-caching every speech tile for instantaneous communication.': 'Pre-caricamento di ogni casella per una comunicazione istantanea.',
     'All AAC tiles are cached for instant 0ms speech.': 'Tutte le tessere CAA sono pronte per una voce immediata a 0 ms.',
     'Speech Tiles Cached': 'Tessere vocali salvate',
@@ -114,8 +120,10 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
     'Voice': 'Voce',
   },
   pt: {
+    'Preparing Your Voice': 'Carregando sua voz',
+    'Preparing your voice...': 'Preparando sua voz...',
     'Loading Your Voice': 'Carregando sua voz',
-    'Voice Pack Ready!': 'Pacote de voz pronto!',
+    'Voice Ready!': 'Pacote de voz pronto!',
     'Pre-caching every speech tile for instantaneous communication.': 'Pré-carregando cada botão para comunicação instantânea.',
     'All AAC tiles are cached for instant 0ms speech.': 'Todos os cartões de CAA estão prontos para fala imediata.',
     'Speech Tiles Cached': 'Botões de voz salvos',
@@ -129,8 +137,10 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
     'Voice': 'Voz',
   },
   ru: {
+    'Preparing Your Voice': 'Подготовка вашего голоса',
+    'Preparing your voice...': 'Подготовка вашего голоса...',
     'Loading Your Voice': 'Загрузка вашего голоса',
-    'Voice Pack Ready!': 'Голосовой пакет готов!',
+    'Voice Ready!': 'Голосовой пакет готов!',
     'Pre-caching every speech tile for instantaneous communication.': 'Кэширование карточек для мгновенной речи.',
     'All AAC tiles are cached for instant 0ms speech.': 'Все карточки ААК готовы к мгновенному озвучиванию.',
     'Speech Tiles Cached': 'Карточки подготовлены',
@@ -144,8 +154,10 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
     'Voice': 'Голос',
   },
   vi: {
+    'Preparing Your Voice': 'Đang chuẩn bị giọng nói',
+    'Preparing your voice...': 'Đang chuẩn bị giọng nói...',
     'Loading Your Voice': 'Đang tải giọng nói của bạn',
-    'Voice Pack Ready!': 'Gói giọng nói đã sẵn sàng!',
+    'Voice Ready!': 'Gói giọng nói đã sẵn sàng!',
     'Pre-caching every speech tile for instantaneous communication.': 'Đang chuẩn bị từng thẻ AAC để phát giọng nói tức thì.',
     'All AAC tiles are cached for instant 0ms speech.': 'Tất cả thẻ AAC đã được lưu để phát âm 0ms ngay lập tức.',
     'Speech Tiles Cached': 'Thẻ giọng nói đã lưu',
@@ -159,8 +171,10 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
     'Voice': 'Giọng nói',
   },
   zh: {
+    'Preparing Your Voice': '正在准备您的专属语音',
+    'Preparing your voice...': '正在准备您的专属语音...',
     'Loading Your Voice': '正在载入您的专属语音',
-    'Voice Pack Ready!': '语音包已准备就绪！',
+    'Voice Ready!': '语音包已准备就绪！',
     'Pre-caching every speech tile for instantaneous communication.': '正在预存每个交流卡片，实现即时发声。',
     'All AAC tiles are cached for instant 0ms speech.': '所有辅助沟通卡片已缓存，零延迟极速发声。',
     'Speech Tiles Cached': '已缓存卡片',
@@ -174,8 +188,10 @@ const SYNC_LOADING_STRINGS: Record<string, Record<string, string>> = {
     'Voice': '发音角色',
   },
   el: {
+    'Preparing Your Voice': 'Προετοιμασία της φωνής σας',
+    'Preparing your voice...': 'Προετοιμασία της φωνής σας...',
     'Loading Your Voice': 'Φόρτωση της φωνής σας',
-    'Voice Pack Ready!': 'Το πακέτο φωνής είναι έτοιμο!',
+    'Voice Ready!': 'Το πακέτο φωνής είναι έτοιμο!',
     'Pre-caching every speech tile for instantaneous communication.': 'Προσωρινή αποθήκευση κάθε κάρτας για άμεση ομιλία.',
     'All AAC tiles are cached for instant 0ms speech.': 'Όλες οι κάρτες ΕΕΚ είναι έτοιμες για άμεση εκφώνηση.',
     'Speech Tiles Cached': 'Κάρτες αποθηκευμένες',
@@ -237,20 +253,8 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
     }
   }, [language]);
 
-  const formatProgressPhrase = (phrase: string): string => {
-    if (!phrase) return '';
-    if (phrase.startsWith('Downloading neural voice model')) return translateLoadingText('Downloading voice model...', currentUiLang);
-    if (phrase.startsWith('Downloading voice model')) return translateLoadingText('Downloading voice model...', currentUiLang);
-    if (phrase.startsWith('Preparing neural speech engine')) return translateLoadingText('Preparing neural speech engine...', currentUiLang);
-    if (phrase.startsWith('Speech engine ready')) return translateLoadingText('Speech engine ready', currentUiLang);
-    if (phrase.startsWith('Voice model ready')) return translateLoadingText('Voice model ready', currentUiLang);
-    if (phrase.startsWith('Connecting to neural speech engine')) return translateLoadingText('Connecting to neural speech engine...', currentUiLang);
-    if (phrase.startsWith('Preparing speech cache')) return translateLoadingText('Preparing speech cache...', currentUiLang);
-    if (phrase.startsWith('Optimizing tile:')) {
-      const tileName = phrase.replace('Optimizing tile:', '').trim();
-      return `${translateLoadingText('Optimizing speech tiles...', currentUiLang)} (${tileName})`;
-    }
-    return translateLoadingText(phrase, currentUiLang);
+  const formatProgressPhrase = (_phrase: string): string => {
+    return translateLoadingText('Preparing your voice...', currentUiLang);
   };
 
   // Keep a stable ref to onComplete to avoid triggering re-renders or restarting preloads
@@ -412,21 +416,6 @@ export const AacVoiceLoadingScreen: React.FC<AacVoiceLoadingScreenProps> = ({
               className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-orange-400 rounded-full transition-all duration-150 ease-out shadow-xs"
               style={{ width: `${Math.min(100, Math.max(4, progress.percent))}%` }}
             />
-          </div>
-
-          <div className="flex items-center justify-between text-[11px] text-[#8C7A6B] font-bold px-0.5">
-            <span>
-              {progress.stage === 'tiles'
-                ? translateLoadingText('Speech Tiles Ready', currentUiLang)
-                : translateLoadingText('Voice Model', currentUiLang)}
-            </span>
-            <span className="tabular-nums font-extrabold">
-              {progress.stage === 'tiles'
-                ? `${progress.loaded} / ${progress.total}`
-                : progress.totalBytes && progress.totalBytes > 0
-                ? `${(progress.loadedBytes ? progress.loadedBytes / (1024 * 1024) : 0).toFixed(1)} MB of ${(progress.totalBytes / (1024 * 1024)).toFixed(1)} MB done`
-                : `${progress.percent}% done`}
-            </span>
           </div>
         </div>
 

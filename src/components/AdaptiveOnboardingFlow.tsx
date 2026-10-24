@@ -766,9 +766,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       <span className="text-xs text-slate-500 font-medium">/{t('month')}</span>
                     </div>
                   </div>
-                  <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-md">
-                    {t('15d trial')}
-                  </span>
                 </button>
 
                 {/* Yearly */}
@@ -798,9 +795,6 @@ export const AdaptiveOnboardingFlow: React.FC<AdaptiveOnboardingFlowProps> = ({
                       <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold">~$7.50/{t('month')}</span>
                     </div>
                   </div>
-                  <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded-md">
-                    {t('15d trial')}
-                  </span>
                 </button>
               </div>
 

@@ -209,9 +209,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                     <span className="text-[10px] text-slate-500 font-normal"> /mo</span>
                   </div>
                 </div>
-                <span className="text-[9px] font-bold text-amber-800 bg-amber-100 dark:bg-amber-900/60 px-1.5 py-0.5 rounded">
-                  {t('15d trial')}
-                </span>
               </button>
 
               {/* Yearly */}
@@ -241,9 +238,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                     <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold"> (~$7.50/mo)</span>
                   </div>
                 </div>
-                <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100 dark:bg-emerald-900/60 px-1.5 py-0.5 rounded">
-                  {t('15d trial')}
-                </span>
               </button>
             </div>
           </div>
