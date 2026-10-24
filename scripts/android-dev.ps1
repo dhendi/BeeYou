@@ -37,35 +37,35 @@ adb -s $deviceId reverse tcp:3001 tcp:3001
 $devConfig = "capacitor.config.dev.json"
 $targetAssetConfig = "android\app\src\main\assets\capacitor.config.json"
 
-if (Test-Path $devConfig) {
-    Write-Host "Applying development configuration with live reload (http://localhost:3000)..."
-    Copy-Item -Path $devConfig -Destination $targetAssetConfig -Force
-}
-
-# Compile and install live-reload debug build if needed
-Write-Host "Compiling and updating Android debug app..."
-Push-Location android
 try {
-    .\gradlew.bat assembleDebug
-} finally {
-    Pop-Location
-}
+    if (Test-Path $devConfig) {
+        Write-Host "Applying development configuration with live reload (http://localhost:3000)..."
+        Copy-Item -Path $devConfig -Destination $targetAssetConfig -Force
+    }
 
-$apkPath = "android\app\build\outputs\apk\debug\app-debug.apk"
-if (Test-Path $apkPath) {
-    Write-Host "Installing live reload build on $deviceId..."
-    adb -s $deviceId install -r $apkPath
-}
+    # Compile and install live-reload debug build if needed
+    Write-Host "Compiling and updating Android debug app..."
+    Push-Location android
+    try {
+        .\gradlew.bat assembleDebug
+    } finally {
+        Pop-Location
+    }
 
-# Launch the app
-Write-Host "Launching BeeYou on device..."
-adb -s $deviceId shell am start -n com.beeyou.app/com.beeyou.app.MainActivity
+    $apkPath = "android\app\build\outputs\apk\debug\app-debug.apk"
+    if (Test-Path $apkPath) {
+        Write-Host "Installing live reload build on $deviceId..."
+        adb -s $deviceId install -r $apkPath
+    }
 
-Write-Host "=== Live Reload Active ==="
-Write-Host "Any React, CSS, or TypeScript changes will update automatically on your phone."
-Write-Host "Starting Vite development server on port 3000 (Press Ctrl+C to stop)..."
+    # Launch the app
+    Write-Host "Launching BeeYou on device..."
+    adb -s $deviceId shell am start -n com.beeyou.app/com.beeyou.app.MainActivity
 
-try {
+    Write-Host "=== Live Reload Active ==="
+    Write-Host "Any React, CSS, or TypeScript changes will update automatically on your phone."
+    Write-Host "Starting Vite development server on port 3000 (Press Ctrl+C to stop)..."
+
     npm run dev
 } finally {
     Write-Host "Restoring production configuration..."

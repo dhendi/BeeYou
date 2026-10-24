@@ -17,6 +17,10 @@ if (Test-Path $sdkPath) {
 
 Write-Host "=== BeeYou Android Production Build ==="
 
+param (
+    [switch]$Release
+)
+
 # Step 1: Build web assets
 Write-Host "Building production web assets..."
 npm run build
@@ -25,11 +29,32 @@ npm run build
 Write-Host "Syncing Capacitor with production bundled assets..."
 npx cap sync android
 
-# Step 3: Compile native Android debug APK
+# Step 2b: Verify production network security configuration
+$assetConfigFile = "android\app\src\main\assets\capacitor.config.json"
+if (Test-Path $assetConfigFile) {
+    $configContent = Get-Content -Raw -Path $assetConfigFile | ConvertFrom-Json
+    if ($configContent.server.url) {
+        throw "Security Error: Development server URL found in production assets: $($configContent.server.url)"
+    }
+    if ($configContent.server.cleartext -ne $false) {
+        throw "Security Error: Cleartext HTTP is enabled in production assets."
+    }
+    Write-Host "Production network security settings verified: cleartext disabled, no dev server URL."
+} else {
+    throw "Security Error: $assetConfigFile was not generated."
+}
+
+# Step 3: Compile native Android APK
 Write-Host "Compiling native Android APK..."
 Push-Location android
 try {
-    .\gradlew.bat assembleDebug
+    if ($Release) {
+        Write-Host "Building Release APK..."
+        .\gradlew.bat assembleRelease
+    } else {
+        Write-Host "Building Debug APK for device testing..."
+        .\gradlew.bat assembleDebug
+    }
 } finally {
     Pop-Location
 }
@@ -38,7 +63,7 @@ try {
 [array]$devices = @(adb devices | Where-Object { $_ -match "\tdevice$" })
 if ($devices.Count -gt 0) {
     $deviceId = ($devices[0].Trim() -split "\s+")[0]
-    $apkPath = "android\app\build\outputs\apk\debug\app-debug.apk"
+    $apkPath = if ($Release) { "android\app\build\outputs\apk\release\app-release-unsigned.apk" } else { "android\app\build\outputs\apk\debug\app-debug.apk" }
     Write-Host "Installing production APK on $deviceId..."
     adb -s $deviceId install -r $apkPath
     Write-Host "Launching BeeYou..."

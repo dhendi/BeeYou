@@ -42,6 +42,26 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
 }
 
+tasks.register('verifyProductionNetworkSecurity') {
+    description = "Verifies that production assets do not include dev server live reload URLs or cleartext permissions."
+    doLast {
+        def configFile = file('src/main/assets/capacitor.config.json')
+        if (configFile.exists()) {
+            def parsed = new groovy.json.JsonSlurper().parseText(configFile.text)
+            if (parsed.server?.url) {
+                throw new GradleException("Security Violation: Release build contains development server URL (${parsed.server.url}) in assets/capacitor.config.json. Restore production config with 'npx cap copy android' before building release.")
+            }
+            if (parsed.server?.cleartext == true) {
+                throw new GradleException("Security Violation: Release build has server.cleartext set to true in assets/capacitor.config.json. Cleartext HTTP is forbidden in production.")
+            }
+        }
+    }
+}
+
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    dependsOn 'verifyProductionNetworkSecurity'
+}
+
 apply from: 'capacitor.build.gradle'
 
 try {
