@@ -37,58 +37,68 @@ export const ChildNavBar: React.FC<ChildNavBarProps> = ({ previewTheme }) => {
     settings?.features?.aacCommunication !== false && 
     settings?.features?.aac !== false;
 
+  const getActiveColor = (itemId: string): string => {
+    if (userAgeGroup === 'adult') {
+      return 'text-blue-600 dark:text-blue-400';
+    }
+    switch (itemId) {
+      case 'home':
+        return effectiveTheme?.palette?.textAccent?.replace('text-', 'text-') || 'text-amber-600 dark:text-amber-400';
+      case 'aac':
+        return 'text-sky-600 dark:text-sky-400';
+      case 'communicate':
+        return 'text-indigo-600 dark:text-indigo-400';
+      case 'me':
+        return 'text-rose-500 dark:text-rose-400';
+      case 'my-routine':
+        return 'text-emerald-600 dark:text-emerald-400';
+      case 'tools':
+        return 'text-purple-600 dark:text-purple-400';
+      default:
+        return 'text-blue-600 dark:text-blue-400';
+    }
+  };
+
   const allNavItems = [
     {
       id: 'home',
       label: userAgeGroup === 'adult' ? 'Dashboard' : 'Home',
-      emoji: '🏠',
       icon: Home,
-      activeBg: effectiveTheme?.palette?.navActiveBg || 'bg-[#D97706] text-white shadow-md ring-2 ring-amber-400',
       show: true,
     },
     {
       id: 'aac',
       label: 'AAC',
-      emoji: '🗣️',
       icon: Volume2,
-      activeBg: 'bg-sky-600 text-white shadow-md ring-2 ring-sky-300',
       show: isAacEnabled,
     },
     {
       id: 'communicate',
       label: 'Communicate',
-      emoji: '💬',
       icon: MessageSquare,
-      activeBg: 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-300',
       show: isAacEnabled,
     },
     {
       id: 'me',
       label: 'Me',
-      emoji: '💛',
       icon: Heart,
-      activeBg: 'bg-amber-600 text-white shadow-md ring-2 ring-amber-300',
       show: true,
     },
     {
       id: 'my-routine',
       label: userAgeGroup === 'adult' ? 'Schedule' : 'My Routine',
-      emoji: '📅',
       icon: CalendarDays,
-      activeBg: 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-300',
       show: true,
     },
     {
       id: 'tools',
       label: userAgeGroup === 'adult' ? 'Toolkit' : 'Tools',
-      emoji: '🧰',
       icon: LayoutGrid,
-      activeBg: 'bg-slate-800 text-white shadow-md ring-2 ring-stone-400',
       show: true,
     },
   ];
 
-  const navItems = allNavItems.filter(item => item.show);
+  const navItems = allNavItems.filter((item) => item.show);
 
   const handleNav = (item: any) => {
     if (previewTheme) {
@@ -119,26 +129,32 @@ export const ChildNavBar: React.FC<ChildNavBarProps> = ({ previewTheme }) => {
   };
 
   return (
-    <nav className="w-full bg-white/80 backdrop-blur-2xl border-t border-white/80 px-2 sm:px-4 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] select-none transition-colors">
+    <nav className="w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800 px-2 sm:px-4 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] shadow-[0_-4px_20px_rgba(0,0,0,0.03)] select-none transition-colors">
       <div className="max-w-3xl mx-auto flex items-center justify-around gap-1 sm:gap-2">
         {navItems.map((item) => {
           const isActive = isItemActive(item.id);
           const Icon = item.icon;
+          const activeColor = getActiveColor(item.id);
+
           return (
             <button
               key={item.id}
               onClick={() => handleNav(item)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex-1 flex flex-col items-center justify-center py-1.5 sm:py-2 px-1 rounded-2xl transition-all active:scale-95 cursor-pointer ${
-                isActive
-                  ? item.activeBg || 'bg-[#2D241E] text-white shadow-md font-black'
-                  : 'bg-white/60 text-stone-600 hover:bg-white/90 border border-white/70 hover:text-stone-900 font-bold'
-              }`}
+              className="flex-1 flex flex-col items-center justify-center py-1 sm:py-1.5 px-1 bg-transparent transition-all active:scale-95 cursor-pointer"
             >
-              <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-white/20' : 'bg-transparent'}`}>
-                <Icon className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.4]" />
-              </div>
-              <span className="text-[10px] sm:text-xs font-black tracking-tight mt-0.5 truncate max-w-full">
+              <Icon
+                className={`w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2] transition-colors ${
+                  isActive ? activeColor : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
+                }`}
+              />
+              <span
+                className={`text-[10px] sm:text-xs tracking-tight mt-1 truncate max-w-full transition-colors ${
+                  isActive
+                    ? `${activeColor} font-black`
+                    : 'text-slate-400 dark:text-slate-500 font-bold hover:text-slate-600 dark:hover:text-slate-400'
+                }`}
+              >
                 {t(item.label)}
               </span>
             </button>
@@ -148,4 +164,3 @@ export const ChildNavBar: React.FC<ChildNavBarProps> = ({ previewTheme }) => {
     </nav>
   );
 };
-
