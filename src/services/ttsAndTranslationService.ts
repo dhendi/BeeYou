@@ -8,6 +8,7 @@ import {
   defaultRateLimitStore,
   getClientIp,
   isRtdbConfigured,
+  isProductionEnvironment,
   resolveRtdbUrl,
   fetchRtdbWithAuth,
   getSecondsUntilMidnight,
@@ -256,23 +257,24 @@ export class UsageBudgetTracker {
             },
             timeoutMs
           );
-          const etag = getRes.headers.get('etag');
 
-          let existing: DailyUsageMetrics | null = null;
-          if (getRes.ok && getRes.status !== 204) {
-            const text = await getRes.text();
-            if (text && text.trim() !== 'null') {
-              try {
-                existing = JSON.parse(text);
-              } catch {}
-            }
+          if (!getRes.ok) {
+            throw new Error(`RTDB GET budget metric failed with status ${getRes.status}`);
           }
 
-          // If document exists, an ETag is mandatory for concurrency safety
-          if (existing && !etag) {
-            const backoff = 20 * Math.pow(2, attempt) + Math.floor(Math.random() * 15);
-            await new Promise((r) => setTimeout(r, backoff));
-            continue;
+          const etag = getRes.headers.get('etag');
+          if (!etag) {
+            throw new Error('RTDB GET budget metric response missing required ETag');
+          }
+
+          const text = await getRes.text();
+          let existing: DailyUsageMetrics | null = null;
+          if (text && text.trim() !== 'null') {
+            try {
+              existing = JSON.parse(text);
+            } catch (jsonErr: any) {
+              throw new Error(`RTDB budget metric contains malformed JSON: ${jsonErr?.message || jsonErr}`);
+            }
           }
 
           if (!existing || existing.date !== today) {
@@ -305,10 +307,8 @@ export class UsageBudgetTracker {
 
           const putHeaders: Record<string, string> = {
             'Content-Type': 'application/json',
+            'if-match': etag,
           };
-          if (etag) {
-            putHeaders['if-match'] = etag;
-          }
 
           const putRes = await this.fetchRtdb(
             url,
@@ -339,11 +339,33 @@ export class UsageBudgetTracker {
           };
         }
       } catch (err: any) {
-        console.warn('[UsageBudgetTracker] RTDB reservation error, using local fallback:', err?.message || err);
+        console.warn('[UsageBudgetTracker] RTDB reservation error:', err?.message || err);
+        if (isProductionEnvironment()) {
+          const retryAfterSec = getSecondsUntilMidnight();
+          return {
+            allowed: false,
+            remaining: 0,
+            date: today,
+            error: 'Authoritative shared spending store is unavailable in production. Cached audio remains available.',
+            retryAfterSec,
+          };
+        }
+      }
+    } else {
+      if (isProductionEnvironment()) {
+        console.error('[UsageBudgetTracker] RTDB unconfigured in production. Upstream TTS blocked to protect spending budget.');
+        const retryAfterSec = getSecondsUntilMidnight();
+        return {
+          allowed: false,
+          remaining: 0,
+          date: today,
+          error: 'Authoritative shared spending store is unconfigured in production. Cached audio remains available.',
+          retryAfterSec,
+        };
       }
     }
 
-    // Local fallback atomic check
+    // Local fallback atomic check (only permitted in offline development / test / non-production)
     if (this.currentMetrics.ttsUpstreamCalls >= this.dailyTtsCap) {
       const retryAfterSec = getSecondsUntilMidnight();
       return {
@@ -384,20 +406,27 @@ export class UsageBudgetTracker {
             },
             timeoutMs
           );
-          const etag = getRes.headers.get('etag');
 
-          if (!getRes.ok || getRes.status === 204) break;
-          const text = await getRes.text();
-          if (!text || text.trim() === 'null') break;
-
-          const existing: DailyUsageMetrics = JSON.parse(text);
-          if (!existing || existing.ttsUpstreamCalls <= 0) return;
-
-          if (existing && !etag) {
-            const backoff = 15 * Math.pow(2, attempt);
-            await new Promise((r) => setTimeout(r, backoff));
-            continue;
+          if (!getRes.ok) {
+            throw new Error(`RTDB GET budget metric failed with status ${getRes.status}`);
           }
+
+          const etag = getRes.headers.get('etag');
+          if (!etag) {
+            throw new Error('RTDB GET budget metric response missing required ETag');
+          }
+
+          const text = await getRes.text();
+          if (!text || text.trim() === 'null') return;
+
+          let existing: DailyUsageMetrics | null = null;
+          try {
+            existing = JSON.parse(text);
+          } catch (jsonErr: any) {
+            throw new Error(`RTDB budget metric contains malformed JSON: ${jsonErr?.message || jsonErr}`);
+          }
+
+          if (!existing || existing.ttsUpstreamCalls <= 0) return;
 
           const updated: DailyUsageMetrics = {
             ...existing,
@@ -406,10 +435,8 @@ export class UsageBudgetTracker {
 
           const putHeaders: Record<string, string> = {
             'Content-Type': 'application/json',
+            'if-match': etag,
           };
-          if (etag) {
-            putHeaders['if-match'] = etag;
-          }
 
           const putRes = await this.fetchRtdb(
             url,
@@ -435,13 +462,18 @@ export class UsageBudgetTracker {
           break;
         }
       } catch (err: any) {
-        console.warn('[UsageBudgetTracker] RTDB release failed, updating local:', err?.message || err);
+        console.warn('[UsageBudgetTracker] RTDB release failed:', err?.message || err);
+        if (isProductionEnvironment()) {
+          return;
+        }
       }
     }
 
-    if (this.currentMetrics.ttsUpstreamCalls > 0) {
-      this.currentMetrics.ttsUpstreamCalls--;
-      this.markDirty();
+    if (!isProductionEnvironment()) {
+      if (this.currentMetrics.ttsUpstreamCalls > 0) {
+        this.currentMetrics.ttsUpstreamCalls--;
+        this.markDirty();
+      }
     }
   }
 
@@ -473,23 +505,24 @@ export class UsageBudgetTracker {
             },
             timeoutMs
           );
-          const etag = getRes.headers.get('etag');
 
-          let existing: DailyUsageMetrics | null = null;
-          if (getRes.ok && getRes.status !== 204) {
-            const text = await getRes.text();
-            if (text && text.trim() !== 'null') {
-              try {
-                existing = JSON.parse(text);
-              } catch {}
-            }
+          if (!getRes.ok) {
+            throw new Error(`RTDB GET budget metric failed with status ${getRes.status}`);
           }
 
-          // If document exists, an ETag is mandatory for concurrency safety
-          if (existing && !etag) {
-            const backoff = 20 * Math.pow(2, attempt) + Math.floor(Math.random() * 15);
-            await new Promise((r) => setTimeout(r, backoff));
-            continue;
+          const etag = getRes.headers.get('etag');
+          if (!etag) {
+            throw new Error('RTDB GET budget metric response missing required ETag');
+          }
+
+          const text = await getRes.text();
+          let existing: DailyUsageMetrics | null = null;
+          if (text && text.trim() !== 'null') {
+            try {
+              existing = JSON.parse(text);
+            } catch (jsonErr: any) {
+              throw new Error(`RTDB budget metric contains malformed JSON: ${jsonErr?.message || jsonErr}`);
+            }
           }
 
           if (!existing || existing.date !== today) {
@@ -522,10 +555,8 @@ export class UsageBudgetTracker {
 
           const putHeaders: Record<string, string> = {
             'Content-Type': 'application/json',
+            'if-match': etag,
           };
-          if (etag) {
-            putHeaders['if-match'] = etag;
-          }
 
           const putRes = await this.fetchRtdb(
             url,
@@ -556,11 +587,33 @@ export class UsageBudgetTracker {
           };
         }
       } catch (err: any) {
-        console.warn('[UsageBudgetTracker] RTDB reservation error, using local fallback:', err?.message || err);
+        console.warn('[UsageBudgetTracker] RTDB reservation error:', err?.message || err);
+        if (isProductionEnvironment()) {
+          const retryAfterSec = getSecondsUntilMidnight();
+          return {
+            allowed: false,
+            remaining: 0,
+            date: today,
+            error: 'Authoritative shared spending store is unavailable in production. Cached translations remain available.',
+            retryAfterSec,
+          };
+        }
+      }
+    } else {
+      if (isProductionEnvironment()) {
+        console.error('[UsageBudgetTracker] RTDB unconfigured in production. Upstream translations blocked to protect spending budget.');
+        const retryAfterSec = getSecondsUntilMidnight();
+        return {
+          allowed: false,
+          remaining: 0,
+          date: today,
+          error: 'Authoritative shared spending store is unconfigured in production. Cached translations remain available.',
+          retryAfterSec,
+        };
       }
     }
 
-    // Local fallback atomic check
+    // Local fallback atomic check (only permitted in offline development / test / non-production)
     if (this.currentMetrics.translateUpstreamCalls >= this.dailyTranslateCap) {
       const retryAfterSec = getSecondsUntilMidnight();
       return {
@@ -601,20 +654,27 @@ export class UsageBudgetTracker {
             },
             timeoutMs
           );
-          const etag = getRes.headers.get('etag');
 
-          if (!getRes.ok || getRes.status === 204) break;
-          const text = await getRes.text();
-          if (!text || text.trim() === 'null') break;
-
-          const existing: DailyUsageMetrics = JSON.parse(text);
-          if (!existing || existing.translateUpstreamCalls <= 0) return;
-
-          if (existing && !etag) {
-            const backoff = 15 * Math.pow(2, attempt);
-            await new Promise((r) => setTimeout(r, backoff));
-            continue;
+          if (!getRes.ok) {
+            throw new Error(`RTDB GET budget metric failed with status ${getRes.status}`);
           }
+
+          const etag = getRes.headers.get('etag');
+          if (!etag) {
+            throw new Error('RTDB GET budget metric response missing required ETag');
+          }
+
+          const text = await getRes.text();
+          if (!text || text.trim() === 'null') return;
+
+          let existing: DailyUsageMetrics | null = null;
+          try {
+            existing = JSON.parse(text);
+          } catch (jsonErr: any) {
+            throw new Error(`RTDB budget metric contains malformed JSON: ${jsonErr?.message || jsonErr}`);
+          }
+
+          if (!existing || existing.translateUpstreamCalls <= 0) return;
 
           const updated: DailyUsageMetrics = {
             ...existing,
@@ -623,10 +683,8 @@ export class UsageBudgetTracker {
 
           const putHeaders: Record<string, string> = {
             'Content-Type': 'application/json',
+            'if-match': etag,
           };
-          if (etag) {
-            putHeaders['if-match'] = etag;
-          }
 
           const putRes = await this.fetchRtdb(
             url,
@@ -652,13 +710,18 @@ export class UsageBudgetTracker {
           break;
         }
       } catch (err: any) {
-        console.warn('[UsageBudgetTracker] RTDB release failed, updating local:', err?.message || err);
+        console.warn('[UsageBudgetTracker] RTDB release failed:', err?.message || err);
+        if (isProductionEnvironment()) {
+          return;
+        }
       }
     }
 
-    if (this.currentMetrics.translateUpstreamCalls > 0) {
-      this.currentMetrics.translateUpstreamCalls--;
-      this.markDirty();
+    if (!isProductionEnvironment()) {
+      if (this.currentMetrics.translateUpstreamCalls > 0) {
+        this.currentMetrics.translateUpstreamCalls--;
+        this.markDirty();
+      }
     }
   }
 

@@ -40,16 +40,45 @@ export interface SharedRateLimitStoreOptions {
 }
 
 /**
- * Safely encodes rate limit keys for Firebase Realtime Database.
- * RTDB forbidden characters: . $ # [ ] / and control characters.
+ * Detects whether the current environment is running in production mode.
+ * Explicit offline development (OFFLINE_DEV=true) overrides production checks.
+ */
+export function isProductionEnvironment(): boolean {
+  if (process.env.OFFLINE_DEV === 'true' || process.env.ALLOW_OFFLINE_STORE === 'true') {
+    return false;
+  }
+  return (
+    process.env.NODE_ENV === 'production' ||
+    process.env.REQUIRE_RTDB_SYNC === 'true' ||
+    process.env.REQUIRE_FIRESTORE_SYNC === 'true'
+  );
+}
+
+/**
+ * Encodes rate limit keys for Firebase Realtime Database using unambiguous, collision-free UTF-8 Base64URL.
+ * RTDB forbidden characters: . $ # [ ] / and control characters (0-31, 127).
+ * Base64URL characters [A-Za-z0-9_-] are strictly disjoint from forbidden characters.
+ *
+ * Rollout Compatibility:
+ * 1. Newly created keys use canonical UTF-8 Base64URL encoding.
+ * 2. Active rate limit windows are ephemeral (60s burst, 15m auth, 24h daily). Legacy records
+ *    naturally expire without requiring live data migration.
+ * 3. decodeRtdbKey provides a backward-compatible fallback for legacy escaped keys (_ASCII_).
  */
 export function encodeRtdbKey(key: string): string {
-  if (!key) return 'empty';
-  return key.replace(/[/.$#[\]]/g, (c) => `_${c.charCodeAt(0)}_`);
+  if (!key) return '_empty_';
+  return Buffer.from(key, 'utf8').toString('base64url');
 }
 
 export function decodeRtdbKey(encoded: string): string {
-  if (!encoded) return '';
+  if (!encoded || encoded === '_empty_') return '';
+  try {
+    const decoded = Buffer.from(encoded, 'base64url').toString('utf8');
+    if (Buffer.from(decoded, 'utf8').toString('base64url') === encoded) {
+      return decoded;
+    }
+  } catch {}
+  // Backward-compatible fallback for legacy escaped keys during rollout
   return encoded.replace(/_(\d+)_/g, (_, code) => String.fromCharCode(Number(code)));
 }
 
@@ -72,7 +101,9 @@ export function isRtdbConfigured(options?: { disableRtdb?: boolean; customDbUrl?
   if (
     process.env.FIREBASE_SERVICE_ACCOUNT ||
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY ||
-    process.env.GOOGLE_APPLICATION_CREDENTIALS
+    process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+    process.env.GCLOUD_PROJECT ||
+    process.env.GOOGLE_CLOUD_PROJECT
   ) {
     return true;
   }
@@ -270,20 +301,20 @@ export class SharedRateLimitStore {
       this.lockoutCache.delete(key);
     }
 
+    const isSensitive =
+      hitOptions?.failClosed === true ||
+      scope === 'account' ||
+      scope === 'pairing' ||
+      key.startsWith('auth:') ||
+      key.startsWith('pairing:') ||
+      key.startsWith('recovery:');
+
     // 2. Distributed Atomic Hit via Firebase Realtime Database
     if (this.isRtdbConfigured()) {
       try {
         return await this.atomicHitRtdb(key, maxRequests, windowMs, scope);
       } catch (dbErr: any) {
-        const isAuthOrSensitive =
-          hitOptions?.failClosed === true ||
-          scope === 'account' ||
-          scope === 'pairing' ||
-          key.startsWith('auth:') ||
-          key.startsWith('pairing:') ||
-          key.startsWith('recovery:');
-
-        if (isAuthOrSensitive) {
+        if (isSensitive) {
           console.error(
             `[RateLimitStore] Fail-closed triggered for sensitive key ${key} due to DB error:`,
             dbErr?.message || dbErr
@@ -301,12 +332,42 @@ export class SharedRateLimitStore {
           };
         }
 
-        // Non-critical scope fallback to local in-memory counter
+        // Non-critical scope fallback to local in-memory counter with monitoring warning
+        console.warn(
+          `[RateLimitStore] RTDB unavailable; falling back to local counter for non-critical key ${key}:`,
+          dbErr?.message || dbErr
+        );
         return this.fallbackLocalHit(key, maxRequests, windowMs, scope);
       }
     }
 
-    // 3. In-Memory Atomic Fallback (when RTDB is disabled or offline)
+    // 3. RTDB is unconfigured or credentials missing
+    const shouldFailClosed =
+      (hitOptions?.failClosed === true || (isProductionEnvironment() && isSensitive)) &&
+      process.env.OFFLINE_DEV !== 'true';
+
+    if (shouldFailClosed) {
+      console.error(
+        `[RateLimitStore] Fail-closed triggered for sensitive key ${key}: RTDB is unconfigured or credentials are missing.`
+      );
+      const retryAfterSec = Math.max(1, Math.ceil(windowMs / 1000));
+      return {
+        allowed: false,
+        count: maxRequests + 1,
+        limit: maxRequests,
+        remaining: 0,
+        resetAt: now + windowMs,
+        retryAfterSec,
+        key,
+        scope,
+      };
+    }
+
+    if (isProductionEnvironment()) {
+      console.warn(
+        `[RateLimitStore] Warning: Operating in degraded local fallback for key ${key} because RTDB is unconfigured in production.`
+      );
+    }
     return this.fallbackLocalHit(key, maxRequests, windowMs, scope);
   }
 
@@ -333,24 +394,26 @@ export class SharedRateLimitStore {
         },
         timeoutMs
       );
-      const etag = getRes.headers.get('etag');
-      const now = Date.now();
 
-      let existing: RateLimitRecord | null = null;
-      if (getRes.ok && getRes.status !== 204) {
-        const text = await getRes.text();
-        if (text && text.trim() !== 'null') {
-          try {
-            existing = JSON.parse(text);
-          } catch {}
-        }
+      // Issue 2: Reject unsuccessful, malformed, or unexpected RTDB GET responses
+      if (!getRes.ok) {
+        throw new Error(`RTDB GET failed with status ${getRes.status}`);
       }
 
-      // If document exists, an ETag is mandatory for concurrency safety
-      if (existing && !etag) {
-        const backoffDelay = 20 * Math.pow(2, attempt) + Math.floor(Math.random() * 15);
-        await new Promise((r) => setTimeout(r, backoffDelay));
-        continue;
+      const etag = getRes.headers.get('etag');
+      if (!etag) {
+        throw new Error('RTDB GET response missing required ETag header');
+      }
+
+      const now = Date.now();
+      const text = await getRes.text();
+      let existing: RateLimitRecord | null = null;
+      if (text && text.trim() !== 'null') {
+        try {
+          existing = JSON.parse(text);
+        } catch (jsonErr: any) {
+          throw new Error(`RTDB rate limit record contains malformed JSON: ${jsonErr?.message || jsonErr}`);
+        }
       }
 
       // Case A: Fresh key or expired window
@@ -364,10 +427,8 @@ export class SharedRateLimitStore {
 
         const putHeaders: Record<string, string> = {
           'Content-Type': 'application/json',
+          'if-match': etag,
         };
-        if (etag) {
-          putHeaders['if-match'] = etag;
-        }
 
         const putRes = await this.fetchRtdb(
           url,
@@ -380,7 +441,7 @@ export class SharedRateLimitStore {
         );
 
         if (putRes.status === 412) {
-          // Concurrency conflict: another server updated in the same millisecond; retry
+          // Concurrency conflict: another server created or updated concurrently; retry
           const backoffDelay = 20 * Math.pow(2, attempt) + Math.floor(Math.random() * 15);
           await new Promise((r) => setTimeout(r, backoffDelay));
           continue;
@@ -430,10 +491,8 @@ export class SharedRateLimitStore {
 
       const putHeaders: Record<string, string> = {
         'Content-Type': 'application/json',
+        'if-match': etag,
       };
-      if (etag) {
-        putHeaders['if-match'] = etag;
-      }
 
       const putRes = await this.fetchRtdb(
         url,
@@ -477,7 +536,7 @@ export class SharedRateLimitStore {
       };
     }
 
-    throw new Error(`Exceeded max retries (${maxRetries}) during atomic rate limit hit for ${key}`);
+    throw new Error(`RTDB rate limit increment exceeded maximum retry attempts (${maxRetries})`);
   }
 
   /**

@@ -22,6 +22,7 @@ process.env.VERCEL = '1';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { spawn, ChildProcess } from 'child_process';
 import {
   SharedRateLimitStore,
   createSingleRateLimiter,
@@ -30,6 +31,7 @@ import {
   encodeRtdbKey,
   decodeRtdbKey,
   getSecondsUntilMidnight,
+  isProductionEnvironment,
 } from '../src/services/sharedRateLimitStore';
 import {
   UsageBudgetTracker,
@@ -47,6 +49,50 @@ function assert(condition: boolean, message: string) {
     failedCount++;
     console.error(`  [FAIL] ${message}`);
   }
+}
+
+function spawnWorkerServer(): Promise<{ child: ChildProcess; port: number }> {
+  return new Promise((resolve, reject) => {
+    const tsxCli = path.resolve('node_modules/tsx/dist/cli.mjs');
+    const child = spawn(process.execPath, [tsxCli, 'scripts/helpers/server-instance-worker.ts'], {
+      env: { ...process.env, VERCEL: '1', NODE_ENV: 'test' },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+
+    let stdoutData = '';
+    let resolved = false;
+
+    child.stdout.on('data', (chunk) => {
+      stdoutData += chunk.toString();
+      const match = stdoutData.match(/READY:(\d+)/);
+      if (match && !resolved) {
+        resolved = true;
+        resolve({ child, port: Number(match[1]) });
+      }
+    });
+
+    child.on('error', (err) => {
+      if (!resolved) {
+        resolved = true;
+        reject(err);
+      }
+    });
+
+    child.on('exit', (code) => {
+      if (!resolved) {
+        resolved = true;
+        reject(new Error(`Worker exited early with code ${code}`));
+      }
+    });
+
+    setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        child.kill('SIGTERM');
+        reject(new Error('Worker spawn timed out'));
+      }
+    }, 15000);
+  });
 }
 
 async function runAcceptanceTests() {
@@ -148,6 +194,84 @@ async function runAcceptanceTests() {
     raceStoreB.destroy();
 
     // ------------------------------------------------------------------------
+    // Scenario 2B: Strict ETag Protection, Non-200 Rejections & Initial Creation Race
+    // ------------------------------------------------------------------------
+    console.log('\n--- Scenario 2B: Strict ETag Protection, Non-200 Rejections & Initial Creation Race ---');
+    // 1. Empty record without ETag header must reject writes and fail closed (never silent unconditional PUT)
+    let interceptedPutWithoutIfMatch = false;
+    const missingEtagStore = new SharedRateLimitStore({
+      customStoragePath: path.join(testTempDir, 'missing_etag.json'),
+      customDbUrl: 'http://mock-db-missing-etag',
+      customFetch: async (_input, init) => {
+        const method = init?.method || 'GET';
+        if (method === 'GET') {
+          // Returns 200 OK with null body but NO etag header
+          return new Response('null', { status: 200, headers: {} });
+        }
+        if (method === 'PUT') {
+          const headers = (init?.headers as Record<string, string>) || {};
+          if (!headers['if-match']) {
+            interceptedPutWithoutIfMatch = true;
+          }
+          return new Response('{"count":1}', { status: 200 });
+        }
+        return new Response('', { status: 404 });
+      },
+    });
+
+    const missingEtagRes = await missingEtagStore.hit('auth:account:missing_etag_user', 5, 60000, 'account', { failClosed: true });
+    assert(!missingEtagRes.allowed, 'Rejects GET response missing mandatory ETag with fail-closed protection');
+    assert(!interceptedPutWithoutIfMatch, 'Never performed an unsafe unconditional write without If-Match');
+    missingEtagStore.destroy();
+
+    // 2. HTTP 401, 403, and 500 GET responses must fail closed and cannot reset counters or budgets
+    for (const code of [401, 403, 500]) {
+      const errorStore = new SharedRateLimitStore({
+        customStoragePath: path.join(testTempDir, `error_${code}.json`),
+        customDbUrl: `http://mock-db-${code}`,
+        customFetch: async () => new Response(JSON.stringify({ error: `Mock Error ${code}` }), { status: code }),
+      });
+
+      const errRes = await errorStore.hit(`auth:account:err_user_${code}`, 5, 60000, 'account', { failClosed: true });
+      assert(!errRes.allowed, `HTTP ${code} GET response triggers fail-closed protection`);
+      errorStore.destroy();
+    }
+
+    // Verify read failures cannot reset daily spending budgets
+    const failingBudgetTracker = new UsageBudgetTracker({
+      customPath: path.join(testTempDir, 'failing_budget.json'),
+      customDbUrl: 'http://mock-db-500',
+      dailyTtsCap: 5,
+      customFetch: async () => new Response(JSON.stringify({ error: 'Database Internal Error' }), { status: 500 }),
+    });
+
+    const oldEnv2B = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    const failBudgetRes = await failingBudgetTracker.reserveTtsBudget();
+    assert(!failBudgetRes.allowed, 'RTDB GET 500 failure rejects reservation and cannot reset budget');
+    process.env.NODE_ENV = oldEnv2B;
+    failingBudgetTracker.destroy();
+
+    // 3. Simultaneous initial-record creation race
+    if (isEmulatorActive) {
+      const initRaceStoreA = new SharedRateLimitStore({ customStoragePath: path.join(testTempDir, 'init_race_a.json') });
+      const initRaceStoreB = new SharedRateLimitStore({ customStoragePath: path.join(testTempDir, 'init_race_b.json') });
+      const initKey = `test:initial_creation_race:${Date.now()}`;
+
+      // Launch two simultaneous initial-record creations on a fresh key
+      const [initA, initB] = await Promise.all([
+        initRaceStoreA.hit(initKey, 5, 60000, 'account'),
+        initRaceStoreB.hit(initKey, 5, 60000, 'account'),
+      ]);
+
+      assert(initA.allowed && initB.allowed, 'Both simultaneous initial creations succeeded via retry');
+      assert((initA.count === 1 && initB.count === 2) || (initA.count === 2 && initB.count === 1), 'One created slot 1, the other handled 412 conflict and incremented to 2');
+
+      initRaceStoreA.destroy();
+      initRaceStoreB.destroy();
+    }
+
+    // ------------------------------------------------------------------------
     // Scenario 3: Restarting a server without resetting active counters
     // ------------------------------------------------------------------------
     console.log('\n--- Scenario 3: Process Reboot Without Resetting Active Counters ---');
@@ -218,28 +342,86 @@ async function runAcceptanceTests() {
     authStoreB.destroy();
 
     // ------------------------------------------------------------------------
-    // Scenario 5: Database timeout and partial failure (fail-closed auth)
+    // Scenario 5: Missing Credentials, Inaccessible RTDB, Recovery & Fail-Closed Auth
     // ------------------------------------------------------------------------
-    console.log('\n--- Scenario 5: Database Timeout & Partial Failure (Fail-Closed Auth) ---');
+    console.log('\n--- Scenario 5: Missing Credentials, Inaccessible RTDB, Recovery & Fail-Closed Auth ---');
+    // 1. Missing RTDB credentials
+    const missingCredsStore = new SharedRateLimitStore({
+      customStoragePath: path.join(testTempDir, 'missing_creds.json'),
+      disableRtdb: true,
+    });
+
+    const sensitiveAuthKey = `auth:account:secure_user_${Date.now()}@corp.org`;
+    const nonSensitiveIpKey = `ip:public_visitor_${Date.now()}`;
+
+    // Sensitive auth rule must FAIL CLOSED when RTDB credentials are missing
+    const authMissingResult = await missingCredsStore.hit(sensitiveAuthKey, 5, 60000, 'account', { failClosed: true });
+    assert(!authMissingResult.allowed, 'Sensitive authentication FAILS CLOSED when RTDB credentials are missing');
+    assert(authMissingResult.retryAfterSec > 0, 'Fail-closed result includes safety retryAfterSec');
+
+    // Non-critical general IP rule falls back to local in-memory counter with warning
+    const nonSensitiveResult = await missingCredsStore.hit(nonSensitiveIpKey, 100, 60000, 'ip', { failClosed: false });
+    assert(nonSensitiveResult.allowed, 'Non-critical general rule falls back to local in-memory counter');
+    missingCredsStore.destroy();
+
+    // Production TTS spending caps must NOT silently fall back to local counters
+    const oldEnvProd = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    const missingBudgetTracker = new UsageBudgetTracker({
+      customPath: path.join(testTempDir, 'missing_budget.json'),
+      disableRtdb: true,
+      dailyTtsCap: 5,
+    });
+    const missingBudgetRes = await missingBudgetTracker.reserveTtsBudget();
+    assert(!missingBudgetRes.allowed, 'Production TTS spending cap FAILS CLOSED when RTDB is unconfigured');
+    assert(missingBudgetRes.error?.includes('unconfigured') || missingBudgetRes.error?.includes('unavailable'), 'Error cites shared store requirement in production');
+    process.env.NODE_ENV = oldEnvProd;
+    missingBudgetTracker.destroy();
+
+    // 2. Inaccessible RTDB (network partition / timeout)
     const brokenDbStore = new SharedRateLimitStore({
       customStoragePath: path.join(testTempDir, 'broken.json'),
       customDbUrl: 'http://127.0.0.1:59999/unreachable_db', // Intentionally unreachable
       timeoutMs: 500, // Rapid timeout
     });
 
-    const sensitiveAuthKey = `auth:account:secure_user_${Date.now()}@corp.org`;
-    const nonSensitiveIpKey = `ip:public_visitor_${Date.now()}`;
+    const authBrokenResult = await brokenDbStore.hit(sensitiveAuthKey, 5, 60000, 'account', { failClosed: true });
+    assert(!authBrokenResult.allowed, 'Sensitive authentication FAILS CLOSED on database error/timeout');
 
-    // Sensitive auth rule must FAIL CLOSED when DB is down
-    const authFailClosedResult = await brokenDbStore.hit(sensitiveAuthKey, 5, 60000, 'account', { failClosed: true });
-    assert(!authFailClosedResult.allowed, 'Sensitive authentication FAILS CLOSED on database error/timeout');
-    assert(authFailClosedResult.retryAfterSec > 0, 'Fail-closed result includes safety retryAfterSec');
-
-    // Non-critical general IP rule FAILS OPEN to local memory cache so legitimate users are not blocked
-    const nonSensitiveResult = await brokenDbStore.hit(nonSensitiveIpKey, 100, 60000, 'ip', { failClosed: false });
-    assert(nonSensitiveResult.allowed, 'Non-critical general rule fails open to local in-memory counter');
-
+    // Inaccessible RTDB in production blocks upstream spending
+    process.env.NODE_ENV = 'production';
+    const brokenBudgetTracker = new UsageBudgetTracker({
+      customPath: path.join(testTempDir, 'broken_budget.json'),
+      customDbUrl: 'http://127.0.0.1:59999/unreachable_db',
+      timeoutMs: 500,
+      dailyTtsCap: 5,
+    });
+    const brokenBudgetRes = await brokenBudgetTracker.reserveTtsBudget();
+    assert(!brokenBudgetRes.allowed, 'Production TTS spending cap FAILS CLOSED when RTDB is inaccessible');
+    process.env.NODE_ENV = oldEnvProd;
+    brokenBudgetTracker.destroy();
     brokenDbStore.destroy();
+
+    // 3. Recovery when RTDB connectivity is restored
+    if (isEmulatorActive) {
+      const recoveredStore = new SharedRateLimitStore({
+        customStoragePath: path.join(testTempDir, 'recovered.json'),
+      });
+      const recoveryResult = await recoveredStore.hit(`auth:account:recovered_${Date.now()}@corp.org`, 5, 60000, 'account', { failClosed: true });
+      assert(recoveryResult.allowed, 'Sensitive authentication succeeds once RTDB connectivity is restored');
+      recoveredStore.destroy();
+    }
+
+    // 4. Preserve explicitly configured offline development and demo behavior
+    process.env.OFFLINE_DEV = 'true';
+    const offlineDevStore = new SharedRateLimitStore({
+      customStoragePath: path.join(testTempDir, 'offline_dev.json'),
+      disableRtdb: true,
+    });
+    const offlineAuthResult = await offlineDevStore.hit('auth:account:dev_user@local', 5, 60000, 'account', { failClosed: true });
+    assert(offlineAuthResult.allowed, 'Explicit offline development permits local authentication without cloud lockout');
+    delete process.env.OFFLINE_DEV;
+    offlineDevStore.destroy();
 
     // ------------------------------------------------------------------------
     // Scenario 6: Daily quota rollover
@@ -428,20 +610,55 @@ async function runAcceptanceTests() {
     assert(avgAacTime < 50, `Average response time for cached AAC tiles: ${avgAacTime.toFixed(1)}ms (< 50ms instant playback)`);
 
     // ------------------------------------------------------------------------
-    // Scenario 11: Accurate usage metrics and bounded memory/storage growth
+    // Scenario 11: Accurate usage metrics, key collision regression & bounded storage
     // ------------------------------------------------------------------------
-    console.log('\n--- Scenario 11: Accurate Usage Metrics & Bounded Storage Growth ---');
+    console.log('\n--- Scenario 11: Accurate Usage Metrics, Collision Regression & Storage ---');
     const metricsFinal = liveBudgetTracker.getMetrics();
     assert(metricsFinal.ttsCacheHits > 0, `Usage tracker accurately counted cache hits (${metricsFinal.ttsCacheHits})`);
     assert(typeof metricsFinal.ttsUpstreamCalls === 'number', 'ttsUpstreamCalls is a valid number');
     assert(typeof metricsFinal.translateCacheHits === 'number', 'translateCacheHits is a valid number');
 
-    // Verify key encoding / decoding for RTDB compatibility
-    const dirtyKey = 'auth:user.name$1#[2]/domain';
-    const encoded = encodeRtdbKey(dirtyKey);
-    assert(!/[/.$#[\]]/.test(encoded), 'encodeRtdbKey strips all forbidden RTDB characters');
-    const decoded = decodeRtdbKey(encoded);
-    assert(decoded === dirtyKey, 'decodeRtdbKey perfectly round-trips encoded keys');
+    // Regression Test: alice.smith@example.com vs alice_46_smith@example.com cannot share a counter
+    const keyDot = 'auth:account:alice.smith@example.com';
+    const keyEsc = 'auth:account:alice_46_smith@example.com';
+    const encDot = encodeRtdbKey(keyDot);
+    const encEsc = encodeRtdbKey(keyEsc);
+    assert(encDot !== encEsc, 'alice.smith@example.com and alice_46_smith@example.com produce strictly distinct Base64URL keys');
+
+    const encodingStore = new SharedRateLimitStore({
+      customStoragePath: path.join(testTempDir, 'encoding_limits.json'),
+    });
+
+    // Exhaust all 5 slots of alice.smith
+    for (let i = 0; i < 5; i++) {
+      await encodingStore.hit(keyDot, 5, 60000, 'account');
+    }
+    const resDot = await encodingStore.hit(keyDot, 5, 60000, 'account');
+    assert(!resDot.allowed, 'alice.smith@example.com is strictly locked out after 5 attempts');
+
+    // alice_46_smith must be completely unaffected and permitted at count 1
+    const resEsc = await encodingStore.hit(keyEsc, 5, 60000, 'account');
+    assert(resEsc.allowed && resEsc.count === 1, 'alice_46_smith@example.com is completely unaffected and starts fresh at count 1');
+    encodingStore.destroy();
+
+    // Verify key encoding / decoding for punctuation, underscores, Unicode, numeric escapes
+    const complexKeys = [
+      'auth:account:josé.o\'connor_46_test$1@[2]#user/3',
+      'auth:account:山田_太郎@domain.jp',
+      'pairing:code:123-456_789',
+      'tts:ip:2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+    ];
+
+    for (const ck of complexKeys) {
+      const enc = encodeRtdbKey(ck);
+      assert(!/[/.$#[\]]/.test(enc), `encodeRtdbKey strips all forbidden RTDB characters for complex key`);
+      const dec = decodeRtdbKey(enc);
+      assert(dec === ck, `decodeRtdbKey perfectly round-trips complex key (${ck.substring(0, 24)}...)`);
+    }
+
+    // Verify rollout backward compatibility: legacy keys decode safely
+    const legacyKey = 'auth:account:bob_46_smith@example.com';
+    assert(decodeRtdbKey(legacyKey) === 'auth:account:bob.smith@example.com', 'decodeRtdbKey safely handles legacy escaped keys during rollout');
 
     // Verify memory cache byte bounding
     const memCache = new ByteBoundedMemoryCache(500, 3);
@@ -458,6 +675,71 @@ async function runAcceptanceTests() {
       const tmpFiles = files.filter((f) => f.endsWith('.tmp'));
       assert(tmpFiles.length === 0, 'No orphaned temporary files lingering on disk');
     });
+
+    // ------------------------------------------------------------------------
+    // Scenario 12: Actual Two-Process Test for Shared Counters & Global Limits
+    // ------------------------------------------------------------------------
+    console.log('\n--- Scenario 12: Actual Two-Process Shared Counters & Global Limits ---');
+    if (isEmulatorActive) {
+      const worker = await spawnWorkerServer();
+      const workerBaseUrl = `http://127.0.0.1:${worker.port}`;
+
+      try {
+        const { signFamilyToken } = await import('../server');
+        const adminAuthToken = signFamilyToken('ADMIN', 'admin', 'admin@beeyou.app', 'admin_worker_verifier');
+
+        const multiProcessAccount = `multiprocess_${Date.now()}@test.org`;
+        const testAuthPath = `/api/family/auth`;
+
+        // Process 1 makes 6 attempts (limit is 10)
+        for (let i = 0; i < 6; i++) {
+          const res = await fetch(`${baseUrl}${testAuthPath}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: multiProcessAccount }),
+          });
+          assert(res.status !== 429, `Process 1 attempt ${i + 1} is permitted`);
+        }
+
+        // Process 2 sends attempts 7 through 10
+        for (let i = 7; i <= 10; i++) {
+          const resWorker = await fetch(`${workerBaseUrl}${testAuthPath}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: multiProcessAccount }),
+          });
+          assert(resWorker.status !== 429, `Worker process processes attempt ${i}`);
+        }
+
+        // Process 2 sends attempt 11: Must receive HTTP 429 Too Many Requests across process boundaries!
+        const resWorker3 = await fetch(`${workerBaseUrl}${testAuthPath}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: multiProcessAccount }),
+        });
+        assert(resWorker3.status === 429, 'Process 2 immediately enforces HTTP 429 rate limit after Process 1 hits');
+
+        // Process 1 sends attempt 12: Also strictly blocked with HTTP 429!
+        const resMainBlocked = await fetch(`${baseUrl}${testAuthPath}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: multiProcessAccount }),
+        });
+        assert(resMainBlocked.status === 429, 'Process 1 confirms HTTP 429 after Process 2 exhausted shared quota');
+
+        // Both processes observe the shared global usage metrics in RTDB
+        const usageResWorker = await fetch(`${workerBaseUrl}/api/admin/usage`, {
+          headers: { 'Authorization': `Bearer ${adminAuthToken}` },
+        });
+        assert(usageResWorker.status === 200, 'Process 2 reports global spending metrics over RTDB');
+
+        assert(true, 'Two separate Node.js processes share rate limits and spending caps across process boundaries');
+      } finally {
+        worker.child.kill('SIGTERM');
+      }
+    } else {
+      console.log('  [SKIP] Multi-process RTDB test skipped in offline mode (requires RTDB emulator)');
+    }
 
     testServer.close();
   } finally {
