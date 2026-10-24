@@ -200,8 +200,96 @@ export const FAMILY_TOKEN_KEY = 'beeyou_family_token';
 export const PAIRING_TOKEN_KEY = 'beeyou_pairing_token';
 
 /**
+ * Decodes base64url or base64 JSON payload cross-platform (Node or browser).
+ */
+function decodeBase64Json<T = any>(str: string): T | null {
+  try {
+    const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = base64.length % 4;
+    const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+    let decoded = '';
+    if (typeof atob === 'function') {
+      decoded = atob(padded);
+    } else if (typeof Buffer !== 'undefined') {
+      decoded = Buffer.from(padded, 'base64').toString('utf-8');
+    } else {
+      return null;
+    }
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Validates whether a token string is non-expired, properly structured,
+ * and matches the expected family code if specified.
+ */
+export function isClientTokenValid(token: string, familyCode?: string): boolean {
+  if (!token || typeof token !== 'string') return false;
+  const trimmed = token.trim();
+
+  // Reviewer Demo Token
+  if (trimmed === 'by_demo_reviewer_token_2026') {
+    const code = (familyCode || getStoredFamilyAccount()?.familyCode || '').trim().toUpperCase();
+    const stored = getStoredFamilyAccount();
+    return (code === 'BEE-DEMO' || code === 'DEMO') && stored?.isDemoAccount === true && stored?.email === 'demo@beeyou.app';
+  }
+
+  // by_tok format: by_tok.<payload>.<sig>
+  if (trimmed.startsWith('by_tok.')) {
+    const parts = trimmed.split('.');
+    if (parts.length !== 3) return false;
+
+    const payload = decodeBase64Json<{ familyCode?: string; exp?: number; iat?: number; role?: string }>(parts[1]);
+    if (!payload || typeof payload !== 'object') return false;
+
+    // Reject legacy tokens without valid expiration or issue timestamp
+    if (!payload.iat || typeof payload.iat !== 'number' || !payload.exp || typeof payload.exp !== 'number') {
+      return false;
+    }
+
+    const now = Date.now();
+    // 30-second buffer for clock skew and network transit
+    if (now >= payload.exp - 30_000) {
+      return false;
+    }
+
+    if (familyCode) {
+      const cleanReq = familyCode.trim().toUpperCase();
+      const cleanPayload = (payload.familyCode || '').trim().toUpperCase();
+      if (cleanReq && cleanPayload && cleanReq !== cleanPayload) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // Pairing session token (tok-...)
+  if (trimmed.startsWith('tok-')) {
+    return true;
+  }
+
+  // Raw Firebase JWT token (3 parts, not by_tok)
+  if (trimmed.split('.').length === 3) {
+    const payload = decodeBase64Json<{ exp?: number; iat?: number }>(trimmed.split('.')[1]);
+    if (payload?.exp && typeof payload.exp === 'number') {
+      const expMs = payload.exp * 1000;
+      if (Date.now() >= expMs - 30_000) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Synchronous client auth token lookup.
- * Returns cached token immediately (0ms) from secure storage in-memory cache.
+ * Returns cached token immediately (0ms) from secure storage in-memory cache
+ * only if non-expired and valid.
  */
 export function getSyncClientAuthToken(familyCode?: string): string {
   const code = (familyCode || getStoredFamilyAccount()?.familyCode || '').trim().toUpperCase();
@@ -219,18 +307,10 @@ export function getSyncClientAuthToken(familyCode?: string): string {
   // 2. Read from secure storage synchronous memory cache
   const secureTok = getSyncSecureAuthToken();
   if (secureTok) {
-    if (secureTok.startsWith('by_tok.')) {
-      const parts = secureTok.split('.');
-      if (parts.length === 3) {
-        try {
-          const payload = JSON.parse(atob(parts[1]));
-          if (payload.familyCode === code && payload.iat) {
-            return secureTok;
-          }
-        } catch {}
-      }
-    } else if (secureTok.startsWith('tok-') || secureTok === 'by_demo_reviewer_token_2026') {
+    if (isClientTokenValid(secureTok, code)) {
       return secureTok;
+    } else {
+      clearClientAuthToken();
     }
   }
 
@@ -238,7 +318,12 @@ export function getSyncClientAuthToken(familyCode?: string): string {
   if (typeof sessionStorage !== 'undefined') {
     try {
       const sessTok = sessionStorage.getItem(FAMILY_TOKEN_KEY) || sessionStorage.getItem(PAIRING_TOKEN_KEY);
-      if (sessTok) return sessTok;
+      if (sessTok && isClientTokenValid(sessTok, code)) {
+        return sessTok;
+      } else if (sessTok) {
+        sessionStorage.removeItem(FAMILY_TOKEN_KEY);
+        sessionStorage.removeItem(PAIRING_TOKEN_KEY);
+      }
     } catch {}
   }
 
@@ -247,6 +332,7 @@ export function getSyncClientAuthToken(familyCode?: string): string {
 
 /**
  * Asynchronously retrieve or exchange a verified family token using secure storage.
+ * Enforces token expiration validation and secure renewal via Firebase authentication.
  */
 export async function getClientAuthToken(familyCode?: string): Promise<string> {
   const code = (familyCode || getStoredFamilyAccount()?.familyCode || '').trim().toUpperCase();
@@ -268,13 +354,17 @@ export async function getClientAuthToken(familyCode?: string): Promise<string> {
   // 3. Asynchronous secure storage lookup
   const secTok = await getSecureAuthToken();
   if (secTok) {
-    return secTok;
+    if (isClientTokenValid(secTok, code)) {
+      return secTok;
+    } else {
+      clearClientAuthToken();
+    }
   }
 
-  // 4. If Firebase user is authenticated, exchange or use ID token
+  // 4. If Firebase user is authenticated, force-refresh ID token and renew family token
   if (auth.currentUser) {
     try {
-      const fbToken = await auth.currentUser.getIdToken();
+      const fbToken = await auth.currentUser.getIdToken(true);
       if (fbToken) {
         try {
           const res = await fetch('/api/family/auth/token', {
@@ -287,13 +377,15 @@ export async function getClientAuthToken(familyCode?: string): Promise<string> {
           });
           if (res.ok) {
             const data = await res.json();
-            if (data?.token) {
+            if (data?.token && isClientTokenValid(data.token, code)) {
               saveClientAuthToken(data.token);
               return data.token;
             }
           }
         } catch {}
-        return fbToken;
+        if (isClientTokenValid(fbToken)) {
+          return fbToken;
+        }
       }
     } catch {}
   }
@@ -314,7 +406,7 @@ export async function getClientAuthToken(familyCode?: string): Promise<string> {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data?.token) {
+        if (data?.token && isClientTokenValid(data.token, code)) {
           saveClientAuthToken(data.token);
           return data.token;
         }
@@ -994,6 +1086,20 @@ export async function launchDemoMode(asRole: 'child' | 'caregiver'): Promise<{
  * Log out of family account and clear active pairing credentials
  */
 export async function logoutFamilyAccount(): Promise<void> {
+  const currentToken = getSyncSecureAuthToken() || (await getSecureAuthToken());
+  if (currentToken) {
+    try {
+      await fetch('/api/caregiver/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}`,
+        },
+      });
+    } catch {}
+  }
+  clearClientAuthToken();
+
   try {
     await signOut(auth);
   } catch (err) {
@@ -1019,6 +1125,20 @@ export async function logoutFamilyAccount(): Promise<void> {
  * Used for school tablet returns, device handoffs, or account deletion.
  */
 export async function wipeDeviceStorage(): Promise<void> {
+  const currentToken = getSyncSecureAuthToken() || (await getSecureAuthToken());
+  if (currentToken) {
+    try {
+      await fetch('/api/caregiver/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}`,
+        },
+      });
+    } catch {}
+  }
+  clearClientAuthToken();
+
   try {
     await signOut(auth);
   } catch (err) {

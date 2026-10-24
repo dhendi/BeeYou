@@ -26,7 +26,7 @@ import {
   onFirebaseGenericEvent,
   parseTimestampMs
 } from './firebaseSync';
-import { getClientAuthToken, getSyncClientAuthToken, saveClientAuthToken, generateSecureFamilyCode } from './authService';
+import { getClientAuthToken, getSyncClientAuthToken, saveClientAuthToken, clearClientAuthToken, generateSecureFamilyCode } from './authService';
 
 const PAIRING_KEY = 'beeyou_caregiver_pairing_code';
 const LOCAL_SESSION_KEY = 'beeyou_caregiver_local_session';
@@ -863,6 +863,8 @@ export function subscribeToCloudChannel(code: string): void {
           }
           notifyConnectionStatus();
         }
+      } else if (res.status === 401 || res.status === 403) {
+        clearClientAuthToken();
       }
     } catch (e) {}
   };
@@ -2070,7 +2072,8 @@ export async function sendCaregiverAlert(alertData: {
         localStorage.setItem(ACTIVE_ALERT_KEY, JSON.stringify(alert));
       } catch {}
     } else if (res.status === 401 || res.status === 403) {
-      // Session / token expired: force re-authentication and retry
+      // Session / token expired or revoked: purge cached token, force re-authentication and retry
+      clearClientAuthToken();
       const freshToken = await getClientAuthToken(code);
       if (freshToken) {
         const retryHeaders: Record<string, string> = { 

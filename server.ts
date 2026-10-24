@@ -34,6 +34,15 @@ import {
   FirestoreConfigReport,
   getFirestoreAuthHeader,
 } from './src/services/firestoreSyncService';
+import {
+  revokeToken,
+  revokeUserTokens,
+  revokeFamilyTokens,
+  isTokenRevoked,
+  initTokenRevocationStore,
+  clearAllRevocationsForTesting,
+  getRevocationStats,
+} from './src/services/tokenRevocationService';
 
 export type { FirestoreConfigReport };
 export {
@@ -41,6 +50,13 @@ export {
   verifyFirestoreConfig,
   FirestoreSyncError,
   getFirestoreAuthHeader,
+  revokeToken,
+  revokeUserTokens,
+  revokeFamilyTokens,
+  isTokenRevoked,
+  initTokenRevocationStore,
+  clearAllRevocationsForTesting,
+  getRevocationStats,
 };
 
 dotenv.config();
@@ -1350,7 +1366,7 @@ export async function fetchGooglePublicKeys(): Promise<Record<string, string>> {
  * Cryptographically verifies a Firebase Auth ID Token using Google's public keys.
  * Rejects forged, expired, or tampered tokens with zero trust in unverified payloads.
  */
-export async function verifyFirebaseIdToken(token: string): Promise<{ uid: string; email?: string; familyCode?: string; role?: string } | null> {
+export async function verifyFirebaseIdToken(token: string): Promise<{ uid: string; email?: string; familyCode?: string; role?: string; iat?: number; exp?: number } | null> {
   if (!token || typeof token !== 'string') return null;
   const trimmed = token.trim();
   const parts = trimmed.split('.');
@@ -1413,6 +1429,8 @@ export async function verifyFirebaseIdToken(token: string): Promise<{ uid: strin
       email: payload.email ? String(payload.email).toLowerCase() : undefined,
       familyCode: payload.familyCode,
       role: payload.role,
+      iat: payload.iat,
+      exp: payload.exp,
     };
   } catch {
     return null;
@@ -1427,21 +1445,56 @@ export interface AuthenticatedUser {
   isDemo?: boolean;
 }
 
+export const TOKEN_EXPIRATION_POLICIES = {
+  admin: 1 * 60 * 60 * 1000,        // 1 hour
+  caregiver: 24 * 60 * 60 * 1000,    // 24 hours
+  child: 30 * 24 * 60 * 60 * 1000,  // 30 days
+  demo: 24 * 60 * 60 * 1000,        // 24 hours
+} as const;
+
+export const MAX_TOKEN_TTL_MS = 31 * 24 * 60 * 60 * 1000; // 31 days max
+
+export interface FamilyTokenPayload {
+  familyCode: string;
+  role: 'caregiver' | 'child' | 'demo' | 'admin';
+  email: string;
+  uid: string;
+  iat: number;
+  exp: number;
+  jti: string;
+}
+
 export function signFamilyToken(
   familyCode: string,
   role: 'caregiver' | 'child' | 'demo' | 'admin' = 'caregiver',
   email?: string,
-  uid?: string
+  uid?: string,
+  customExpiresInMs?: number
 ): string {
   const cleanCode = sanitizeFamilyCode(familyCode);
   if (!cleanCode) throw new Error('Cannot sign token: invalid family code');
-  const payload = {
+
+  const effectiveRole = cleanCode === 'BEE-DEMO' ? 'demo' : role;
+  const now = Date.now();
+  const defaultTtl = TOKEN_EXPIRATION_POLICIES[effectiveRole] || TOKEN_EXPIRATION_POLICIES.caregiver;
+  let ttl = customExpiresInMs !== undefined
+    ? Math.min(Math.max(1000, customExpiresInMs), MAX_TOKEN_TTL_MS)
+    : defaultTtl;
+
+  if (effectiveRole === 'admin') {
+    ttl = Math.min(ttl, 2 * 60 * 60 * 1000); // Admin max 2 hours
+  }
+
+  const payload: FamilyTokenPayload = {
     familyCode: cleanCode,
-    role: cleanCode === 'BEE-DEMO' ? 'demo' : role,
+    role: effectiveRole,
     email: email || '',
     uid: uid || '',
-    iat: Date.now(),
+    iat: now,
+    exp: now + ttl,
+    jti: 'jti_' + crypto.randomBytes(16).toString('hex'),
   };
+
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const sig = crypto.createHmac('sha256', SERVER_AUTH_SECRET).update(payloadB64).digest('base64url');
   return `by_tok.${payloadB64}.${sig}`;
@@ -1453,10 +1506,10 @@ export const revokedFamilyTokens = new Set<string>();
 export async function verifyFamilyToken(token: string): Promise<AuthenticatedUser | null> {
   if (!token || typeof token !== 'string') return null;
   const trimmed = token.trim();
-  if (revokedFamilyTokens.has(trimmed)) return null;
 
   // 1. App Store & Google Play reviewer demo token
   if (trimmed === 'by_demo_reviewer_token_2026' || trimmed === 'DEMO-APPSTORE-REVIEWER-2026') {
+    if (isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
     return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid: 'B5wSQd95KbYRuL79L6I3wNMgSxP2', isDemo: true };
   }
 
@@ -1469,38 +1522,100 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
         const expectedSig = crypto.createHmac('sha256', SERVER_AUTH_SECRET).update(payloadB64).digest('base64url');
         const sigBuf = Buffer.from(sig);
         const expBuf = Buffer.from(expectedSig);
-        if (sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf)) {
-          const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf-8'));
-          if (parsed && parsed.familyCode) {
-            const cleanCode = sanitizeFamilyCode(parsed.familyCode);
-            if (!cleanCode || revokedFamilyCodes.has(cleanCode)) return null;
+        if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+          return null; // Forged or tampered signature
+        }
 
-            // Check if member UID was revoked
-            if (parsed.uid) {
-              const acc = findFamilyAccount({ familyCode: cleanCode });
-              if (acc?.revokedMembers && acc.revokedMembers[parsed.uid]) return null;
+        const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf-8')) as Partial<FamilyTokenPayload>;
+        if (!parsed || !parsed.familyCode) return null;
+
+        // Reject legacy tokens without valid expiration or issue timestamp
+        if (!parsed.iat || typeof parsed.iat !== 'number' || !parsed.exp || typeof parsed.exp !== 'number') {
+          return null;
+        }
+
+        const now = Date.now();
+
+        // Reject future-dated tokens beyond 60-second clock skew tolerance
+        if (parsed.iat > now + 60_000) {
+          return null;
+        }
+
+        // Reject expired tokens
+        if (now >= parsed.exp) {
+          return null;
+        }
+
+        // Reject excessively long-lived tokens
+        if (parsed.exp - parsed.iat > MAX_TOKEN_TTL_MS) {
+          return null;
+        }
+
+        // Check persistent and shared revocation state
+        if (isTokenRevoked(trimmed, parsed as FamilyTokenPayload) || revokedFamilyTokens.has(trimmed)) {
+          return null;
+        }
+
+        const cleanCode = sanitizeFamilyCode(parsed.familyCode);
+        if (!cleanCode || revokedFamilyCodes.has(cleanCode)) return null;
+
+        // Authoritative server-side identity & role validation
+        let effectiveRole: 'caregiver' | 'child' | 'demo' | 'admin' = cleanCode === 'BEE-DEMO' ? 'demo' : (parsed.role || 'caregiver');
+
+        if (cleanCode !== 'BEE-DEMO' && parsed.uid) {
+          const acc = findFamilyAccount({ familyCode: cleanCode });
+          if (acc) {
+            // Check member revocation
+            if (acc.revokedMembers && acc.revokedMembers[parsed.uid]) {
+              return null;
             }
-
-            return {
-              familyCode: cleanCode,
-              role: cleanCode === 'BEE-DEMO' ? 'demo' : (parsed.role || 'caregiver'),
-              email: parsed.email,
-              uid: parsed.uid,
-              isDemo: cleanCode === 'BEE-DEMO',
-            };
+            // Check server-side role changes
+            if (acc.members && acc.members[parsed.uid]) {
+              const serverRole = acc.members[parsed.uid].role;
+              if (serverRole === 'admin' || serverRole === 'caregiver' || serverRole === 'child') {
+                effectiveRole = serverRole;
+              }
+            } else if (acc.ownerUid === parsed.uid) {
+              effectiveRole = 'caregiver';
+            }
           }
         }
-      } catch {}
+
+        return {
+          familyCode: cleanCode,
+          role: effectiveRole,
+          email: parsed.email,
+          uid: parsed.uid,
+          isDemo: cleanCode === 'BEE-DEMO',
+        };
+      } catch {
+        return null;
+      }
     }
+    return null;
   }
 
   // 3. Active pairing session token (tok-...)
   if (trimmed.startsWith('tok-')) {
+    if (isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
+
+    const now = Date.now();
     for (const [code, session] of pairingSessions.entries()) {
-      if (session.token === trimmed && (session.status === 'paired' || session.status === 'pending')) {
+      if (session.token === trimmed) {
+        // Enforce paired status ONLY (pending, awaiting_approval, rejected are denied access)
+        if (session.status !== 'paired') {
+          return null;
+        }
+
+        // Enforce pairing token expiration
+        if (session.expiresAt && now >= session.expiresAt) {
+          return null;
+        }
+
         const effectiveFamilyCode = session.targetFamilyCode || code;
         const cleanCode = sanitizeFamilyCode(effectiveFamilyCode);
-        if (!cleanCode || revokedFamilyCodes.has(cleanCode)) continue;
+        if (!cleanCode || revokedFamilyCodes.has(cleanCode) || isTokenRevoked(cleanCode)) continue;
+
         return {
           familyCode: cleanCode,
           role: session.initiatedBy === 'caregiver' ? 'caregiver' : 'child',
@@ -1509,6 +1624,7 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
         };
       }
     }
+    return null;
   }
 
   // 4. Firebase Auth ID Token (Strict Cryptographic RS256 Verification with Google)
@@ -1519,7 +1635,13 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
 
       // Demo reviewer bypass
       if (email === 'demo@beeyou.app' || uid === 'B5wSQd95KbYRuL79L6I3wNMgSxP2') {
+        if (isTokenRevoked(trimmed) || revokedFamilyTokens.has(trimmed)) return null;
         return { familyCode: 'BEE-DEMO', role: 'demo', email: 'demo@beeyou.app', uid, isDemo: true };
+      }
+
+      const tokenIatMs = verified.iat ? verified.iat * 1000 : undefined;
+      if (isTokenRevoked(trimmed, { uid, iat: tokenIatMs }) || revokedFamilyTokens.has(trimmed)) {
+        return null;
       }
 
       // Check if user is an administrator via verified Firebase claim or configured admin email
@@ -1537,12 +1659,16 @@ export async function verifyFamilyToken(token: string): Promise<AuthenticatedUse
       // Check authoritative family accounts
       const acc = findFamilyAccount({ uid, email });
       if (acc) {
+        if (isTokenRevoked(trimmed, { uid, familyCode: acc.familyCode, iat: tokenIatMs })) {
+          return null;
+        }
+
         // Enforce revocation: if this user was revoked from the family, deny access
         if (acc.revokedMembers && acc.revokedMembers[uid]) {
           return null;
         }
 
-        if (!revokedFamilyCodes.has(acc.familyCode)) {
+        if (!revokedFamilyCodes.has(acc.familyCode) && !isTokenRevoked(acc.familyCode)) {
           const role = acc.ownerUid === uid ? 'caregiver' : (acc.members?.[uid]?.role || 'caregiver');
           return {
             familyCode: acc.familyCode,
@@ -1615,7 +1741,9 @@ export function requireFamilyAuth(options?: { allowedRoles?: string[] }) {
 
     // Cross-Family Denial: Ensure user token has explicit access to target family
     if (targetCode) {
-      if (user.familyCode !== targetCode && user.role !== 'admin') {
+      const pairing = pairingSessions.get(targetCode);
+      const effectiveTargetFamily = pairing?.targetFamilyCode || targetCode;
+      if (user.familyCode !== effectiveTargetFamily && user.role !== 'admin') {
         return res.status(403).json({
           error: 'Forbidden',
           message: `Access denied. Your authorization token does not have access to family '${targetCode}'.`,
@@ -1776,7 +1904,7 @@ function generatePairingCode(): string {
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let part = '';
   for (let i = 0; i < 6; i++) {
-    part += chars.charAt(Math.floor(Math.random() * chars.length));
+    part += chars.charAt(crypto.randomInt(chars.length));
   }
   return `PAIR-${part}`;
 }
@@ -1853,6 +1981,16 @@ app.post('/api/family/auth/token', async (req, res) => {
   return res.json({ success: true, token, familyCode: cleanCode, role: effectiveRole });
 });
 
+// Explicit client logout endpoint to persistently revoke credentials
+app.post(['/api/caregiver/logout', '/api/family/auth/logout'], async (req, res) => {
+  const token = extractAuthToken(req);
+  if (token) {
+    revokedFamilyTokens.add(token);
+    await revokeToken(token, undefined, 'user_logout');
+  }
+  return res.json({ success: true, message: 'Logged out successfully. Authentication token revoked.' });
+});
+
 // -------------------------------------------------------------
 // 1. Temporary Pairing Sessions (Explicit, Expiring, Intended Account Approval)
 // -------------------------------------------------------------
@@ -1876,7 +2014,7 @@ app.post('/api/caregiver/pairing/create', async (req, res) => {
     pairingCode = generatePairingCode();
   }
 
-  const token = 'tok-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+  const token = 'tok-' + Date.now() + '-' + crypto.randomBytes(16).toString('hex');
   const now = Date.now();
   const session: TemporaryPairingSessionData = {
     pairingCode,
@@ -2103,7 +2241,7 @@ app.post('/api/caregiver/pairing/approve', async (req, res) => {
 });
 
 // Explicit decline endpoint called when the intended account rejects the pairing request
-app.post('/api/caregiver/pairing/reject', (req, res) => {
+app.post('/api/caregiver/pairing/reject', async (req, res) => {
   const { pairingCode } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code) {
@@ -2113,6 +2251,9 @@ app.post('/api/caregiver/pairing/reject', (req, res) => {
   const session = pairingSessions.get(code);
   if (session) {
     session.status = 'rejected';
+    if (session.token) {
+      await revokeToken(session.token, session.expiresAt, 'pairing_rejected');
+    }
     savePairingSessions().catch(() => {});
   }
 
@@ -2127,7 +2268,7 @@ app.post('/api/caregiver/pairing/reject', (req, res) => {
 });
 
 // Unlink a paired device
-app.post('/api/caregiver/device/unlink', requireFamilyAuth(), (req, res) => {
+app.post('/api/caregiver/device/unlink', requireFamilyAuth(), async (req, res) => {
   const { pairingCode } = req.body || {};
   const code = sanitizeFamilyCode(pairingCode);
   if (!code) {
@@ -2138,6 +2279,7 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), (req, res) => {
   const callerToken = extractAuthToken(req);
   if (callerToken) {
     revokedFamilyTokens.add(callerToken);
+    await revokeToken(callerToken, undefined, 'device_unlinked');
   }
 
   const session = getCaregiverSession(code);
@@ -2153,6 +2295,7 @@ app.post('/api/caregiver/device/unlink', requireFamilyAuth(), (req, res) => {
     pairing.status = 'revoked';
     if (pairing.token) {
       revokedFamilyTokens.add(pairing.token);
+      await revokeToken(pairing.token, undefined, 'device_unlinked');
     }
     savePairingSessions().catch(() => {});
   }
@@ -3168,6 +3311,9 @@ app.post('/api/family/member/revoke', requireFamilyAuth(), async (req, res) => {
   }
   await saveFamilyAccounts();
 
+  // Persistently invalidate all active credentials and sessions for revoked user
+  await revokeUserTokens(targetUid, reason?.trim() || 'Revoked by family owner');
+
   // Remove member from Firebase Realtime Database and record revocation with response verification and reconciliation
   let rtdbReconciliationPending = false;
   if (FIREBASE_DB_URL && !user.isDemo) {
@@ -3344,6 +3490,7 @@ app.post('/api/caregiver/family/delete', requireFamilyAuth(), async (req, res) =
 
     // 7. Revoke family code and tokens
     revokedFamilyCodes.add(targetCode);
+    await revokeFamilyTokens(targetCode, 'family_deleted');
 
     return res.json({
       success: true,
